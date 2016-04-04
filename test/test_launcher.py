@@ -7,9 +7,15 @@ import threading
 
 class TestLauncher(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        # this happens only once for the whole TestLauncher test-suite
+        cls.launcher = Launcher()
+        cls.launcher.setup()
+
     def setUp(self):
-        # self.fixture1_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'fixtures', 'fixture1'))
-        self.launcher = Launcher()
+        # this happens before each test
+        self.launcher = self.__class__.launcher
 
     def test_run_and_stop(self):
         # create separate thread to run launcher's main loop
@@ -30,10 +36,35 @@ class TestLauncher(unittest.TestCase):
         self.assertFalse(self.launcher.running)
         # verify thread has ended as well
         self.assertFalse(thread.isAlive())
+        del thread
 
     def _threadMain(self):
         # run the launcher's main loop (this will loop forever until requested to stop)
         self.launcher.run()
+        return
+
+    def test_osc_broadcast(self):
+        # setup
+        self.sent_messages = []
+        self.launcher.osc_output.messageEvent += self._onOscMessage
+
+        # before
+        self.assertEqual(len(self.sent_messages), 0)
+
+        # do broadcasts
+        self.launcher.controller.interval_broadcast.broadcast()
+        self.launcher.controller.interface.broadcasts.create({'data': '123-test-check'})
+        self.launcher.controller.interface.broadcasts.create()
+
+        # after
+        self.assertEqual(len(self.sent_messages), 3)
+        self.assertEqual(self.sent_messages[0][0], 'TODO: controller info JSON')
+        self.assertEqual(self.sent_messages[1][0], '123-test-check')
+        self.assertEqual(len(self.sent_messages[2]), 0)
+
+    def _onOscMessage(self, message, osc_output):
+        self.sent_messages.append(message)
+
 
 if __name__ == '__main__':
     unittest.main()

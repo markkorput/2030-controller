@@ -13,8 +13,8 @@ class TestIntervalBroadcast(unittest.TestCase):
     def test_defaults(self):
         # uses by default the singleton interface instance
         self.assertEqual(self.interval_broadcast.interface, Interface.instance())
-        self.assertIsNone(self.interval_broadcast._data())
-        self.assertEqual(self.interval_broadcast._interval(), 5.0)
+        self.assertIsNone(self.interval_broadcast.data())
+        self.assertEqual(self.interval_broadcast.interval(), 5.0)
 
     def test_manual_broadcast(self):
         # setup

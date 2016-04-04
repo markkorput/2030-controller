@@ -5,7 +5,7 @@ class Controller:
     def __init__(self, options = {}):
         # attributes
         self.interface = Interface.instance() # use global interface singleton instance
-        self.interval_broadcast = IntervalBroadcast({'interval': 5.0, 'data': 'TODO: get controller info JSON'})
+        self.interval_broadcast = IntervalBroadcast({'interval': 5.0, 'data': 'TODO: controller info JSON'})
 
         # configuration
         self.options = {}

@@ -27,3 +27,8 @@ class Model:
         # send notifications
         if notify:
             self.updateEvent(self, data)
+
+    def get(self, attr_name):
+        if attr_name in self.data:
+            return self.data[attr_name]
+        return None

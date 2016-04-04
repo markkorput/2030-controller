@@ -13,7 +13,7 @@ class IntervalBroadcast:
 
         # schedule first broadcast; immediately
         self.startTime = datetime.now()
-        self.nextBroadcastTime = self._interval()
+        self.nextBroadcastTime = self.interval()
         self.time = 0.0
 
     def configure(self, options):
@@ -32,14 +32,14 @@ class IntervalBroadcast:
             # broadcast
             self.broadcast()
             # schedule next broadcast
-            self.nextBroadcastTime += self._interval()
+            self.nextBroadcastTime += self.interval()
 
     def broadcast(self):
-        self.interface.broadcasts.create({'data': self._data()})
+        self.interface.broadcasts.create({'data': self.data()})
 
     # option readers
-    def _data(self):
+    def data(self):
         return self.options['data'] if 'data' in self.options else None
 
-    def _interval(self):
+    def interval(self):
         return self.options['interval'] if 'interval' in self.options else 5.0

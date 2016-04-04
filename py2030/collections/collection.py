@@ -1,7 +1,7 @@
 from py2030.utils.event import Event
 from py2030.collections.model import Model
 
-class Collection(list):
+class Collection:
     model = Model
 
     def __len__(self):
