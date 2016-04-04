@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # Add project path to system's python path,
 # so we can find and import the pymocap package
 import os, sys
