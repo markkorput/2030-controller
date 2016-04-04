@@ -1,17 +1,15 @@
 import test_helper
-
-# from py2030.module import ModuleClass
-controllerModule = __import__('2030-controller')
+from launcher import Launcher
 
 import unittest, os, time
 
 import threading
 
-class Test2030Controller(unittest.TestCase):
+class TestLauncher(unittest.TestCase):
 
     def setUp(self):
         # self.fixture1_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'fixtures', 'fixture1'))
-        self.launcher = controllerModule.Launcher()
+        self.launcher = Launcher()
 
     def test_run_and_stop(self):
         # create separate thread to run launcher's main loop

@@ -20,6 +20,8 @@ class Launcher:
         self.controller = Controller()
         self.running = True
 
+        ColorTerminal().green('2030 Controller Started')
+
         try:
             while True:
                 if self.stopRequested:
