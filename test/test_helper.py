@@ -7,3 +7,8 @@ projectdir = os.path.abspath(os.path.join(thisdir, '..'))
 
 if projectdir not in sys.path:
   sys.path.insert(0, projectdir)
+
+if __name__ == '__main__':
+    import subprocess
+    os.chdir(thisdir)
+    subprocess.call(['python', '-m', 'unittest', 'discover'])
