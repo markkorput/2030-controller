@@ -4,9 +4,6 @@ from py2030.collections.model import Model
 class Collection:
     model = Model
 
-    def __len__(self):
-        return len(self.models)
-
     def __init__(self, options = {}):
         # attributes
         self.model = None
@@ -37,3 +34,9 @@ class Collection:
     def clear(self):
         self.models = []
         self.clearEvent(self)
+
+    def __len__(self):
+        return len(self.models)
+
+    def __getitem__(self, idx):
+        return self.models[idx]

@@ -24,4 +24,4 @@ class Client:
         pass
 
     def update(self):
-        pass
+        self.osc_input.update()

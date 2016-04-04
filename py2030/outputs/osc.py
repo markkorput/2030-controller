@@ -78,7 +78,7 @@ class Osc:
             self.client = OSC.OSCClient()
             self.client.connect((self.host(), self.port()))
         except OSC.OSCClientError as err:
-            ColorTerminal().error("OSC connection failure: {0}".format(err))
+            ColorTerminal().fail("OSC connection failure: {0}".format(err))
             return False
 
         self.connected = True
@@ -101,6 +101,7 @@ class Osc:
         self._sendMessage('/broadcast', model.get('data'))
 
     def _sendMessage(self, tag, content):
+        # print('py2030.outputs.osc.Osc sending message: ', tag, content)
         msg = OSC.OSCMessage()
         msg.setAddress(tag) # set OSC address
         if content:
