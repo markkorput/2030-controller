@@ -3,7 +3,6 @@ import sys
 
 from py2030.controller import Controller
 from py2030.utils.color_terminal import ColorTerminal
-from py2030.outputs.osc import Osc
 
 class Launcher:
     def __init__(self, options = {}):
@@ -25,11 +24,9 @@ class Launcher:
 
     def setup(self):
         self.controller = Controller()
-        self.osc_output = Osc()
         self.isSetup = True
 
     def destroy(self):
-        self.osc_output.stop()
         self.isSetup = False
 
     def run(self):
