@@ -1,3 +1,4 @@
+from py2030.collections.broadcasts import Broadcasts
 
 class Interface:
     _instance = None
@@ -13,6 +14,9 @@ class Interface:
         return Interface._instance
 
     def __init__(self, options = {}):
+        # attributes
+        self.broadcasts = Broadcasts()
+
         # configuration
         self.options = {}
         self.configure(options)
