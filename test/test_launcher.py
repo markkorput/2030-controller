@@ -46,7 +46,7 @@ class TestLauncher(unittest.TestCase):
     def test_osc_broadcast(self):
         # setup
         self.sent_messages = []
-        self.launcher.osc_output.messageEvent += self._onOscMessage
+        self.launcher.controller.osc_output.messageEvent += self._onOscMessage
 
         # before
         self.assertEqual(len(self.sent_messages), 0)

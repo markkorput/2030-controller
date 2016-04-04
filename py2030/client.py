@@ -1,13 +1,11 @@
 from py2030.interface import Interface
-from py2030.interval_broadcast import IntervalBroadcast
-from py2030.outputs.osc import Osc
+from py2030.inputs.osc import Osc
 
-class Controller:
+class Client:
     def __init__(self, options = {}):
         # attributes
         self.interface = Interface.instance() # use global interface singleton instance
-        self.interval_broadcast = IntervalBroadcast({'interval': 5.0, 'data': 'TODO: controller info JSON'})
-        self.isSetup = False
+        self.osc_input = Osc() # uses same global instance of interface be default
 
         # configuration
         self.options = {}
@@ -23,12 +21,7 @@ class Controller:
         # TODO; any internal updates needed for the (re-)configuration happen here
 
     def setup(self):
-        self.osc_output = Osc() # auto connects
-        self.isSetup = True
-
-    def destroy(self):
-        self.osc_output.stop()
-        self.isSetup = False
+        pass
 
     def update(self):
-        self.interval_broadcast.update()
+        self.osc_input.update()
