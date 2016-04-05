@@ -8,14 +8,14 @@ import unittest
 
 class TestInterface(unittest.TestCase):
 
-    # @classmethod
-    # def setUpClass(cls):
-    #     # this happens only once for the whole TestLauncher test-suite
-    #     cls.client = Client()
+    @classmethod
+    def setUpClass(cls):
+        # this happens only once for the whole TestLauncher test-suite
+        cls.client = Client()
 
     def setUp(self):
         # this happens before each test
-        self.client = Client()
+        self.client = self.__class__.client
 
     def test_osc_connection(self):
         # setup; create separate interface (simulating a different machine)

@@ -1,4 +1,5 @@
 from py2030.collections.broadcasts import Broadcasts
+from py2030.utils.event import Event
 
 class Interface:
     _instance = None
@@ -16,6 +17,10 @@ class Interface:
     def __init__(self, options = {}):
         # attributes
         self.broadcasts = Broadcasts()
+        self.broadcasts.newModelEvent += self.onNewModel
+
+        # events
+        self.newModelEvent = Event()
 
         # configuration
         self.options = {}
@@ -25,3 +30,7 @@ class Interface:
         previous_options = self.options
         self.options.update(options)
         # TODO; any internal updates needed for the (re-)configuration happen here
+
+    def onNewModel(self, model, collection):
+        # simply forward the event to our own listeners, but add self as extra param
+        self.newModelEvent(model, collection, self)
