@@ -1,12 +1,12 @@
 import test_helper
 
 from py2030.client import Client
-from py2030.client import Interface
+from py2030.interface import Interface
 from py2030.outputs.osc import Osc as OscOutput
 
 import unittest
 
-class TestInterface(unittest.TestCase):
+class TestClient(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):

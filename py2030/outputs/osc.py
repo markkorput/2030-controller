@@ -2,6 +2,8 @@ from py2030.utils.color_terminal import ColorTerminal
 from py2030.utils.event import Event
 from py2030.interface import Interface
 
+import json
+
 try:
     import OSC
 except ImportError:
@@ -51,11 +53,11 @@ class Osc:
         if 'interface' in options:
             # unregister previous callback
             if 'interface' in previous_options and previous_options['interface']:
-                previous_options['interface'].broadcasts.newModelEvent -= self._onNewBroadcast
+                previous_options['interface'].newModelEvent -= self._onNewModel
 
             # register callback new callback
             if options['interface']: # could also be None if caller is UNsetting the manager
-                options['interface'].broadcasts.newModelEvent += self._onNewBroadcast
+                options['interface'].newModelEvent += self._onNewModel
 
     def start(self):
         if self._connect():
@@ -96,9 +98,10 @@ class Osc:
         ColorTerminal().success("OSC client closed")
         return True
 
-    # callback, called when manager gets a new frame of mocap data
-    def _onNewBroadcast(self, model, collection):
-        self._sendMessage('/broadcast', model.get('data'))
+    def _onNewModel(self, model, collection, interface):
+        # if model.__class__.__name__ == 'Broadcast'
+        # self._sendMessage('/Boadcasts', model.get('data'))
+        self._sendMessage('/'+collection.__class__.__name__, json.dumps(model.data))
 
     def _sendMessage(self, tag, content):
         # print('py2030.outputs.osc.Osc sending message: ', tag, content)

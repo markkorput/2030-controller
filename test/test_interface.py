@@ -23,7 +23,7 @@ class TestInterface(unittest.TestCase):
 
     def test_newModelEvent(self):
         # setup
-        instance = Interface.instance()
+        instance = Interface()
         instance.newModelEvent += self._onNewModel
         # before
         self.assertEqual(instance.newModelEvent.counter, 0)
