@@ -1,6 +1,7 @@
 from py2030.utils.event import Event
-import os
+from py2030.utils.color_terminal import ColorTerminal
 
+import os, json
 from watchdog.observers import Observer
 from watchdog.events import LoggingEventHandler
 from watchdog.events import FileSystemEventHandler
@@ -8,36 +9,50 @@ from watchdog.events import FileSystemEventHandler
 class EventHandler(FileSystemEventHandler):
     def __init__(self, config_file):
         self.config_file = config_file
-        self.path = self.config_file.path()
 
     def on_modified(self, event):
-        if event.src_path == self.path:
-            self.config_file.fileChangeEvent(self.config_file)
-
+        self.config_file.reload()
 
 class ConfigFile:
     def __init__(self, options = {}):
         # attributes
         self.monitoring = False
+        self.previous_data = None
+        self.data = None
 
         # events
-        self.fileChangeEvent = Event()
+        self.dataChangeEvent = Event()
 
         # config
         self.options = {}
         self.configure(options)
 
+        if 'monitor' in self.options and self.options['monitor']:
+            self.start_monitoring()
+
     def __del__(self):
-        if self.monitoring:
+        if hasattr(self, 'monitoring') and self.monitoring:
             self.stop_monitoring()
 
     def configure(self, options):
         previous_options = self.options
         self.options.update(options)
-        
+
         if 'path' in options and self.monitoring:
+            self.reload()
             self.stop_monitoring()
             self.start_monitoring()
+
+    def reload(self):
+        # try:
+        new_data = json.loads(self.read())
+        # except ValueError as err:
+            # ColorTerminal().fail("Couldn't parse config file json: {0}".format(self.path()))
+            # return
+
+        self.previous_data = self.data
+        self.data = new_data
+        self.dataChangeEvent(new_data, self)
 
     def path(self):
         return self.options['path'] if 'path' in self.options else None
@@ -71,4 +86,3 @@ class ConfigFile:
         self.observer.join()
         self.observer = None
         self.monitoring = False
-
