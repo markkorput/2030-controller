@@ -1,5 +1,4 @@
-from py2030.collections.changes import Changes
-from py2030.collections.broadcasts import Broadcasts
+import py2030.collections.collections as Collections
 from py2030.utils.event import Event
 
 class Interface:
@@ -17,9 +16,8 @@ class Interface:
 
     def __init__(self, options = {}):
         # attributes
-        self.changes = Changes()
-        self.broadcasts = Broadcasts()
-        self.broadcasts.newModelEvent += self.onNewModel
+        self.changes = Collections.Changes()
+        self.addResourceCollection(Collections.Broadcasts, 'broadcasts')
 
         # events
         self.newModelEvent = Event()
@@ -33,10 +31,19 @@ class Interface:
         self.options.update(options)
         # TODO; any internal updates needed for the (re-)configuration happen here
 
+    def addResourceCollection(self, cls, type):
+        # create new instance of the collection
+        col = cls()
+        # set it as attr on self
+        setattr(self, type, col)
+        cls.serialize_name = type
+        # register callbacks
+        col.newModelEvent += self.onNewModel
+
     def onNewModel(self, model, collection):
         # we'l forward the event to our own listeners, but add self as extra param
         self.newModelEvent(model, collection, self)
 
         # Interface 'records' all local changes (create/update/delete) to its collections
         # into the changes collection
-        self.changes.create({'method': 'create', 'type': collection.__class__.__name__.lower(), 'data': model.data})
+        self.changes.create({'method': 'create', 'type': collection.serialize_name, 'data': model.data})
