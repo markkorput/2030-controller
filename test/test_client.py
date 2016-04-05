@@ -20,6 +20,7 @@ class TestClient(unittest.TestCase):
     def test_osc_connection(self):
         # setup; create separate interface (simulating a different machine)
         other_interface = Interface()
+        self.client.interface.broadcasts.clear()
         # initial situation; no broadcasts in client's interface
         self.assertEqual(len(self.client.interface.broadcasts), 0)
         # create broadcast on other interface
