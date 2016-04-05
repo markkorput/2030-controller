@@ -1,3 +1,4 @@
+from py2030.collections.changes import Changes
 from py2030.collections.broadcasts import Broadcasts
 from py2030.utils.event import Event
 
@@ -16,6 +17,7 @@ class Interface:
 
     def __init__(self, options = {}):
         # attributes
+        self.changes = Changes()
         self.broadcasts = Broadcasts()
         self.broadcasts.newModelEvent += self.onNewModel
 
@@ -32,5 +34,9 @@ class Interface:
         # TODO; any internal updates needed for the (re-)configuration happen here
 
     def onNewModel(self, model, collection):
-        # simply forward the event to our own listeners, but add self as extra param
+        # we'l forward the event to our own listeners, but add self as extra param
         self.newModelEvent(model, collection, self)
+
+        # Interface 'records' all local changes (create/update/delete) to its collections
+        # into the changes collection
+        self.changes.create({'method': 'create', 'type': collection.__class__.__name__.lower(), 'data': model.data})
