@@ -60,3 +60,5 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+
+test/fixtures/dummy_config_file.txt
