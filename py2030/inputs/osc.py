@@ -2,6 +2,8 @@ from py2030.utils.color_terminal import ColorTerminal
 from py2030.utils.event import Event
 from py2030.interface import Interface
 
+import json
+
 try:
     from OSC import OSCServer
 except ImportError:
@@ -83,7 +85,7 @@ class Osc:
         try:
             self.oscServer = OSCServer((self.host(), int(self.port())))
             self.oscServer.handle_timeout = self._onTimeout
-            self.oscServer.addMsgHandler('/broadcast', self._onBroadcast)
+            self.oscServer.addMsgHandler('/change', self._onChange)
             self.connected = True
             ColorTerminal().success("OSC Server running @ {0}:{1}".format(self.host(), str(self.port())))
         except:
@@ -102,15 +104,13 @@ class Osc:
             self.disconnectEvent(self)
             ColorTerminal().success('OSC Server stopped')
 
-    def _onBroadcast(self, addr, tags, data, client_address):
+    def _onChange(self, addr, tags, data, client_address):
         # print('got broadcast, data:', data)
         if len(data) < 1:
-            ColorTerminal().warn('Got broadcast OSC message without content')
-            content = None
-        else:
-            content = data[0]
+            ColorTerminal().warn('Got /change OSC message without data')
+            return
 
-        self.interface.broadcasts.create({'data': content})
+        self.interface.updates.create(json.loads(data[0]))
 
     def _onTimeout(self):
         if hasattr(self, 'oscServer') and self.oscServer:

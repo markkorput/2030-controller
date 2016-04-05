@@ -1,6 +1,7 @@
 from py2030.interface import Interface
 from py2030.inputs.osc import Osc
 
+
 class Client:
     def __init__(self, options = {}):
         # attributes

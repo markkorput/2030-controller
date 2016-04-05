@@ -1,21 +1,21 @@
 import test_helper
 
 from py2030.client import Client
-from py2030.client import Interface
+from py2030.interface import Interface
 from py2030.outputs.osc import Osc as OscOutput
 
 import unittest
 
-class TestInterface(unittest.TestCase):
+class TestClient(unittest.TestCase):
 
-    # @classmethod
-    # def setUpClass(cls):
-    #     # this happens only once for the whole TestLauncher test-suite
-    #     cls.client = Client()
+    @classmethod
+    def setUpClass(cls):
+        # this happens only once for the whole TestLauncher test-suite
+        cls.client = Client()
 
     def setUp(self):
         # this happens before each test
-        self.client = Client()
+        self.client = self.__class__.client
 
     def test_osc_connection(self):
         # setup; create separate interface (simulating a different machine)

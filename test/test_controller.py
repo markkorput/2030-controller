@@ -1,7 +1,8 @@
 import test_helper
 from py2030.controller import Controller
 
-import unittest
+
+import unittest, json
 
 class TestController(unittest.TestCase):
 
@@ -30,9 +31,9 @@ class TestController(unittest.TestCase):
 
         # after
         self.assertEqual(len(self.sent_messages), 3)
-        self.assertEqual(self.sent_messages[0][0], 'TODO: controller info JSON')
-        self.assertEqual(self.sent_messages[1][0], '123-test-check')
-        self.assertEqual(len(self.sent_messages[2]), 0)
+        self.assertEqual(json.loads(self.sent_messages[0][0]), {'method': 'create', 'type': 'broadcasts', 'data': {'data': 'TODO: controller info JSON'}})
+        self.assertEqual(json.loads(self.sent_messages[1][0]), {'method': 'create', 'type': 'broadcasts', 'data': {'data': '123-test-check'}})
+        self.assertEqual(json.loads(self.sent_messages[2][0]), {'method': 'create', 'type': 'broadcasts', 'data': {}})
 
     def _onOscMessage(self, message, osc_output):
         self.sent_messages.append(message)
