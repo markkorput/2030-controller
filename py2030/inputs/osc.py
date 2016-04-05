@@ -85,7 +85,7 @@ class Osc:
         try:
             self.oscServer = OSCServer((self.host(), int(self.port())))
             self.oscServer.handle_timeout = self._onTimeout
-            self.oscServer.addMsgHandler('/Broadcasts', self._onBroadcast)
+            self.oscServer.addMsgHandler('/change', self._onChange)
             self.connected = True
             ColorTerminal().success("OSC Server running @ {0}:{1}".format(self.host(), str(self.port())))
         except:
@@ -104,17 +104,13 @@ class Osc:
             self.disconnectEvent(self)
             ColorTerminal().success('OSC Server stopped')
 
-    # def _onOscMessage(self, addr, tags, data, client_address):
-    #     if addr == '/Broadcasts':
-    #         self._onBroadcast(addr, tags, data, client_address)
-
-    def _onBroadcast(self, addr, tags, data, client_address):
+    def _onChange(self, addr, tags, data, client_address):
         # print('got broadcast, data:', data)
         if len(data) < 1:
-            ColorTerminal().warn('Got /Broadcasts OSC message without content')
+            ColorTerminal().warn('Got /change OSC message without data')
             return
 
-        self.interface.broadcasts.create(json.loads(data[0]))
+        self.interface.updates.create(json.loads(data[0]))
 
     def _onTimeout(self):
         if hasattr(self, 'oscServer') and self.oscServer:
