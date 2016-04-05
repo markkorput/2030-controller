@@ -55,11 +55,12 @@ class Interface:
         # a change in one of our sync source causes and update
         self.updates.create(model.data)
 
-    def addResourceCollection(self, cls, type):
+    def addResourceCollection(self, cls, type, options = {}):
         # create new instance of the collection
         col = cls()
         # set it as attr on self
         setattr(self, type, col)
+        serialize_name = options['serialize_name'] if 'serialize_name' in options else type
         cls.serialize_name = type
         # register callbacks
         col.newModelEvent += self.onNewModel
