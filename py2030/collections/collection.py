@@ -21,6 +21,7 @@ class Collection:
     #     previous_options = self.options
     #     self.options.update(options)
     #     # TODO; any internal updates needed for the (re-)configuration happen here
+
     def getModelClass(self):
         return self.model if self.model else self.__class__.model
 
@@ -33,6 +34,7 @@ class Collection:
     def add(self, new_model):
         self.models.append(new_model)
         self.newModelEvent(new_model, self)
+        return self
 
     def clear(self):
         self.models = []
