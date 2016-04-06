@@ -12,7 +12,7 @@ class EventHandler(FileSystemEventHandler):
         self.config_file = config_file
 
     def on_modified(self, event):
-        self.config_file.reload()
+        self.config_file.load({'force': True})
 
 class ConfigFile:
     default_paths = ('config/config.yaml', '../config/config.yaml', 'config/config.yaml.default', '../config/config.yaml.default')
@@ -66,13 +66,24 @@ class ConfigFile:
                 self.stop_monitoring()
                 self.start_monitoring()
 
-    def reload(self):
+    def load(self, options = {}):
+        # already have data loaded?
+        if self.data != None:
+            # we'll need the {'force': True} option to force a reload
+            if not 'force' in options or options['force'] != True:
+                # abort
+                return
+
+        content = self.read()
+        if not content:
+            return
+
         new_data = None
         try:
             if self.path().endswith('.yaml'):
-                new_data = yaml.load(self.read())
+                new_data = yaml.load(content)
             elif self.path().endswith('.json'):
-                new_data = json.loads(self.read())
+                new_data = json.loads(content)
             else:
                 ColorTerminal().fail('[ConfigFile] could not determine config file data format from file name: '+self.path())
         except ValueError as err:
@@ -91,6 +102,9 @@ class ConfigFile:
         return os.path.dirname(self.path())
 
     def read(self):
+        if not self.exists():
+            ColorTerminal().warn("[ConfigFile] file doesn't exist, can't read content ({0})".format(self.path()))
+            return None
         f = open(self.path(), 'r')
         content = f.read()
         f.close()

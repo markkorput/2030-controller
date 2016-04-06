@@ -8,9 +8,9 @@ class TestConfigFile(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # this happens only once for the whole TestLauncher test-suite
-        path = os.path.join(os.path.dirname(__file__), 'fixtures', 'dummy_config_file.txt')
+        path = os.path.join(os.path.dirname(__file__), 'fixtures', 'dummy.yaml')
         cls.config_file = ConfigFile({'path': path})
-        cls.content = "{foo:'bar'}"
+        cls.content = "foo:\n  bar: 'nothing'"
         # reset content, in case a test failed at the last run
         cls.config_file.write(cls.content)
 
@@ -39,6 +39,9 @@ class TestConfigFile(unittest.TestCase):
 
     def test_read(self):
         self.assertEqual(self.config_file.read(), self.content)
+
+    def test_read_fails(self):
+        self.assertEqual(ConfigFile({'path': 'i-dont-exist.yaml'}).read(), None)
 
     def test_write(self):
         # before
@@ -92,6 +95,36 @@ class TestConfigFile(unittest.TestCase):
     def test_exists(self):
         self.assertFalse(ConfigFile({'path': 'foo/bar/idontexist.json'}).exists())
         self.assertTrue(ConfigFile({'path': __file__}).exists())
+
+    def test_load(self):
+        # new instance for same file
+        config_file = ConfigFile({'path': self.config_file.path()})
+        # before (doesn't auto-load by default)
+        self.assertEqual(config_file.data, None)
+        # load
+        config_file.load()
+        # after
+        self.assertEqual(config_file.data, {'foo': {'bar': 'nothing'}})
+
+    def test_load_skipped(self):
+        # new instance for same file
+        config_file = ConfigFile({'path': self.config_file.path()})
+        config_file.data = {}
+        self.assertEqual(config_file.data, {})
+        # load
+        config_file.load()
+        # after; didn't reload
+        self.assertEqual(config_file.data, {})
+
+    def test_load_forced(self):
+        # new instance for same file
+        config_file = ConfigFile({'path': self.config_file.path()})
+        config_file.data = {}
+        self.assertEqual(config_file.data, {})
+        # load
+        config_file.load({'force': True})
+        # after; didn't reload
+        self.assertEqual(config_file.data, {'foo': {'bar': 'nothing'}})
 
 if __name__ == '__main__':
     unittest.main()
