@@ -1,3 +1,4 @@
+from py2030.utils.color_terminal import ColorTerminal
 from py2030.interface import Interface
 from py2030.utils.event import Event
 
@@ -6,7 +7,7 @@ class Output:
         # attributes
         self.interface = None
 
-        # default
+        # defaults
         if not 'interface' in options:
             options['interface'] = Interface.instance()
 
@@ -21,19 +22,32 @@ class Output:
         self.previous_options = self.options
         self.options.update(options)
 
+        # new interface?
         if 'interface' in options:
+            # unregister from current interface
             if self.interface:
-                self.interface.changes.newModelEvent -= self._onNewChange
-
+                self.interface.changes.newModelEvent -= self._onChange
+            # set interface as attribute
             self.interface = options['interface']
-
+            # register on new interface
             if self.interface:
-                self.interface.changes.newModelEvent += self._onNewChange
+                self.interface.changes.newModelEvent += self._onChange
+
+        if ('accept_types' in options or 'ignore_types' in options) and 'accept_types' in self.options and 'ignore_types' in self.options:
+            both = list(set(self.options['accept_types']) & set(self.options['ignore_types']))
+            if len(both) > 0:
+                ColorTerminal().warn("[Output] these types are specified to be both ignored and accepted, they will be ignored: {0}".format(both))
 
     def output(self, change_model):
         # overwrite this method with output-specific logic
         pass
 
-    def _onNewChange(self, change_model, collection):
+    def _onChange(self, change_model, collection):
+        if 'accept_types' in self.options and not change_model.get('type') in self.options['accept_types']:
+            return
+
+        if 'ignore_types' in self.options and change_model.get('type') in self.options['ignore_types']:
+            return
+
         self.output(change_model)
         self.outputEvent(change_model, self)

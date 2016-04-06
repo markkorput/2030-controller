@@ -39,6 +39,49 @@ class TestOutput(unittest.TestCase):
         self.assertEqual(eventlog[2], (self.output.interface.changes[2], self.output))
         self.assertEqual(eventlog[2][0].data, {'data': {'ip': 'localhost'}, 'type': 'broadcasts', 'method': 'create'})
 
+    def test_accept_types(self):
+        #setup
+        out = Output({'accept_types': ['type1', 'type3']})
+        eventlog = EventLog(out.outputEvent)
+        #type1 changes are accepted
+        out.interface.changes.create({'type': 'type1'})
+        self.assertEqual(eventlog.count, 1)
+        self.assertEqual(eventlog[0][0].get('type'), 'type1')
+        #type2 changes not accepted
+        out.interface.changes.create({'type': 'type2'})
+        self.assertEqual(eventlog.count, 1)
+        #type3 changes are accepted
+        out.interface.changes.create({'type': 'type3'})
+        self.assertEqual(eventlog.count, 2)
+        self.assertEqual(eventlog[1][0].get('type'), 'type3')
+        #foo-type changes not accepted
+        out.interface.changes.create({'type': 'foo'})
+        self.assertEqual(eventlog.count, 2)
+
+    def test_ignore_types(self):
+        #setup
+        out = Output({'ignore_types': ['ignored1', 'ignored2']})
+        eventlog = EventLog(out.outputEvent)
+        #type1 changes are accepted
+        out.interface.changes.create({'type': 'type1'})
+        self.assertEqual(eventlog.count, 1)
+        self.assertEqual(eventlog[0][0].get('type'), 'type1')
+        #ignored1 changes not accepted
+        out.interface.changes.create({'type': 'ignored1'})
+        self.assertEqual(eventlog.count, 1)
+        #type3 changes are accepted
+        out.interface.changes.create({'type': 'type3'})
+        self.assertEqual(eventlog.count, 2)
+        self.assertEqual(eventlog[1][0].get('type'), 'type3')
+        #foo-type changes not accepted
+        out.interface.changes.create({'type': 'ignored2'})
+        self.assertEqual(eventlog.count, 2)
+
+    def test_both_ignored_and_accepted_will_be_ignored(self):
+        out = Output({'ignore_types': ['t1'], 'accept_types': ['t1']})
+        out.interface.changes.create({'type': 't1'})
+        self.assertEqual(out.outputEvent.counter, 0)
+
 
 if __name__ == '__main__':
     unittest.main()
