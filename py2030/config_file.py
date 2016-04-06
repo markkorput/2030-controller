@@ -86,3 +86,6 @@ class ConfigFile:
         self.observer.join()
         self.observer = None
         self.monitoring = False
+
+    def exists(self):
+        return os.path.isfile(self.path())
