@@ -41,8 +41,8 @@ class TestOscBroadcastServer(unittest.TestCase):
         self.assertEqual(self.received_on_server2, [])
 
         # send two packages
-        osc_output._sendMessage('/packet', 'foo')
-        osc_output._sendMessage('/packet', 'bar')
+        osc_output._sendMessage('/packet', ['foo'])
+        osc_output._sendMessage('/packet', ['bar'])
         # receive first packets on both server instances
         self.server1.timed_out = False
         self.server1.handle_request()
