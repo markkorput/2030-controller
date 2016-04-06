@@ -12,7 +12,9 @@ class EventHandler(FileSystemEventHandler):
         self.config_file = config_file
 
     def on_modified(self, event):
-        self.config_file.load({'force': True})
+        if event.src_path == self.config_file.path():
+            ColorTerminal().output('Config file modified ({0}), reloading content'.format(event.src_path))
+            self.config_file.load({'force': True})
 
 class ConfigFile:
     default_paths = ('config/config.yaml', '../config/config.yaml', 'config/config.yaml.default', '../config/config.yaml.default')
@@ -81,11 +83,25 @@ class ConfigFile:
         new_data = None
         try:
             if self.path().endswith('.yaml'):
-                new_data = yaml.load(content)
+                try:
+                    new_data = yaml.load(content)
+                except:
+                    ColorTerminal().warn("[ConfigFile] yaml corrupted ({0}), can't load data".format(self.path()))
+                    return
             elif self.path().endswith('.json'):
-                new_data = json.loads(content)
+                try:
+                    new_data = json.loads(content)
+                except:
+                    ColorTerminal().warn("[ConfigFile] json corrupted ({0}), can't load data".format(self.path()))
+                    return
             else:
-                ColorTerminal().fail('[ConfigFile] could not determine config file data format from file name: '+self.path())
+                ColorTerminal().warn('[ConfigFile] could not determine config file data format from file name ({0}), assuming yaml'.format(self.path()))
+                try:
+                    new_data = yaml.load(content)
+                except:
+                    ColorTerminal().warn("[ConfigFile] yaml corrupted ({0}), can't load data".format(self.path()))
+                    return
+
         except ValueError as err:
             ColorTerminal().fail("Couldn't parse config file: {0}".format(self.path()))
             return

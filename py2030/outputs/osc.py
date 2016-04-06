@@ -1,3 +1,4 @@
+from py2030.outputs.output import Output
 from py2030.utils.color_terminal import ColorTerminal
 from py2030.utils.event import Event
 from py2030.interface import Interface
@@ -10,7 +11,7 @@ except ImportError:
     ColorTerminal().warn("importing embedded version of pyOSC library for py2030.outputs.osc")
     import py2030.dependencies.OSC as OSC
 
-class Osc:
+class Osc(Output):
     def __init__(self, options = {}):
         # attributes
         self.client = None
@@ -22,14 +23,7 @@ class Osc:
         self.disconnectEvent = Event()
         self.messageEvent = Event()
 
-        # default config
-        if not 'interface' in options:
-            options['interface'] = Interface.instance()
-
-        # configuration
-        self.options = {}
-        self.configure(options)
-
+        Output.__init__(self, options)
 
         # autoStart is True by default
         if not 'autoStart' in options or options['autoStart']:
@@ -39,25 +33,12 @@ class Osc:
         self.stop()
 
     def configure(self, options):
-        # we might need the overwritten options
-        previous_options = self.options
-        # overwrite/update configuration
-        self.options = dict(previous_options.items() + options.items())
+        Output.configure(self, options)
 
         # new host or port configs? We need to reconnect, but only if we're running
         if ('host' in options or 'port' in options) and self.connected:
             self.stop()
             self.start()
-
-        # new manager? register callback
-        if 'interface' in options:
-            # unregister previous callback
-            if 'interface' in previous_options and previous_options['interface']:
-                previous_options['interface'].changes.newModelEvent -= self._onNewChangeModel
-
-            # register callback new callback
-            if options['interface']: # could also be None if caller is UNsetting the manager
-                options['interface'].changes.newModelEvent += self._onNewChangeModel
 
     def start(self):
         if self._connect():
@@ -98,15 +79,16 @@ class Osc:
         ColorTerminal().success("OSC client closed")
         return True
 
-    def _onNewChangeModel(self, model, collection):
+    def output(self, change_model):
         # todo; more sophisticated protocol?
-        self._sendMessage('/change', json.dumps(model.data))
+        self._sendMessage('/change', [json.dumps(change_model.data)])
 
-    def _sendMessage(self, tag, content = None):
+    def _sendMessage(self, tag, data=[]):
         msg = OSC.OSCMessage()
         msg.setAddress(tag) # set OSC address
-        if content:
-            msg.append(content)
+
+        for item in data:
+            msg.append(item)
 
         if self.connected:
             # print('py2030.outputs.osc.Osc sending message: ', tag, content)

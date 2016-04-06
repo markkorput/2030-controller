@@ -1,4 +1,4 @@
-import test_helper
+from test_helper import EventLog
 from py2030.controller import Controller
 
 
@@ -17,26 +17,19 @@ class TestController(unittest.TestCase):
 
     def test_osc_broadcast(self):
         # setup
-        self.sent_messages = []
-        self.controller.broadcast_osc_output.messageEvent += self._onOscMessage
-
+        eventlog = EventLog(self.controller.broadcast_osc_output.messageEvent)
         # before
-        self.assertEqual(len(self.sent_messages), 0)
-
+        self.assertEqual(eventlog.count, 0)
         # do broadcasts
         self.controller.interval_broadcast.broadcast()
         self.controller.interface.broadcasts.create({'data': '123-test-check'})
         self.controller.interface.broadcasts.create()
-
         # after
-        self.assertEqual(len(self.sent_messages), 3)
-        self.assertEqual(json.loads(self.sent_messages[0][0]), {'method': 'create', 'type': 'broadcasts', 'data': {'data': 'TODO: controller info JSON'}})
-        self.assertEqual(json.loads(self.sent_messages[1][0]), {'method': 'create', 'type': 'broadcasts', 'data': {'data': '123-test-check'}})
-        self.assertEqual(json.loads(self.sent_messages[2][0]), {'method': 'create', 'type': 'broadcasts', 'data': {}})
+        self.assertEqual(eventlog.count, 3)
 
-    def _onOscMessage(self, message, osc_output):
-        self.sent_messages.append(message)
-
+        self.assertEqual(eventlog[0][0][0], json.dumps({'method': 'create', 'type': 'broadcasts', 'data': {'data': 'TODO: controller info JSON'}}))
+        self.assertEqual(eventlog[1][0][0], json.dumps({'method': 'create', 'type': 'broadcasts', 'data': {'data': '123-test-check'}}))
+        self.assertEqual(eventlog[2][0][0], json.dumps({'method': 'create', 'type': 'broadcasts', 'data': {}}))
 
 if __name__ == '__main__':
     unittest.main()
