@@ -32,11 +32,10 @@ class TestConfigFile(unittest.TestCase):
             self.assertEqual(instance.path(), 'config/config.yaml')
         elif os.path.isfile('../config/config.yaml'):
             self.assertEqual(instance.path(), '../config/config.yaml')
-        elif os.path.isfile('../config/config.yaml.default'):
+        elif os.path.isfile('config/config.yaml.default'):
             self.assertEqual(instance.path(), 'config/config.yaml.default')
         elif os.path.isfile('../config/config.yaml.default'):
             self.assertEqual(instance.path(), '../config/config.yaml.default')
-
 
     def test_read(self):
         self.assertEqual(self.config_file.read(), self.content)

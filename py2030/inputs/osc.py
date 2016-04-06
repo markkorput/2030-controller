@@ -110,7 +110,10 @@ class Osc:
         # set internal connected flag
         self.connected = True
         # notify
-        ColorTerminal().success("OSC Server running @ {0}:{1}".format(self.host(), str(self.port())))
+        if self.osc_server.__class__ == OscBroadcastServer:
+            ColorTerminal().success("OSC Broadcast Server running @ {0}:{1}".format(self.multicast(), str(self.port())))
+        else:
+            ColorTerminal().success("OSC Server running @ {0}:{1}".format(self.host(), str(self.port())))
         self.connectEvent(self)
 
     def _disconnect(self):

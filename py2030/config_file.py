@@ -61,12 +61,13 @@ class ConfigFile:
         previous_options = self.options
         self.options.update(options)
 
-        if 'path' in options and self.monitoring:
-            self.reload()
-            self.stop_monitoring()
-            self.start_monitoring()
+        if 'path' in options:
+            if self.monitoring:
+                self.stop_monitoring()
+                self.start_monitoring()
 
     def reload(self):
+        new_data = None
         try:
             if self.path().endswith('.yaml'):
                 new_data = yaml.load(self.read())
@@ -78,9 +79,10 @@ class ConfigFile:
             ColorTerminal().fail("Couldn't parse config file: {0}".format(self.path()))
             return
 
-        self.previous_data = self.data
-        self.data = new_data
-        self.dataChangeEvent(new_data, self)
+        if new_data:
+            self.previous_data = self.data
+            self.data = new_data
+            self.dataChangeEvent(new_data, self)
 
     def path(self):
         return self.options['path'] if 'path' in self.options else None
@@ -111,12 +113,14 @@ class ConfigFile:
         self.observer.schedule(self.event_handler, self.folder_path())
         self.observer.start()
         self.monitoring = True
+        ColorTerminal().success('ConfigFile started monitoring {0}'.format(self.path()))
 
     def stop_monitoring(self):
         self.observer.stop()
         self.observer.join()
         self.observer = None
         self.monitoring = False
+        ColorTerminal().success('ConfigFile stopped monitoring {0}'.format(self.path()))
 
     def exists(self):
         return os.path.isfile(self.path())
