@@ -103,15 +103,13 @@ class Osc:
         self._sendMessage('/change', json.dumps(model.data))
 
     def _sendMessage(self, tag, content = None):
-
-
-        # print('py2030.outputs.osc.Osc sending message: ', tag, content)
         msg = OSC.OSCMessage()
         msg.setAddress(tag) # set OSC address
         if content:
             msg.append(content)
 
         if self.connected:
+            # print('py2030.outputs.osc.Osc sending message: ', tag, content)
             try:
                 self.client.send(msg)
             except OSC.OSCClientError as err:

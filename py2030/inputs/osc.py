@@ -54,7 +54,7 @@ class Osc:
         self.running = False
 
     def update(self):
-        if self.osc_server == None:
+        if not self.connected:
             return
 
         # we'll enforce a limit to the number of osc requests
@@ -93,13 +93,15 @@ class Osc:
                 self.osc_server = OscBroadcastServer((self.multicast(), int(self.port())))
             else:
                 self.osc_server = OSCServer((self.host(), int(self.port())))
-
-        except Exception:
+        except Exception as err:
             # something went wrong, cleanup
             self.connected = False
             self.osc_server = None
             # notify
-            ColorTerminal().fail("OSC Server could not start @ {0}:{1}\n{3}".format(self.host(), str(self.port()), ))
+            if self.multicast():
+                ColorTerminal().fail("{0}\nOSC Broadcast Server could not start @ {1}:{2}".format(err, self.multicast(), str(self.port())))
+            else:
+                ColorTerminal().fail("{0}\nOSC Server could not start @ {1}:{2}".format(err, self.host(), str(self.port())))
             # abort
             return
 
@@ -112,11 +114,12 @@ class Osc:
         # set internal connected flag
         self.connected = True
         # notify
+        self.connectEvent(self)
+
         if self.osc_server.__class__ == OscBroadcastServer:
             ColorTerminal().success("OSC Broadcast Server running @ {0}:{1}".format(self.multicast(), str(self.port())))
         else:
             ColorTerminal().success("OSC Server running @ {0}:{1}".format(self.host(), str(self.port())))
-        self.connectEvent(self)
 
     def _disconnect(self):
         if hasattr(self, 'osc_server') and self.osc_server:
@@ -127,11 +130,10 @@ class Osc:
             ColorTerminal().success('OSC Server stopped')
 
     def _onChange(self, addr, tags, data, client_address):
-        # print('received /change, data:', data)
         if len(data) < 1:
             ColorTerminal().warn('Got /change OSC message without data')
             return
-
+        print('received /change, data:', data)
         self.interface.updates.create(json.loads(data[0]))
 
     def _onTimeout(self):

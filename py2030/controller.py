@@ -8,7 +8,7 @@ class Controller:
     def __init__(self, options = {}):
         # attributes
         self.interface = Interface.instance() # use global interface singleton instance
-        self.interval_broadcast = IntervalBroadcast({'interval': 5.0, 'data': 'TODO: controller info JSON'})
+        self.interval_broadcast = None
         self.broadcast_osc_output = None
         self.config_file = None
 
@@ -41,14 +41,15 @@ class Controller:
 
         # osc broadcaster
         opts = {'autoStart': True}
+        if self.config_file.get_value('py2030.multicast_ip'):
+            opts['host'] = self.config_file.get_value('py2030.multicast_ip')
+        if self.config_file.get_value('py2030.multicast_port'):
+            opts['port'] = self.config_file.get_value('py2030.multicast_port')
+        self.broadcast_osc_output = Osc(opts)
 
-        if 'py2030' in self.config_file.data:
-            if 'multicast_ip' in self.config_file.data['py2030']:
-                opts['host'] = self.config_file.data['py2030']['multicast_ip']
-            if 'multicast_port' in self.config_file.data['py2030']:
-                opts['port'] = self.config_file.data['py2030']['multicast_port']
-
-        self.broadcast_osc_output = Osc(opts) # auto connects
+        broadcast_interval = self.config_file.get_value('py2030.controller.broadcast_interval')
+        if broadcast_interval and broadcast_interval > 0:
+            self.interval_broadcast = IntervalBroadcast({'interval': broadcast_interval, 'data': 'TODO: controller info JSON'})
 
     def destroy(self):
         if self.broadcast_osc_output:
@@ -60,7 +61,8 @@ class Controller:
             self.config_file = None
 
     def update(self):
-        self.interval_broadcast.update()
+        if self.interval_broadcast:
+            self.interval_broadcast.update()
 
     def _onConfigDataChange(self, data, config_file):
         ColorTerminal().yellow('config change: {0}'.format(data))
