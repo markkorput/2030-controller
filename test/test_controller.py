@@ -10,7 +10,6 @@ class TestController(unittest.TestCase):
     def setUpClass(cls):
         # this happens only once for the whole test-suite
         cls.controller = Controller()
-        cls.controller.setup()
 
     def setUp(self):
         # this happens before each test

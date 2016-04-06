@@ -4,10 +4,10 @@ from py2030.interface import Interface
 from py2030.utils.osc_broadcast_server import OscBroadcastServer
 
 try:
-    from OSC import OSCServer
+    from OSC import OSCServer, NoCallbackError
 except ImportError:
     ColorTerminal().warn("importing embedded version of pyOSC library for py2030.inputs.osc")
-    from py2030.dependencies.OSC import OSCServer
+    from py2030.dependencies.OSC import OSCServer, NoCallbackError
 
 import json
 
@@ -20,6 +20,7 @@ class Osc:
 
         self.connectEvent = Event()
         self.disconnectEvent = Event()
+        self.unknownMessageEvent = Event()
 
         # default configs
         if not 'interface' in options:
@@ -106,6 +107,7 @@ class Osc:
         self.osc_server.handle_timeout = self._onTimeout
         # register specific OSC messages callback(s)
         self.osc_server.addMsgHandler('/change', self._onChange)
+        self.osc_server.addMsgHandler('default', self._onUnknownMessage)
 
         # set internal connected flag
         self.connected = True
@@ -135,3 +137,7 @@ class Osc:
     def _onTimeout(self):
         if hasattr(self, 'osc_server') and self.osc_server:
             self.osc_server.timed_out = True
+
+    def _onUnknownMessage(self, addr, tags, data, client_address):
+        ColorTerminal().warn('Got unknown OSC Message {0}'.format((addr, tags, data, client_address)))
+        self.unknownMessageEvent(addr, tags, data, client_address, self)
