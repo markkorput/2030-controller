@@ -71,5 +71,9 @@ class TestConfigFile(unittest.TestCase):
             time.sleep(0.1)
         self.assertEqual(self.config_file.fileChangeEvent.counter, 2)
 
+    def test_exists(self):
+        self.assertFalse(ConfigFile({'path': 'foo/bar/idontexist.json'}).exists())
+        self.assertTrue(ConfigFile({'path': __file__}).exists())
+
 if __name__ == '__main__':
     unittest.main()

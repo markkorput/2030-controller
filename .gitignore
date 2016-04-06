@@ -63,3 +63,4 @@ target/
 
 test/fixtures/dummy_config_file.txt
 config/config.json
+config/config.yaml
