@@ -10,10 +10,14 @@ except ImportError:
     ColorTerminal().warn("importing embedded version of pyOSC library for py2030.inputs.osc")
     from py2030.dependencies.OSC import OSCServer
 
+# import socket
+# myip = socket.gethostbyname(socket.gethostname())
+# print('my ip: {0}'.format(myip))
+
 class Osc:
     def __init__(self, options = {}):
         # attributes
-        self.oscServer = None
+        self.osc_server = None
         self.connected = False
         self.running = False
 
@@ -52,7 +56,7 @@ class Osc:
         self.running = False
 
     def update(self):
-        if self.oscServer == None:
+        if self.osc_server == None:
             return
 
         # we'll enforce a limit to the number of osc requests
@@ -62,11 +66,11 @@ class Osc:
         count = 0
 
         # clear timed_out flag
-        self.oscServer.timed_out = False
+        self.osc_server.timed_out = False
 
         # handle all pending requests then return
-        while not self.oscServer.timed_out and count < limit:
-            self.oscServer.handle_request()
+        while not self.osc_server.timed_out and count < limit:
+            self.osc_server.handle_request()
             count += 1
 
     def port(self):
@@ -83,29 +87,37 @@ class Osc:
             return
 
         try:
-            self.oscServer = OSCServer((self.host(), int(self.port())))
-            self.oscServer.handle_timeout = self._onTimeout
-            self.oscServer.addMsgHandler('/change', self._onChange)
-            self.connected = True
-            ColorTerminal().success("OSC Server running @ {0}:{1}".format(self.host(), str(self.port())))
+            # create server instance
+            self.osc_server = OSCServer((self.host(), int(self.port())))
+            # register time out callback
+            self.osc_server.handle_timeout = self._onTimeout
+            # register specific OSC messages callback(s)
+            self.osc_server.addMsgHandler('/change', self._onChange)
         except:
+            # something went wrong, cleanup
             self.connected = False
-            self.oscServer
+            self.osc_server = None
+            # notify
             ColorTerminal().fail("OSC Server could not start @ {0}:{1}".format(self.host(), str(self.port())))
+            # abort
+            return
 
-        if self.connected:
-            self.connectEvent(self)
+        # set internal connected flag
+        self.connected = True
+        # notify
+        ColorTerminal().success("OSC Server running @ {0}:{1}".format(self.host(), str(self.port())))
+        self.connectEvent(self)
 
     def _disconnect(self):
-        if hasattr(self, 'oscServer') and self.oscServer:
-            self.oscServer.close()
+        if hasattr(self, 'osc_server') and self.osc_server:
+            self.osc_server.close()
             self.connected = False
-            self.oscServer = None
+            self.osc_server = None
             self.disconnectEvent(self)
             ColorTerminal().success('OSC Server stopped')
 
     def _onChange(self, addr, tags, data, client_address):
-        # print('got broadcast, data:', data)
+        print('received /change, data:', data)
         if len(data) < 1:
             ColorTerminal().warn('Got /change OSC message without data')
             return
@@ -113,5 +125,5 @@ class Osc:
         self.interface.updates.create(json.loads(data[0]))
 
     def _onTimeout(self):
-        if hasattr(self, 'oscServer') and self.oscServer:
-            self.oscServer.timed_out = True
+        if hasattr(self, 'osc_server') and self.osc_server:
+            self.osc_server.timed_out = True
