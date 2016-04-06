@@ -3,6 +3,12 @@ from py2030.utils.event import Event
 from py2030.interface import Interface
 from py2030.utils.osc_broadcast_server import OscBroadcastServer
 
+try:
+    from OSC import OSCServer
+except ImportError:
+    ColorTerminal().warn("importing embedded version of pyOSC library for py2030.inputs.osc")
+    from py2030.dependencies.OSC import OSCServer
+
 import json
 
 class Osc:
@@ -72,6 +78,9 @@ class Osc:
         # default is localhost
         return self.options['host'] if 'host' in self.options else '127.0.0.1'
 
+    def multicast(self):
+        return self.options['multicast'] if 'multicast' in self.options else None
+
     def _connect(self):
         if self.connected:
             ColorTerminal().warning('py2030.inputs.osc.Osc - Already connected')
@@ -79,7 +88,11 @@ class Osc:
 
         try:
             # create server instance
-            self.osc_server = OscBroadcastServer((self.host(), int(self.port())))
+            if self.multicast():
+                self.osc_server = OscBroadcastServer((self.multicast(), int(self.port())))
+            else:
+                self.osc_server = OSCServer((self.host(), int(self.port())))
+
         except Exception:
             # something went wrong, cleanup
             self.connected = False
@@ -109,7 +122,7 @@ class Osc:
             ColorTerminal().success('OSC Server stopped')
 
     def _onChange(self, addr, tags, data, client_address):
-        print('received /change, data:', data)
+        # print('received /change, data:', data)
         if len(data) < 1:
             ColorTerminal().warn('Got /change OSC message without data')
             return
