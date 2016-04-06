@@ -10,7 +10,6 @@ class TestController(unittest.TestCase):
     def setUpClass(cls):
         # this happens only once for the whole test-suite
         cls.controller = Controller()
-        cls.controller.setup()
 
     def setUp(self):
         # this happens before each test
@@ -19,7 +18,7 @@ class TestController(unittest.TestCase):
     def test_osc_broadcast(self):
         # setup
         self.sent_messages = []
-        self.controller.osc_output.messageEvent += self._onOscMessage
+        self.controller.broadcast_osc_output.messageEvent += self._onOscMessage
 
         # before
         self.assertEqual(len(self.sent_messages), 0)

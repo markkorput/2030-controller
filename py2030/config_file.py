@@ -6,6 +6,7 @@ from watchdog.observers import Observer
 from watchdog.events import LoggingEventHandler
 from watchdog.events import FileSystemEventHandler
 
+# Handler class for file system event
 class EventHandler(FileSystemEventHandler):
     def __init__(self, config_file):
         self.config_file = config_file
@@ -14,6 +15,28 @@ class EventHandler(FileSystemEventHandler):
         self.config_file.reload()
 
 class ConfigFile:
+    default_paths = ('config/config.yaml', '../config/config.yaml', 'config/config.yaml.default', '../config/config.yaml.default')
+
+    _instance = None
+
+    @classmethod
+    def instance(cls, options = {}):
+        # Find existing instance
+        if cls._instance:
+            return cls._instance
+
+        # unless path is specified, we'll try to find an
+        # existing config file at the expected paths
+        if not 'path' in options:
+            for path in cls.default_paths:
+                if os.path.isfile(path):
+                    options['path'] = path
+                    break
+
+        # Create instance and save it in the _instance class-attribute
+        cls._instance = cls(options)
+        return cls._instance
+
     def __init__(self, options = {}):
         # attributes
         self.monitoring = False
@@ -38,12 +61,13 @@ class ConfigFile:
         previous_options = self.options
         self.options.update(options)
 
-        if 'path' in options and self.monitoring:
-            self.reload()
-            self.stop_monitoring()
-            self.start_monitoring()
+        if 'path' in options:
+            if self.monitoring:
+                self.stop_monitoring()
+                self.start_monitoring()
 
     def reload(self):
+        new_data = None
         try:
             if self.path().endswith('.yaml'):
                 new_data = yaml.load(self.read())
@@ -55,9 +79,10 @@ class ConfigFile:
             ColorTerminal().fail("Couldn't parse config file: {0}".format(self.path()))
             return
 
-        self.previous_data = self.data
-        self.data = new_data
-        self.dataChangeEvent(new_data, self)
+        if new_data:
+            self.previous_data = self.data
+            self.data = new_data
+            self.dataChangeEvent(new_data, self)
 
     def path(self):
         return self.options['path'] if 'path' in self.options else None
@@ -88,12 +113,23 @@ class ConfigFile:
         self.observer.schedule(self.event_handler, self.folder_path())
         self.observer.start()
         self.monitoring = True
+        ColorTerminal().success('ConfigFile started monitoring {0}'.format(self.path()))
 
     def stop_monitoring(self):
         self.observer.stop()
         self.observer.join()
         self.observer = None
         self.monitoring = False
+        ColorTerminal().success('ConfigFile stopped monitoring {0}'.format(self.path()))
 
     def exists(self):
         return os.path.isfile(self.path())
+
+    def get_value(self, path):
+        data = self.data if self.data else {}
+        names = path.split('.')
+        for name in names:
+            if not name in data:
+                return None
+            data = data[name]
+        return data

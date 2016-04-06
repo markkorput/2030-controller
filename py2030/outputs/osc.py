@@ -102,19 +102,20 @@ class Osc:
         # todo; more sophisticated protocol?
         self._sendMessage('/change', json.dumps(model.data))
 
-    def _sendMessage(self, tag, content):
-        # print('py2030.outputs.osc.Osc sending message: ', tag, content)
+    def _sendMessage(self, tag, content = None):
         msg = OSC.OSCMessage()
         msg.setAddress(tag) # set OSC address
         if content:
             msg.append(content)
 
-        try:
-            self.client.send(msg)
-        except OSC.OSCClientError as err:
-            pass
-            # ColorTerminal().warn("OSC failure: {0}".format(err))
-            # no need to call connect again on the client, it will automatically
-            # try to connect when we send the next message
+        if self.connected:
+            # print('py2030.outputs.osc.Osc sending message: ', tag, content)
+            try:
+                self.client.send(msg)
+            except OSC.OSCClientError as err:
+                pass
+                # ColorTerminal().warn("OSC failure: {0}".format(err))
+                # no need to call connect again on the client, it will automatically
+                # try to connect when we send the next message
 
         self.messageEvent(msg, self)
