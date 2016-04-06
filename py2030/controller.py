@@ -6,13 +6,14 @@ from py2030.config_file import ConfigFile
 
 class Controller:
 
-    config_file_paths = ('config/config.json', '../config/config.json')
+    config_file_paths = ('config/config.yaml', '../config/config.yaml', 'config/config.yaml.default', '../config/config.yaml.default')
 
     def __init__(self, options = {}):
         # attributes
         self.interface = Interface.instance() # use global interface singleton instance
         self.interval_broadcast = IntervalBroadcast({'interval': 5.0, 'data': 'TODO: controller info JSON'})
         self.osc_output = None
+        self.config_file = None
 
         # configuration
         self.options = {}
@@ -37,6 +38,7 @@ class Controller:
                 # changes to the config file will be directly ingested
                 self.config_file.dataChangeEvent += self._onConfigDataChange
                 self.config_file.start_monitoring()
+                ColorTerminal().green('[Controller] config file loaded and monitored: {0}'.format(self.config_file.path()))
                 break
 
         if not self.config_file.exists():
@@ -48,6 +50,10 @@ class Controller:
         if self.osc_output:
             self.osc_output.stop()
             self.osc_output = None
+
+        if self.config_file:
+            self.config_file.stop_monitoring()
+            self.config_file = None
 
     def update(self):
         self.interval_broadcast.update()

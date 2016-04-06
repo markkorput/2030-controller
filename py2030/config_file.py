@@ -1,7 +1,7 @@
 from py2030.utils.event import Event
 from py2030.utils.color_terminal import ColorTerminal
 
-import os, json
+import os, json, yaml
 from watchdog.observers import Observer
 from watchdog.events import LoggingEventHandler
 from watchdog.events import FileSystemEventHandler
@@ -44,11 +44,16 @@ class ConfigFile:
             self.start_monitoring()
 
     def reload(self):
-        # try:
-        new_data = json.loads(self.read())
-        # except ValueError as err:
-            # ColorTerminal().fail("Couldn't parse config file json: {0}".format(self.path()))
-            # return
+        try:
+            if self.path().endswith('.yaml'):
+                new_data = yaml.load(self.read())
+            elif self.path().endswith('.json'):
+                new_data = json.loads(self.read())
+            else:
+                ColorTerminal().fail('[ConfigFile] could not determine config file data format from file name: '+self.path())
+        except ValueError as err:
+            ColorTerminal().fail("Couldn't parse config file: {0}".format(self.path()))
+            return
 
         self.previous_data = self.data
         self.data = new_data
@@ -65,6 +70,9 @@ class ConfigFile:
         content = f.read()
         f.close()
         return content
+
+    def write_yaml(self, yaml):
+        self.write(yaml.dump(yaml))
 
     def write(self, content):
         f = open(self.path(), 'w')
