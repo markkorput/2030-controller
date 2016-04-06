@@ -19,6 +19,25 @@ class TestConfigFile(unittest.TestCase):
         self.config_file = self.__class__.config_file
         self.content = self.__class__.content
 
+    def test_default_paths(self):
+        self.assertEqual(ConfigFile.default_paths, ('config/config.yaml', '../config/config.yaml', 'config/config.yaml.default', '../config/config.yaml.default'))
+
+    def test_instance(self):
+        # get singleton instance
+        instance = ConfigFile.instance()
+        # before; singleton instance initialized and equal to returned instance
+        self.assertIsNotNone(ConfigFile._instance)
+        self.assertEqual(instance, ConfigFile._instance)
+        if os.path.isfile('config/config.yaml'):
+            self.assertEqual(instance.path(), 'config/config.yaml')
+        elif os.path.isfile('../config/config.yaml'):
+            self.assertEqual(instance.path(), '../config/config.yaml')
+        elif os.path.isfile('../config/config.yaml.default'):
+            self.assertEqual(instance.path(), 'config/config.yaml.default')
+        elif os.path.isfile('../config/config.yaml.default'):
+            self.assertEqual(instance.path(), '../config/config.yaml.default')
+
+
     def test_read(self):
         self.assertEqual(self.config_file.read(), self.content)
 
