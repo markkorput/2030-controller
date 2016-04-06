@@ -1,2 +1,2 @@
-foo:
-  bar: 'ok'
+py2030:
+  broadcast_ip: '224.0.0.251'

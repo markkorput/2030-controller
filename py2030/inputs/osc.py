@@ -1,18 +1,9 @@
 from py2030.utils.color_terminal import ColorTerminal
 from py2030.utils.event import Event
 from py2030.interface import Interface
+from py2030.utils.osc_broadcast_server import OscBroadcastServer
 
 import json
-
-try:
-    from OSC import OSCServer
-except ImportError:
-    ColorTerminal().warn("importing embedded version of pyOSC library for py2030.inputs.osc")
-    from py2030.dependencies.OSC import OSCServer
-
-# import socket
-# myip = socket.gethostbyname(socket.gethostname())
-# print('my ip: {0}'.format(myip))
 
 class Osc:
     def __init__(self, options = {}):
@@ -88,19 +79,20 @@ class Osc:
 
         try:
             # create server instance
-            self.osc_server = OSCServer((self.host(), int(self.port())))
-            # register time out callback
-            self.osc_server.handle_timeout = self._onTimeout
-            # register specific OSC messages callback(s)
-            self.osc_server.addMsgHandler('/change', self._onChange)
-        except:
+            self.osc_server = OscBroadcastServer((self.host(), int(self.port())))
+        except Exception:
             # something went wrong, cleanup
             self.connected = False
             self.osc_server = None
             # notify
-            ColorTerminal().fail("OSC Server could not start @ {0}:{1}".format(self.host(), str(self.port())))
+            ColorTerminal().fail("OSC Server could not start @ {0}:{1}\n{3}".format(self.host(), str(self.port()), ))
             # abort
             return
+
+        # register time out callback
+        self.osc_server.handle_timeout = self._onTimeout
+        # register specific OSC messages callback(s)
+        self.osc_server.addMsgHandler('/change', self._onChange)
 
         # set internal connected flag
         self.connected = True
