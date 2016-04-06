@@ -10,7 +10,7 @@ class Controller:
         self.interface = Interface.instance() # use global interface singleton instance
         self.interval_broadcast = None
         self.broadcast_osc_output = None
-        self.config_file = None
+        self.config_file = ConfigFile.instance()
 
         # configuration
         self.options = {}
@@ -29,15 +29,9 @@ class Controller:
         # TODO; any internal updates needed for the (re-)configuration happen here
 
     def setup(self):
-        # config file; load global instance
-        self.config_file = ConfigFile.instance()
+        self.config_file.load()
         # start monitoring for file changes
         self.config_file.start_monitoring()
-        # if config file exists, loads its content
-        if self.config_file.exists():
-            self.config_file.reload()
-        else:
-            ColorTerminal().fail('[Controller] could not find config file, using defaults')
 
         # osc broadcaster
         opts = {'autoStart': True}
