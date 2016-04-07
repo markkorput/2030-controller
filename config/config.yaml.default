@@ -1,5 +1,5 @@
 py2030:
-  multicast_ip: '224.0.0.251'
+  multicast_ip: '224.0.20.30'
   multicast_port: 2030
   controller:
     broadcast_interval: 5.0
