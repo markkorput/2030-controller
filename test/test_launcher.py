@@ -1,5 +1,6 @@
 import test_helper
 from launcher import Launcher
+from py2030.config_file import ConfigFile
 
 import unittest, time
 
@@ -11,37 +12,34 @@ class TestLauncher(unittest.TestCase):
     def setUpClass(cls):
         # this happens only once for the whole TestLauncher test-suite
         cls.launcher = Launcher()
-        cls.launcher.setup()
+        cls.client_launcher = Launcher({'argv': ['--client']})
+        cls.config_file = ConfigFile.instance()
+        cls.config_file.load()
 
     def setUp(self):
         # this happens before each test
         self.launcher = self.__class__.launcher
+        self.client_launcher = self.__class__.client_launcher
+        self.config_file =self.__class__.config_file
 
-    def test_run_and_stop(self):
-        # create separate thread to run launcher's main loop
-        thread = threading.Thread(target=self._threadMain)
-        # verify launcher isn't running yet
-        self.assertFalse(self.launcher.running)
-        # start thread
-        thread.start()
-        # verify that the thread is alive
-        self.assertTrue(thread.isAlive())
-        # verify that the launcher is running
-        self.assertTrue(self.launcher.running)
-        # tell launcher to stop
-        self.launcher.stop()
-        # give the thread a ms to finish
-        time.sleep(0.001)
-        # verify launcher is not running anymore
-        self.assertFalse(self.launcher.running)
-        # verify thread has ended as well
-        self.assertFalse(thread.isAlive())
-        del thread
+    def test_controller(self):
+        # setup
+        c = self.launcher.controller
+        # assert
+        self.assertTrue(c.broadcast_osc_output.running)
+        self.assertEqual(c.broadcast_osc_output.host(), self.config_file.get_value('py2030.multicast_ip'))
+        self.assertEqual(c.broadcast_osc_output.port(), self.config_file.get_value('py2030.multicast_port'))
+        self.assertEqual(c.interval_broadcast.interval(), self.config_file.get_value('py2030.controller.broadcast_interval'))
 
-    def _threadMain(self):
-        # run the launcher's main loop (this will loop forever until requested to stop)
-        self.launcher.run()
-        return
+    def test_client(self):
+        # setup
+        c = self.client_launcher.client
+        # assert
+        self.assertTrue(c.broadcast_osc_input.running)
+        self.assertTrue(c.broadcast_osc_input.connected)
+        self.assertEqual(c.broadcast_osc_input.host(), '127.0.0.1') # default
+        self.assertEqual(c.broadcast_osc_input.multicast(), self.config_file.get_value('py2030.multicast_ip'))
+        self.assertEqual(c.broadcast_osc_input.port(), self.config_file.get_value('py2030.multicast_port'))
 
 
 if __name__ == '__main__':

@@ -85,7 +85,7 @@ class Osc:
     def _connect(self):
         if self.connected:
             ColorTerminal().warning('py2030.inputs.osc.Osc - Already connected')
-            return
+            return False
 
         try:
             # create server instance
@@ -103,7 +103,7 @@ class Osc:
             else:
                 ColorTerminal().fail("{0}\nOSC Server could not start @ {1}:{2}".format(err, self.host(), str(self.port())))
             # abort
-            return
+            return False
 
         # register time out callback
         self.osc_server.handle_timeout = self._onTimeout
@@ -120,6 +120,8 @@ class Osc:
             ColorTerminal().success("OSC Broadcast Server running @ {0}:{1}".format(self.multicast(), str(self.port())))
         else:
             ColorTerminal().success("OSC Server running @ {0}:{1}".format(self.host(), str(self.port())))
+
+        return True
 
     def _disconnect(self):
         if hasattr(self, 'osc_server') and self.osc_server:
