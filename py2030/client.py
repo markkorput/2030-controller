@@ -1,11 +1,13 @@
 from py2030.interface import Interface
 from py2030.inputs.osc import Osc
+from py2030.config_file import ConfigFile
 
 class Client:
     def __init__(self, options = {}):
         # attributes
+        self.config_file = ConfigFile.instance()
         self.interface = Interface.instance() # use global interface singleton instance
-        self.osc_input = Osc() # uses same global instance of interface be default
+        self.broadcast_osc_input = None
 
         # configuration
         self.options = {}
@@ -18,10 +20,20 @@ class Client:
     def configure(self, options):
         previous_options = self.options
         self.options.update(options)
-        # TODO; any internal updates needed for the (re-)configuration happen here
 
     def setup(self):
-        pass
+        self.config_file.load()
+        # start monitoring for file changes
+        self.config_file.start_monitoring()
+
+        # osc inputs
+        opts = {'autoStart': True}
+        if self.config_file.get_value('py2030.multicast_ip'):
+            opts['multicast'] = self.config_file.get_value('py2030.multicast_ip')
+        if self.config_file.get_value('py2030.multicast_port'):
+            opts['port'] = self.config_file.get_value('py2030.multicast_port')
+
+        self.broadcast_osc_input = Osc(opts)
 
     def update(self):
-        self.osc_input.update()
+        self.broadcast_osc_input.update()

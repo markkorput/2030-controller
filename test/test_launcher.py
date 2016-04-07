@@ -1,7 +1,7 @@
 import test_helper
 from launcher import Launcher
 
-import unittest, os, time
+import unittest, time
 
 import threading
 
@@ -42,28 +42,6 @@ class TestLauncher(unittest.TestCase):
         # run the launcher's main loop (this will loop forever until requested to stop)
         self.launcher.run()
         return
-
-    def test_osc_broadcast(self):
-        # setup
-        self.sent_messages = []
-        self.launcher.controller.osc_output.messageEvent += self._onOscMessage
-
-        # before
-        self.assertEqual(len(self.sent_messages), 0)
-
-        # do broadcasts
-        self.launcher.controller.interval_broadcast.broadcast()
-        self.launcher.controller.interface.broadcasts.create({'data': '123-test-check'})
-        self.launcher.controller.interface.broadcasts.create()
-
-        # after
-        self.assertEqual(len(self.sent_messages), 3)
-        self.assertEqual(self.sent_messages[0][0], 'TODO: controller info JSON')
-        self.assertEqual(self.sent_messages[1][0], '123-test-check')
-        self.assertEqual(len(self.sent_messages[2]), 0)
-
-    def _onOscMessage(self, message, osc_output):
-        self.sent_messages.append(message)
 
 
 if __name__ == '__main__':

@@ -14,3 +14,17 @@ if __name__ == '__main__':
     import subprocess
     os.chdir(thisdir)
     subprocess.call(['python', '-m', 'unittest', 'discover'])
+
+class EventLog:
+    def __init__(self, event):
+        self.event = event
+        self.log = []
+        self.event += self.onEvent
+        self.count = 0
+
+    def onEvent(self, *args):
+        self.log.append(args)
+        self.count += 1
+
+    def __getitem__(self, idx):
+        return self.log[idx]
