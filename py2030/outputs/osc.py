@@ -55,8 +55,8 @@ class Osc(Output):
         self.running = False
 
     def port(self):
-        # default is 8080
-        return int(self.options['port']) if 'port' in self.options else 8080
+        # default is 2030
+        return int(self.options['port']) if 'port' in self.options else 2030
 
     def host(self):
         # default is localhost
@@ -86,7 +86,6 @@ class Osc(Output):
         return True
 
     def output(self, change_model):
-        # todo; more sophisticated protocol?
         self._sendMessage('/change', [json.dumps(change_model.data)])
 
     def _sendMessage(self, tag, data=[]):

@@ -19,7 +19,6 @@ class IntervalBroadcast:
     def configure(self, options):
         previous_options = self.options
         self.options.update(options)
-        # TODO; any internal updates needed for the (re-)configuration happen here
 
     def update(self, dt=None):
         if dt:

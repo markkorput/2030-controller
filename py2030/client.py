@@ -20,7 +20,6 @@ class Client:
     def configure(self, options):
         previous_options = self.options
         self.options.update(options)
-        # TODO; any internal updates needed for the (re-)configuration happen here
 
     def setup(self):
         self.config_file.load()

@@ -13,15 +13,6 @@ class Collection:
         self.newModelEvent = Event()
         self.clearEvent = Event()
 
-    #     # configuration
-    #     self.options = {}
-    #     self.configure(options)
-    #
-    # def configure(self, options):
-    #     previous_options = self.options
-    #     self.options.update(options)
-    #     # TODO; any internal updates needed for the (re-)configuration happen here
-
     def getModelClass(self):
         return self.model if self.model else self.__class__.model
 

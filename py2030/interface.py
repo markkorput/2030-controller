@@ -52,7 +52,6 @@ class Interface:
     def configure(self, options):
         previous_options = self.options
         self.options.update(options)
-        # TODO; any internal updates needed for the (re-)configuration happen here
 
     # start monitoring the given interface's changes collection
     # and forwarding new models into our own updates collection
