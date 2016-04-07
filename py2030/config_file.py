@@ -80,35 +80,34 @@ class ConfigFile:
         if not content:
             return
 
-        new_data = None
+        if self.path().endswith('.yaml'):
+            self.loadYaml(content)
+        elif self.path().endswith('.json'):
+            self.loadJson(content)
+        else:
+            ColorTerminal().warn('[ConfigFile] could not determine config file data format from file name ({0}), assuming yaml'.format(self.path()))
+            self.loadYaml(content)
+
+    def loadJson(self, content):
         try:
-            if self.path().endswith('.yaml'):
-                try:
-                    new_data = yaml.load(content)
-                except:
-                    ColorTerminal().warn("[ConfigFile] yaml corrupted ({0}), can't load data".format(self.path()))
-                    return
-            elif self.path().endswith('.json'):
-                try:
-                    new_data = json.loads(content)
-                except:
-                    ColorTerminal().warn("[ConfigFile] json corrupted ({0}), can't load data".format(self.path()))
-                    return
-            else:
-                ColorTerminal().warn('[ConfigFile] could not determine config file data format from file name ({0}), assuming yaml'.format(self.path()))
-                try:
-                    new_data = yaml.load(content)
-                except:
-                    ColorTerminal().warn("[ConfigFile] yaml corrupted ({0}), can't load data".format(self.path()))
-                    return
-
-        except ValueError as err:
-            ColorTerminal().fail("Couldn't parse config file: {0}".format(self.path()))
+            new_data = json.loads(content)
+        except:
+            ColorTerminal().warn("[ConfigFile] json corrupted ({0}), can't load data".format(self.path()))
             return
+        self.setData(new_data)
 
-        if new_data:
-            self.previous_data = self.data
-            self.data = new_data
+    def loadYaml(self, content):
+        try:
+            new_data = yaml.load(content)
+        except:
+            ColorTerminal().warn("[ConfigFile] yaml corrupted ({0}), can't load data".format(self.path()))
+            return
+        self.setData(new_data)
+
+    def setData(self, new_data):
+        self.previous_data = self.data
+        self.data = new_data
+        if self.previous_data != new_data:
             self.dataChangeEvent(new_data, self)
 
     def path(self):

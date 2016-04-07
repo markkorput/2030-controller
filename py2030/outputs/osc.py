@@ -36,9 +36,15 @@ class Osc(Output):
         Output.configure(self, options)
 
         # new host or port configs? We need to reconnect, but only if we're running
-        if ('host' in options or 'port' in options) and self.connected:
-            self.stop()
-            self.start()
+        if self.connected:
+            if 'host' in options and self.host() != self.client.client_address[0]:
+                self.stop()
+                self.start()
+            # also check for port change. if both host and port changed,
+            # restart already happened and self.client.client_address should have the new port
+            if 'port' in options and self.port() != self.client.client_address[1]:
+                self.stop()
+                self.start()
 
     def start(self):
         if self._connect():

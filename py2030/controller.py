@@ -30,20 +30,15 @@ class Controller:
 
     def setup(self):
         self.config_file.load()
+        # apply config
+        self.applyConfig(self.config_file.data)
         # start monitoring for file changes
+        self.config_file.dataChangeEvent += self._onConfigDataChange
         self.config_file.start_monitoring()
 
-        # osc broadcaster
-        opts = {'autoStart': True}
-        if self.config_file.get_value('py2030.multicast_ip'):
-            opts['host'] = self.config_file.get_value('py2030.multicast_ip')
-        if self.config_file.get_value('py2030.multicast_port'):
-            opts['port'] = self.config_file.get_value('py2030.multicast_port')
-        self.broadcast_osc_output = Osc(opts)
-
-        broadcast_interval = self.config_file.get_value('py2030.controller.broadcast_interval')
-        if broadcast_interval and broadcast_interval > 0:
-            self.interval_broadcast = IntervalBroadcast({'interval': broadcast_interval, 'data': 'TODO: controller info JSON'})
+    def _onConfigDataChange(self, data, config_file):
+        ColorTerminal().yellow('config change: {0}'.format(data))
+        self.applyConfig(data)
 
     def destroy(self):
         if self.broadcast_osc_output:
@@ -58,5 +53,31 @@ class Controller:
         if self.interval_broadcast:
             self.interval_broadcast.update()
 
-    def _onConfigDataChange(self, data, config_file):
-        ColorTerminal().yellow('config change: {0}'.format(data))
+    def applyConfig(self, data):
+        # osc broadcaster
+        opts = {'autoStart': True}
+        host = self.config_file.get_value('py2030.multicast_ip')
+        if host:
+            opts['host'] = host
+        port = self.config_file.get_value('py2030.multicast_port')
+        if port:
+            opts['port'] = port
+
+        if not self.broadcast_osc_output:
+            self.broadcast_osc_output = Osc(opts)
+        else:
+            self.broadcast_osc_output.configure(opts)
+
+        # interval broadcast
+        interval = self.config_file.get_value('py2030.controller.broadcast_interval')
+        if (not interval or interval <= 0) and self.interval_broadcast:
+            self.interval_broadcast = None
+            ColorTerminal().yellow('broadcast interval disabled')
+
+        if interval and interval > 0:
+            if self.interval_broadcast:
+                self.interval_broadcast.configure({'interval': interval})
+                ColorTerminal().yellow('set broadcast interval to {0}'.format(interval))
+            else:
+                self.interval_broadcast = IntervalBroadcast({'interval': interval, 'data': 'TODO: controller info JSON'})
+                ColorTerminal().yellow('started broadcast interval at {0}'.format(interval))
