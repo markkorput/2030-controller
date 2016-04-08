@@ -1,4 +1,4 @@
-import paramiko, os, re, time
+import paramiko, os, re, time, subprocess
 from scp import SCPClient
 
 from py2030.utils.color_terminal import ColorTerminal
@@ -63,26 +63,35 @@ class SshInstaller:
 
     def unpack_package(self):
         ColorTerminal().blue('unpacking {0} on {1}'.format(self.package_name, self.ip))
-        stdin, stdout, stderr = self.client.exec_command('unzip -o {0}'.format(self.package_name))
+        stdin, stdout, stderr = self.client.exec_command('mkdir {0}'.format(self.folder_name))
         # wait?
         for line in stdout: pass
+        for line in stderr: ColorTerminal().fail(str(line.strip('\n')))
+
+        stdin, stdout, stderr = self.client.exec_command('unzip -o {0} -d {1}'.format(self.package_name, self.folder_name))
+        # wait?
+        for line in stdout: pass
+        for line in stderr: ColorTerminal().fail(str(line.strip('\n')))
 
     def delete_package(self):
         ColorTerminal().blue('deleting {0} on {1}'.format(self.package_name, self.ip))
         stdin, stdout, stderr = self.client.exec_command('rm {0}'.format(self.package_name))
         for line in stdout: pass
+        for line in stderr: ColorTerminal().fail(str(line.strip('\n')))
 
     def install(self, cd=True):
         if cd:
             self.client.exec_command('cd ~/{0}'.format(self.folder_name))
         stdin, stdout, stderr = self.client.exec_command('./py-2030.py --install')
         for line in stdout: pass
+        for line in stderr: ColorTerminal().fail(str(line.strip('\n')))
 
     def bootstrap(self, cd=True):
         if cd:
             self.client.exec_command('cd ~/{0}'.format(self.folder_name))
         stdin, stdout, stderr = self.client.exec_command('./py-2030.py --bootstrap')
         for line in stdout: pass
+        for line in stderr: ColorTerminal().fail(str(line.strip('\n')))
 
     def start_remotely(self):
         pass
@@ -90,6 +99,7 @@ class SshInstaller:
             self.client.exec_command('cd ~/{0}'.format(self.folder_name))
         stdin, stdout, stderr = self.client.exec_command('./py-2030.py --install-client')
         for line in stdout: pass
+        for line in stderr: ColorTerminal().fail(str(line.strip('\n')))
 
     def _connect(self):
         if self.connected:
@@ -114,8 +124,19 @@ class SshInstaller:
             self.client = None
 
     def install(self):
+        zip_created = False
+
+        if not os.path.isfile(os.path.abspath(self.local_package_path)):
+            ColorTerminal().blue('[SshInstaller] creating local zip {0}'.format(self.local_package_path))
+            subprocess.call(['zip', '-r', 'py2030.zip', '.', '-x', '.*'])
+            zip_created = True
+
         self.put()
         if self.folder_exists():
             self.backup_folder()
         self.unpack_package()
         self.delete_package()
+
+        if zip_created:
+            ColorTerminal().blue('[SshInstaller] deleting local zip {0}'.format(self.local_package_path))
+            subprocess.call(['rm', self.local_package_path])

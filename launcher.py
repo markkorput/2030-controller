@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 import sys
 
-from py2030.controller import Controller
-from py2030.client import Client
 from py2030.utils.color_terminal import ColorTerminal
 
 class Launcher:
@@ -19,11 +17,13 @@ class Launcher:
 
     def setup(self):
         if self.do_client():
+            from py2030.client import Client
             self.client = Client()
             self._update_children.append(self.client)
             ColorTerminal().green('2030 Client Started')
 
         if self.do_controller():
+            from py2030.controller import Controller
             self.controller = Controller()
             self._update_children.append(self.controller)
             ColorTerminal().green('2030 Controller Started')
