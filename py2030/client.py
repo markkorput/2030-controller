@@ -23,8 +23,6 @@ class Client:
 
     def setup(self):
         self.config_file.load()
-        # start monitoring for file changes
-        self.config_file.start_monitoring()
 
         # osc inputs
         opts = {'autoStart': True}
