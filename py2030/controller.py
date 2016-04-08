@@ -3,6 +3,7 @@ from py2030.interface import Interface
 from py2030.interval_broadcast import IntervalBroadcast
 from py2030.outputs.osc import Osc
 from py2030.config_file import ConfigFile
+from py2030.config_file_monitor import ConfigFileMonitor
 
 class Controller:
     def __init__(self, options = {}):
@@ -11,7 +12,7 @@ class Controller:
         self.interval_broadcast = None
         self.broadcast_osc_output = None
         self.config_file = ConfigFile.instance()
-
+        self.config_file_monitor = ConfigFileMonitor(self.config_file, start=False)
         # configuration
         self.options = {}
         self.configure(options)
@@ -33,7 +34,7 @@ class Controller:
         self.applyConfig(self.config_file.data)
         # start monitoring for file changes
         self.config_file.dataChangeEvent += self._onConfigDataChange
-        self.config_file.start_monitoring()
+        self.config_file_monitor.start()
 
     def _onConfigDataChange(self, data, config_file):
         ColorTerminal().yellow('config change: {0}'.format(data))

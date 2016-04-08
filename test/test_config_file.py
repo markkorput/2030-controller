@@ -60,38 +60,6 @@ class TestConfigFile(unittest.TestCase):
         # cleanup; change content back
         self.config_file.write(self.content)
 
-    def folder_path(self):
-        self.assertEqual(self.config_file.folder_path(), './fixtures/')
-
-    @unittest.skip("ConfigFile monitoring test disabled because of hard-to-test threading issue")
-    def test_monitoring(self):
-        # setup
-        self.config_file.start_monitoring()
-        # before
-        self.assertEqual(self.config_file.changeDataEvent.counter, 0)
-        # change content
-        f = open(self.config_file.path(), 'w')
-        content = f.write('TextConfigFile.text_monitoring failed again...')
-        f.close()
-        # # give the monitoring thread some time to pick up on the file change
-        t1 = time.time()
-        while time.time() - t1 < 1:
-            if self.config_file.fileChangeEvent.counter == 1:
-                break
-            time.sleep(0.1)
-        self.assertEqual(self.config_file.changeDataEvent.counter, 1)
-        # change content back
-        f = open(self.config_file.path(), 'w')
-        content = f.write(self.content)
-        f.close()
-        # give the monitoring thread some time to pick up on the file change
-        t1 = time.time()
-        while time.time() - t1 < 1:
-            if self.config_file.fileChangeEvent.counter == 2:
-                break
-            time.sleep(0.1)
-        self.assertEqual(self.config_file.fileChangeEvent.counter, 2)
-
     def test_exists(self):
         self.assertFalse(ConfigFile({'path': 'foo/bar/idontexist.json'}).exists())
         self.assertTrue(ConfigFile({'path': __file__}).exists())
