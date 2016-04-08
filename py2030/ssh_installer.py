@@ -79,27 +79,27 @@ class SshInstaller:
         for line in stdout: pass
         for line in stderr: ColorTerminal().fail(str(line.strip('\n')))
 
-    def install(self, cd=True):
+    def install(self, cd=True, bootstrap=True):
         if cd:
             self.client.exec_command('cd ~/{0}'.format(self.folder_name))
-        stdin, stdout, stderr = self.client.exec_command('./py-2030.py --install')
+            for line in stdout: pass
+            for line in stderr: ColorTerminal().fail(str(line.strip('\n')))
+
+        # todo; install pip if necessary?
+
+        self.client.exec_command('sudo pip install -r requirements_client.txt')
         for line in stdout: pass
         for line in stderr: ColorTerminal().fail(str(line.strip('\n')))
 
-    def bootstrap(self, cd=True):
-        if cd:
-            self.client.exec_command('cd ~/{0}'.format(self.folder_name))
-        stdin, stdout, stderr = self.client.exec_command('./py-2030.py --bootstrap')
+        if bootstrap:
+            stdin, stdout, stderr = self.client.exec_command('./launcher.py --install --bootstrap')
+        else:
+            stdin, stdout, stderr = self.client.exec_command('./launcher.py --install')
         for line in stdout: pass
         for line in stderr: ColorTerminal().fail(str(line.strip('\n')))
 
     def start_remotely(self):
-        pass
-        if cd:
-            self.client.exec_command('cd ~/{0}'.format(self.folder_name))
-        stdin, stdout, stderr = self.client.exec_command('./py-2030.py --install-client')
-        for line in stdout: pass
-        for line in stderr: ColorTerminal().fail(str(line.strip('\n')))
+        # launch daemon
 
     def _connect(self):
         if self.connected:
@@ -123,7 +123,7 @@ class SshInstaller:
             self.client.close()
             self.client = None
 
-    def install(self):
+    def execute(self):
         zip_created = False
 
         if not os.path.isfile(os.path.abspath(self.local_package_path)):
@@ -135,6 +135,7 @@ class SshInstaller:
         if self.folder_exists():
             self.backup_folder()
         self.unpack_package()
+        self.install(bootstrap=True)
         self.delete_package()
 
         if zip_created:

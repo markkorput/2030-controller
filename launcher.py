@@ -29,10 +29,7 @@ class Launcher:
             ColorTerminal().green('2030 Controller Started')
 
     def do_client(self):
-        if 'argv' in self.options:
-            if '-c' in self.options['argv'] or '--client' in self.options['argv']:
-                return True
-        return False
+        return 'client' in self.options and self.options['client']
 
     def do_controller(self):
         return not self.do_client()
@@ -42,7 +39,25 @@ class Launcher:
             child.update()
 
 if __name__ == '__main__':
-    launcher = Launcher({'argv': sys.argv})
+    from optparse import OptionParser
+    parser = OptionParser()
+    parser.add_option('-c', '--client', dest='client', action="store_true", default=False)
+    parser.add_option('--install', dest='install', action="store_true", default=False)
+    parser.add_option('--bootstrap', dest='bootstrap', action="store_true", default=False)
+    options, remainder = parser.parse_args()
+    del OptionParser
+
+    if options.install:
+        ColorTerminal().red('--install not implemented yet')
+
+    if options.bootstrap:
+        ColorTerminal().red('--bootstrap not implemented yet')
+
+    if options.install or options.bootstrap:
+        # we're done
+        exit(0)
+
+    launcher = Launcher({'client': options.client})
 
     try:
         while True:
