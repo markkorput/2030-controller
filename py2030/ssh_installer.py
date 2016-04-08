@@ -72,11 +72,24 @@ class SshInstaller:
         stdin, stdout, stderr = self.client.exec_command('rm {0}'.format(self.package_name))
         for line in stdout: pass
 
-    def bootstrap(self):
-        pass
+    def install(self, cd=True):
+        if cd:
+            self.client.exec_command('cd ~/{0}'.format(self.folder_name))
+        stdin, stdout, stderr = self.client.exec_command('./py-2030.py --install')
+        for line in stdout: pass
+
+    def bootstrap(self, cd=True):
+        if cd:
+            self.client.exec_command('cd ~/{0}'.format(self.folder_name))
+        stdin, stdout, stderr = self.client.exec_command('./py-2030.py --bootstrap')
+        for line in stdout: pass
 
     def start_remotely(self):
         pass
+        if cd:
+            self.client.exec_command('cd ~/{0}'.format(self.folder_name))
+        stdin, stdout, stderr = self.client.exec_command('./py-2030.py --install-client')
+        for line in stdout: pass
 
     def _connect(self):
         if self.connected:
@@ -105,4 +118,4 @@ class SshInstaller:
         if self.folder_exists():
             self.backup_folder()
         self.unpack_package()
-        # self.delete_package()
+        self.delete_package()
