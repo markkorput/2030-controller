@@ -26,8 +26,11 @@ class Client:
 
         # osc inputs
         opts = {'autoStart': True}
+
         if self.config_file.get_value('py2030.multicast_ip'):
             opts['multicast'] = self.config_file.get_value('py2030.multicast_ip')
+        elif self.config_file.get_value('py2030.broadcast_ip'):
+            opts['host'] = self.config_file.get_value('py2030.broadcast_ip')
         if self.config_file.get_value('py2030.multicast_port'):
             opts['port'] = self.config_file.get_value('py2030.multicast_port')
 

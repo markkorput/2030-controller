@@ -56,12 +56,14 @@ class Controller:
     def applyConfig(self, data):
         # osc broadcaster
         opts = {'autoStart': True}
-        host = self.config_file.get_value('py2030.multicast_ip')
-        if host:
-            opts['host'] = host
-        port = self.config_file.get_value('py2030.multicast_port')
-        if port:
-            opts['port'] = port
+
+        if self.config_file.get_value('py2030.multicast_ip'):
+            opts['host'] = self.config_file.get_value('py2030.multicast_ip')
+        elif self.config_file.get_value('py2030.broadcast_ip'):
+            opts['host'] = self.config_file.get_value('py2030.broadcast_ip')
+
+        if self.config_file.get_value('py2030.multicast_port'):
+            opts['port'] = self.config_file.get_value('py2030.multicast_port')
 
         if not self.broadcast_osc_output:
             self.broadcast_osc_output = Osc(opts)
