@@ -96,7 +96,7 @@ class Osc(Output):
             msg.append(item)
 
         if self.connected:
-            # print('py2030.outputs.osc.Osc sending message: ', tag, content)
+            print('py2030.outputs.osc.Osc sending message: ', tag, data)
             try:
                 self.client.send(msg)
             except OSC.OSCClientError as err:
