@@ -108,4 +108,4 @@ class Osc(Output):
         self.messageEvent(msg, self)
 
     def trigger(self, event, data):
-        self._sendMessage('/'+event, data)
+        self._sendMessage('/'+event, [json.dumps(data)])
