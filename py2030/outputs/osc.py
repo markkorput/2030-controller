@@ -106,3 +106,6 @@ class Osc(Output):
                 # try to connect when we send the next message
 
         self.messageEvent(msg, self)
+
+    def trigger(self, event, data):
+        self._sendMessage('/'+event, data)
