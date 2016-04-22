@@ -28,6 +28,10 @@ class Launcher:
             self._update_children.append(self.controller)
             ColorTerminal().green('2030 Controller Started')
 
+    def destroy(self):
+        if self.do_controller():
+            self.controller.destroy()
+
     def do_client(self):
         return 'client' in self.options and self.options['client']
 
@@ -64,3 +68,5 @@ if __name__ == '__main__':
             launcher.update()
     except KeyboardInterrupt:
         ColorTerminal().yellow('KeyboardInterrupt. Quitting.')
+
+    launcher.destroy()

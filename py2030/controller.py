@@ -5,6 +5,7 @@ from py2030.outputs.osc import Osc
 from py2030.config_file import ConfigFile
 from py2030.config_file_monitor import ConfigFileMonitor
 from py2030.inputs.midi import MidiEffectInput
+from py2030.http_server import HttpServer
 
 class Controller:
     def __init__(self, options = {}):
@@ -15,6 +16,8 @@ class Controller:
         self.config_file = ConfigFile.instance()
         self.config_file_monitor = ConfigFileMonitor(self.config_file, start=False)
         self.midi_effect_input = MidiEffectInput()
+        self.http_server = HttpServer()
+
         # configuration
         self.options = {}
         self.configure(options)
@@ -39,6 +42,7 @@ class Controller:
         self.config_file_monitor.start()
         # start receiving incoming midi message and map them to effect events
         self.midi_effect_input.setup()
+        self.http_server.start()
 
     def _onConfigDataChange(self, data, config_file):
         ColorTerminal().yellow('config change: {0}'.format(data))
@@ -55,6 +59,7 @@ class Controller:
 
         # unregister from config file data change events
         self.config_file.dataChangeEvent -= self._onConfigDataChange
+        self.http_server.stop()
 
     def update(self):
         self.midi_effect_input.update()
