@@ -24,7 +24,8 @@ class ConfigFileMonitor(FileSystemEventHandler):
             self.start()
 
     def __del__(self):
-        self.stop()
+        if self.started:
+            self.stop()
 
     def on_modified(self, event):
         if event.src_path == self.config_file.path():
@@ -46,4 +47,4 @@ class ConfigFileMonitor(FileSystemEventHandler):
         self.observer.join()
         self.observer = None
         self.started = False
-        ColorTerminal().success('ConfigFileMonitor stopped for {0}'.format(self.path()))
+        ColorTerminal().success('ConfigFileMonitor stopped for {0}'.format(self.config_file.path()))

@@ -5,6 +5,7 @@ from py2030.outputs.osc import Osc
 from py2030.config_file import ConfigFile
 from py2030.config_file_monitor import ConfigFileMonitor
 from py2030.inputs.midi import MidiEffectInput
+from py2030.http_server import HttpServer
 
 class Controller:
     def __init__(self, options = {}):
@@ -15,6 +16,8 @@ class Controller:
         self.config_file = ConfigFile.instance()
         self.config_file_monitor = ConfigFileMonitor(self.config_file, start=False)
         self.midi_effect_input = MidiEffectInput()
+        self.http_server = None
+
         # configuration
         self.options = {}
         self.configure(options)
@@ -55,6 +58,9 @@ class Controller:
 
         # unregister from config file data change events
         self.config_file.dataChangeEvent -= self._onConfigDataChange
+        if self.http_server:
+            self.http_server.stop()
+            self.http_server = None
 
     def update(self):
         self.midi_effect_input.update()
@@ -66,6 +72,7 @@ class Controller:
         # osc broadcaster
         opts = {'autoStart': True}
 
+        # IP multicast/broadcasting
         if self.config_file.get_value('py2030.multicast_ip'):
             opts['host'] = self.config_file.get_value('py2030.multicast_ip')
         elif self.config_file.get_value('py2030.broadcast_ip'):
@@ -92,3 +99,14 @@ class Controller:
             else:
                 self.interval_broadcast = IntervalBroadcast({'interval': interval, 'data': 'TODO: controller info JSON'})
                 ColorTerminal().yellow('started broadcast interval at {0}'.format(interval))
+
+        # http server
+        port = self.config_file.get_value('py2030.controller.http_port')
+        if port:
+            if self.http_server and self.http_server.port != port:
+                self.http_server.stop()
+
+            self.http_server = HttpServer({'port': port})
+            self.http_server.start()
+        elif not port and self.http_server:
+            self.http_server.stop()
