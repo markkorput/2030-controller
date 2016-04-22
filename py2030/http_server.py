@@ -14,7 +14,7 @@ class HttpServer(threading.Thread):
         threading.Thread.__init__(self)
         self.options = options
         self.url = ""
-        self.port = 2031 # 8888
+        self.port = self.options['port'] if 'port' in self.options else 2031 # 8888
         self.kill = False
 
     def stop(self):

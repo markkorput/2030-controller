@@ -16,7 +16,7 @@ class Controller:
         self.config_file = ConfigFile.instance()
         self.config_file_monitor = ConfigFileMonitor(self.config_file, start=False)
         self.midi_effect_input = MidiEffectInput()
-        self.http_server = HttpServer()
+        self.http_server = None
 
         # configuration
         self.options = {}
@@ -42,7 +42,6 @@ class Controller:
         self.config_file_monitor.start()
         # start receiving incoming midi message and map them to effect events
         self.midi_effect_input.setup()
-        self.http_server.start()
 
     def _onConfigDataChange(self, data, config_file):
         ColorTerminal().yellow('config change: {0}'.format(data))
@@ -59,7 +58,9 @@ class Controller:
 
         # unregister from config file data change events
         self.config_file.dataChangeEvent -= self._onConfigDataChange
-        self.http_server.stop()
+        if self.http_server:
+            self.http_server.stop()
+            self.http_server = None
 
     def update(self):
         self.midi_effect_input.update()
@@ -71,6 +72,7 @@ class Controller:
         # osc broadcaster
         opts = {'autoStart': True}
 
+        # IP multicast/broadcasting
         if self.config_file.get_value('py2030.multicast_ip'):
             opts['host'] = self.config_file.get_value('py2030.multicast_ip')
         elif self.config_file.get_value('py2030.broadcast_ip'):
@@ -97,3 +99,14 @@ class Controller:
             else:
                 self.interval_broadcast = IntervalBroadcast({'interval': interval, 'data': 'TODO: controller info JSON'})
                 ColorTerminal().yellow('started broadcast interval at {0}'.format(interval))
+
+        # http server
+        port = self.config_file.get_value('py2030.controller.http_port')
+        if port:
+            if self.http_server and self.http_server.port != port:
+                self.http_server.stop()
+
+            self.http_server = HttpServer({'port': port})
+            self.http_server.start()
+        elif not port and self.http_server:
+            self.http_server.stop()
