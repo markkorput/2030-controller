@@ -4,6 +4,7 @@ from py2030.interval_broadcast import IntervalBroadcast
 from py2030.outputs.osc import Osc
 from py2030.config_file import ConfigFile
 from py2030.config_file_monitor import ConfigFileMonitor
+from py2030.inputs.midi import MidiEffectInput
 
 class Controller:
     def __init__(self, options = {}):
@@ -13,6 +14,7 @@ class Controller:
         self.broadcast_osc_output = None
         self.config_file = ConfigFile.instance()
         self.config_file_monitor = ConfigFileMonitor(self.config_file, start=False)
+        self.midi_effect_input = MidiEffectInput()
         # configuration
         self.options = {}
         self.configure(options)
@@ -35,6 +37,8 @@ class Controller:
         # start monitoring for file changes
         self.config_file.dataChangeEvent += self._onConfigDataChange
         self.config_file_monitor.start()
+        # start receiving incoming midi message and map them to effect events
+        self.midi_effect_input.setup()
 
     def _onConfigDataChange(self, data, config_file):
         ColorTerminal().yellow('config change: {0}'.format(data))
@@ -45,11 +49,16 @@ class Controller:
             self.broadcast_osc_output.stop()
             self.broadcast_osc_output = None
 
-        if self.config_file:
-            self.config_file.stop_monitoring()
-            self.config_file = None
+        # stop monitoring config file file system changes
+        if self.config_file_monitor.started:
+            self.config_file_monitor.stop()
+
+        # unregister from config file data change events
+        self.config_file.dataChangeEvent -= self._onConfigDataChange
 
     def update(self):
+        self.midi_effect_input.update()
+
         if self.interval_broadcast:
             self.interval_broadcast.update()
 

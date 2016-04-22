@@ -4,3 +4,4 @@ PyYAML==3.11
 watchdog==0.8.3
 paramiko=1.16.0
 scp=0.10.2
+python-rtmidi=0.5b1 # pip install --pre python-rtmidi
