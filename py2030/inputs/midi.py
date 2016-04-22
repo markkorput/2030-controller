@@ -87,7 +87,7 @@ class MidiEffectInput:
             effect_data = self.midi_message_to_effect(msg[0])
             if effect_data:
                 self.interface.effectEvent(effect_data)
-                print('[MidiEffectInput] triggered interface effectEvent with: ', effect_data)
+                # print('[MidiEffectInput] triggered interface effectEvent with: ', effect_data)
 
             # debugging
             # print("[%s] @%0.6f %r" % (self.port_name, self.time, message))
