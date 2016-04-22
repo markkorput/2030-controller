@@ -1,5 +1,11 @@
 py2030:
   multicast_ip: '224.0.20.30'
   multicast_port: 2030
+  broadcast_ip: '192.168.3.255'
   controller:
     broadcast_interval: 5.0
+  midi_triggers:
+    48: # C2
+      effect: ('COLOR', 255, 0, 0)
+    60: # C3
+      effect: ('COLOR', 0, 255, 0)
