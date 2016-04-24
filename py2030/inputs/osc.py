@@ -149,6 +149,7 @@ class Osc:
         self.unknownMessageEvent(addr, tags, data, client_address, self)
 
     def _onEvent(self, addr, tags, data, client_address):
+        # print '_onEvent:', addr, tags, data, client_address
         params = json.loads(data[0])
         self.interface.genericEvent(params)
 
