@@ -23,7 +23,8 @@ class ReconfigDownloader:
         self.interface.genericEvent += self._onGenericEvent
 
     def destroy(self):
-        self.interface.genericEvent -= self._onGenericEvent
+        if self._onGenericEvent in self.interface.genericEvent:
+            self.interface.genericEvent -= self._onGenericEvent
 
     def _onGenericEvent(self, data):
         typ = data['type'] if 'type' in data else None
