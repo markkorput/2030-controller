@@ -112,10 +112,15 @@ class Controller:
         port = self.config_file.get_value('py2030.controller.http_port')
         if port:
             if self.http_server and self.http_server.port != port:
+                # stop running http server
                 self.http_server.stop()
+                self.http_server = None
 
-            self.http_server = HttpServer({'port': port})
-            self.http_server.start()
+            # if server not initialized already (or just shutdown)
+            if not self.http_server:
+                # start http server on (new) port
+                self.http_server = HttpServer({'port': port})
+                self.http_server.start()
         elif not port and self.http_server:
             self.http_server.stop()
 
@@ -124,7 +129,7 @@ class Controller:
         #
         port = self.config_file.get_value('py2030.controller.midi_in_port')
         if port:
-            if not self.midi_effect_input.port == port:
+            if self.midi_effect_input.port != port:
                 self.midi_effect_input.destroy()
                 self.midi_effect_input.port = port
                 # start receiving incoming midi message and map them to effect events

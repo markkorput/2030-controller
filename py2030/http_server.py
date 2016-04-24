@@ -4,8 +4,10 @@ from SimpleHTTPServer import SimpleHTTPRequestHandler
 
 class MyRequestHandler(SimpleHTTPRequestHandler):
     def translate_path(self, path):
-        if self.path.endswith('config.yaml'):
-            return '/config/config.yaml'
+        # print '[MyRequestHandler] translate_path:', path
+        if path.endswith('config.yaml'):
+            #     print 'assumed config.yaml'
+            return SimpleHTTPRequestHandler.translate_path(self, '/config/config.yaml')
 
         return SimpleHTTPRequestHandler.translate_path(self, path)
 

@@ -1,7 +1,7 @@
 from py2030.utils.event import Event
 from py2030.utils.color_terminal import ColorTerminal
 
-import os, json, yaml
+import os, json, yaml, time, shutil
 
 class ConfigFile:
     default_paths = ('config/config.yaml', '../config/config.yaml', 'config/config.yaml.default', '../config/config.yaml.default')
@@ -119,3 +119,9 @@ class ConfigFile:
                 return None
             data = data[name]
         return data
+
+    def backup(self, backup_path=None):
+        if not backup_path:
+            backup_path = self.path() + '.bak.' + time.strftime('%Y%m%d.%H%M%S')
+
+        shutil.copy(self.path(), backup_path)
