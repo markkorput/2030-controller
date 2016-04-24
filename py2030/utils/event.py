@@ -1,4 +1,5 @@
 from py2030.utils.color_terminal import ColorTerminal
+# import traceback
 
 class Event:
     def __init__(self):
@@ -26,8 +27,13 @@ class Event:
         except:
             # raise ValueError("Handler is not handling this event, so cannot unhandle it.")
             ColorTerminal().red('Event.unhandle got unknown handler')
+            # traceback.print_exc()
+            # traceback.print_stack()
 
         return self
+
+    def handles(self, handler):
+        return handler in self.handlers
 
     def fire(self, *args, **kargs):
         # change state
@@ -71,3 +77,4 @@ class Event:
     __isub__ = unhandle
     __call__ = fire
     __len__  = getHandlerCount
+    __contains__ = handles

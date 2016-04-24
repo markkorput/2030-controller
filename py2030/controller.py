@@ -57,7 +57,10 @@ class Controller:
             self.config_file_monitor.stop()
 
         # unregister from config file data change events
-        self.config_file.dataChangeEvent -= self._onConfigDataChange
+        if self._onConfigDataChange in self.config_file.dataChangeEvent:
+            self.config_file.dataChangeEvent -= self._onConfigDataChange
+
+        # stop http server
         if self.http_server:
             self.http_server.stop()
             self.http_server = None
