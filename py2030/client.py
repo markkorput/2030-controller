@@ -48,7 +48,6 @@ class Client:
 
         if typ == 'reconfig':
             # print '[Client] /event type reconfig'
-            self.config_file.backup()
             try:
                 if 'url' in data and data['url']:
                     response = urllib2.urlopen(data['url'])
@@ -57,12 +56,9 @@ class Client:
 
             except urllib2.URLError as err:
                 print 'Failed to download config.yaml for reconfig:', err
-                response = None
+                return
 
-            if response:
-                content = response.read()
-                print 'downloaded config.yaml: ', content
-
-            # download file
-            # self.config_file.write(content_of_downloaded_file)
-            # remove downloaded file
+            self.config_file.backup()
+            content = response.read()
+            self.config_file.write(content)
+            print 'Todo; apply new config settings at runtime'
