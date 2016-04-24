@@ -35,6 +35,7 @@ class Interface:
         self.newModelEvent = Event()
 
         # network distributed events
+        self.genericEvent = Event()
         self.effectEvent = Event()
 
         # configuration

@@ -17,13 +17,13 @@ class MidiEffectInput:
         self.midiin = None
         self.port_name = None
         self.limit = 10
+
         # setup
         if 'setup' in options and options['setup']:
             self.setup()
 
     def __del__(self):
-        if self.midiin:
-            self._disconnect()
+        self.destroy()
 
     def setup(self):
         # make sure our config file instance has loaded its data
@@ -39,6 +39,10 @@ class MidiEffectInput:
         self._connect()
         # reset timer
         self.time = 0
+
+    def destroy(self):
+        if self.midiin:
+            self._disconnect()
 
     def _get_midi_effect_map(self):
         # get the part of the config file data we need
@@ -61,7 +65,11 @@ class MidiEffectInput:
     def _connect(self):
         try:
             self.midiin, self.port_name = open_midiport(self.port)
-        except (EOFError, KeyboardInterrupt):
+        except IOError as err:
+            print "Failed to initialize MIDI interface:", err
+            self.midiin = None
+            self.port_name = None
+        except EOFError as err:
             print("Failed to initialize MIDI interface")
             self.midiin = None
             self.port_name = None

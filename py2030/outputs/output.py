@@ -27,6 +27,7 @@ class Output:
             # unregister from current interface
             if self.interface:
                 self.interface.changes.newModelEvent -= self._onChange
+                self.interface.genericEvent -= self._onGenericEvent
                 self.interface.effectEvent -= self._onEffect
 
             # set interface as attribute
@@ -35,6 +36,7 @@ class Output:
             # register on new interface
             if self.interface:
                 self.interface.changes.newModelEvent += self._onChange
+                self.interface.genericEvent += self._onGenericEvent
                 self.interface.effectEvent += self._onEffect
 
         if ('accept_types' in options or 'ignore_types' in options) and 'accept_types' in self.options and 'ignore_types' in self.options:
@@ -59,6 +61,9 @@ class Output:
     def trigger(self, event, data):
         # overwrite this method with output-specific logic
         pass
+
+    def _onGenericEvent(self, effect_data):
+        self.trigger('event', effect_data)
 
     def _onEffect(self, effect_data):
         self.trigger('effect', effect_data)
