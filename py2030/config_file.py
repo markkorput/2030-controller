@@ -4,7 +4,7 @@ from py2030.utils.color_terminal import ColorTerminal
 import os, json, yaml, time, shutil
 
 class ConfigFile:
-    default_paths = ('config/config.yaml', '../config/config.yaml', 'config/config.yaml.default', '../config/config.yaml.default')
+    default_paths = ('config/config.yaml', '../config/config.yaml')
 
     _instance = None
 
@@ -100,8 +100,8 @@ class ConfigFile:
         f.close()
         return content
 
-    def write_yaml(self, yaml):
-        self.write(yaml.dump(yaml))
+    def write_yaml(self, data):
+        self.write(yaml.dump(data, default_flow_style=False))
 
     def write(self, content):
         f = open(self.path(), 'w')

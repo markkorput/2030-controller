@@ -2,6 +2,7 @@ from py2030.interface import Interface
 from py2030.inputs.osc import Osc
 from py2030.config_file import ConfigFile
 from py2030.client_side.reconfig_downloader import ReconfigDownloader
+from py2030.client_side.client_info import ClientInfo
 
 class Client:
     def __init__(self, options = {}):
@@ -10,6 +11,7 @@ class Client:
         self.interface = Interface.instance() # use global interface singleton instance
         self.broadcast_osc_input = None
         self.reconfig_downloader = ReconfigDownloader()
+        self.client_info = ClientInfo()
 
         # configuration
         self.options = {}
@@ -23,10 +25,15 @@ class Client:
         previous_options = self.options
         self.options.update(options)
 
+
     def setup(self):
         self.config_file.load()
 
-        # osc inputs
+        print 'client-id: ', self.client_info.client_id()
+
+        #
+        # osc input
+        #
         opts = {'autoStart': True}
 
         if self.config_file.get_value('py2030.multicast_ip'):
@@ -38,8 +45,10 @@ class Client:
 
         self.broadcast_osc_input = Osc(opts)
 
+        #
+        # ReconfigDownloader
+        #
         self.reconfig_downloader.setup()
-
 
     def update(self):
         self.broadcast_osc_input.update()
