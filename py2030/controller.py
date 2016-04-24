@@ -6,6 +6,7 @@ from py2030.config_file import ConfigFile
 from py2030.config_file_monitor import ConfigFileMonitor
 from py2030.inputs.midi import MidiEffectInput
 from py2030.http_server import HttpServer
+from py2030.config_broadcaster import ConfigBroadcaster
 
 class Controller:
     def __init__(self, options = {}):
@@ -17,6 +18,7 @@ class Controller:
         self.config_file_monitor = ConfigFileMonitor(self.config_file, start=False)
         self.midi_effect_input = MidiEffectInput()
         self.http_server = None
+        self.config_broadcaster = ConfigBroadcaster()
 
         # configuration
         self.options = {}
@@ -40,8 +42,6 @@ class Controller:
         # start monitoring for file changes
         self.config_file.dataChangeEvent += self._onConfigDataChange
         self.config_file_monitor.start()
-        # start receiving incoming midi message and map them to effect events
-        self.midi_effect_input.setup()
 
     def _onConfigDataChange(self, data, config_file):
         ColorTerminal().yellow('config change: {0}'.format(data))
@@ -72,10 +72,11 @@ class Controller:
             self.interval_broadcast.update()
 
     def applyConfig(self, data):
-        # osc broadcaster
+        #
+        # OSC Broadcast/Multicast output
+        #
         opts = {'autoStart': True}
 
-        # IP multicast/broadcasting
         if self.config_file.get_value('py2030.multicast_ip'):
             opts['host'] = self.config_file.get_value('py2030.multicast_ip')
         elif self.config_file.get_value('py2030.broadcast_ip'):
@@ -89,7 +90,9 @@ class Controller:
         else:
             self.broadcast_osc_output.configure(opts)
 
-        # interval broadcast
+        #
+        # Interval broadcaster
+        #
         interval = self.config_file.get_value('py2030.controller.broadcast_interval')
         if (not interval or interval <= 0) and self.interval_broadcast:
             self.interval_broadcast = None
@@ -103,7 +106,9 @@ class Controller:
                 self.interval_broadcast = IntervalBroadcast({'interval': interval, 'data': 'TODO: controller info JSON'})
                 ColorTerminal().yellow('started broadcast interval at {0}'.format(interval))
 
+        #
         # http server
+        #
         port = self.config_file.get_value('py2030.controller.http_port')
         if port:
             if self.http_server and self.http_server.port != port:
@@ -113,3 +118,16 @@ class Controller:
             self.http_server.start()
         elif not port and self.http_server:
             self.http_server.stop()
+
+        #
+        # midi input
+        #
+        port = self.config_file.get_value('py2030.controller.midi_in_port')
+        if port:
+            if not self.midi_effect_input.port == port:
+                self.midi_effect_input.destroy()
+                self.midi_effect_input.port = port
+                # start receiving incoming midi message and map them to effect events
+                self.midi_effect_input.setup()
+        else:
+            self.midi_effect_input.destroy()
