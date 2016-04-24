@@ -122,6 +122,6 @@ class ConfigFile:
 
     def backup(self, backup_path=None):
         if not backup_path:
-            backup_path = self.path() + '.bak.' + time.strftime('%Y%m%d.%H%M%s')
+            backup_path = self.path() + '.bak.' + time.strftime('%Y%m%d.%H%M%S')
 
         shutil.copy(self.path(), backup_path)

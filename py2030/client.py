@@ -50,7 +50,10 @@ class Client:
             # print '[Client] /event type reconfig'
             self.config_file.backup()
             try:
-                response = urllib2.urlopen('http://127.0.0.1:2031/config.yaml')
+                if 'url' in data and data['url']:
+                    response = urllib2.urlopen(data['url'])
+                else:
+                    response = urllib2.urlopen('http://127.0.0.1:2031/config.yaml')
 
             except urllib2.URLError as err:
                 print 'Failed to download config.yaml for reconfig:', err
