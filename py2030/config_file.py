@@ -32,6 +32,7 @@ class ConfigFile:
         self.data = None
 
         # events
+        self.dataLoadedEvent = Event()
         self.dataChangeEvent = Event()
 
         # config
@@ -82,7 +83,10 @@ class ConfigFile:
         self.previous_data = self.data
         self.data = new_data
         if self.previous_data != new_data:
-            self.dataChangeEvent(new_data, self)
+            if self.previous_data == None:
+                self.dataLoadedEvent(new_data, self)
+            else:
+                self.dataChangeEvent(new_data, self)
 
     def path(self):
         return self.options['path'] if 'path' in self.options else None
