@@ -1,8 +1,7 @@
 from py2030.interface import Interface
 from py2030.inputs.osc import Osc
 from py2030.config_file import ConfigFile
-
-import urllib2
+from py2030.client_side.reconfig_downloader import ReconfigDownloader
 
 class Client:
     def __init__(self, options = {}):
@@ -10,6 +9,7 @@ class Client:
         self.config_file = ConfigFile.instance()
         self.interface = Interface.instance() # use global interface singleton instance
         self.broadcast_osc_input = None
+        self.reconfig_downloader = ReconfigDownloader()
 
         # configuration
         self.options = {}
@@ -38,27 +38,8 @@ class Client:
 
         self.broadcast_osc_input = Osc(opts)
 
-        self.interface.genericEvent += self._onGenericEvent
+        self.reconfig_downloader.setup()
+
 
     def update(self):
         self.broadcast_osc_input.update()
-
-    def _onGenericEvent(self, data):
-        typ = data['type'] if 'type' in data else None
-
-        if typ == 'reconfig':
-            # print '[Client] /event type reconfig'
-            try:
-                if 'url' in data and data['url']:
-                    response = urllib2.urlopen(data['url'])
-                else:
-                    response = urllib2.urlopen('http://127.0.0.1:2031/config.yaml')
-
-            except urllib2.URLError as err:
-                print 'Failed to download config.yaml for reconfig:', err
-                return
-
-            self.config_file.backup()
-            content = response.read()
-            self.config_file.write(content)
-            print 'Todo; apply new config settings at runtime'
