@@ -20,7 +20,7 @@ class ClientInfo:
         self.client_cache_file.load()
 
         # try to get client id fmor client cache file
-        client_id = self.client_cache_file.get_value('py2030.client_id')
+        client_id = self.client_cache_file.get_value('client_id')
 
         # if we couldn't get client id form client cache file; get it from config file and save it to client cache file
         if not client_id:
@@ -29,9 +29,7 @@ class ClientInfo:
             if client_id:
                 # create client cache file / update client cache file with client id
                 client_cache_data = self.client_cache_file.data if self.client_cache_file.data else {}
-                if not 'py2030' in client_cache_data:
-                    client_cache_data['py2030'] = {}
-                client_cache_data['py2030']['client_id'] = client_id
+                client_cache_data['client_id'] = client_id
                 # write data to cache file
                 ColorTerminal().output("Writing client_id to client.cache.yaml")
                 self.client_cache_file.write_yaml(client_cache_data)
