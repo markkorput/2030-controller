@@ -1,23 +1,10 @@
 from py2030.utils.event import Event
 from py2030.utils.color_terminal import ColorTerminal
 
-import os, json, yaml
-from watchdog.observers import Observer
-from watchdog.events import LoggingEventHandler
-from watchdog.events import FileSystemEventHandler
-
-# Handler class for file system event
-class EventHandler(FileSystemEventHandler):
-    def __init__(self, config_file):
-        self.config_file = config_file
-
-    def on_modified(self, event):
-        if event.src_path == self.config_file.path():
-            ColorTerminal().output('Config file modified ({0}), reloading content'.format(event.src_path))
-            self.config_file.load({'force': True})
+import os, json, yaml, time, shutil
 
 class ConfigFile:
-    default_paths = ('config/config.yaml', '../config/config.yaml', 'config/config.yaml.default', '../config/config.yaml.default')
+    default_paths = ('config/config.yaml', '../config/config.yaml')
 
     _instance = None
 
@@ -41,32 +28,20 @@ class ConfigFile:
 
     def __init__(self, options = {}):
         # attributes
-        self.monitoring = False
         self.previous_data = None
         self.data = None
 
         # events
+        self.dataLoadedEvent = Event()
         self.dataChangeEvent = Event()
 
         # config
         self.options = {}
         self.configure(options)
 
-        if 'monitor' in self.options and self.options['monitor']:
-            self.start_monitoring()
-
-    def __del__(self):
-        if hasattr(self, 'monitoring') and self.monitoring:
-            self.stop_monitoring()
-
     def configure(self, options):
         previous_options = self.options
         self.options.update(options)
-
-        if 'path' in options:
-            if self.monitoring:
-                self.stop_monitoring()
-                self.start_monitoring()
 
     def load(self, options = {}):
         # already have data loaded?
@@ -108,13 +83,13 @@ class ConfigFile:
         self.previous_data = self.data
         self.data = new_data
         if self.previous_data != new_data:
-            self.dataChangeEvent(new_data, self)
+            if self.previous_data == None:
+                self.dataLoadedEvent(new_data, self)
+            else:
+                self.dataChangeEvent(new_data, self)
 
     def path(self):
         return self.options['path'] if 'path' in self.options else None
-
-    def folder_path(self):
-        return os.path.dirname(self.path())
 
     def read(self):
         if not self.exists():
@@ -125,31 +100,13 @@ class ConfigFile:
         f.close()
         return content
 
-    def write_yaml(self, yaml):
-        self.write(yaml.dump(yaml))
+    def write_yaml(self, data):
+        self.write(yaml.dump(data, default_flow_style=False))
 
     def write(self, content):
         f = open(self.path(), 'w')
         f.write(content)
         f.close()
-
-    def start_monitoring(self):
-        if self.monitoring:
-            return
-
-        self.event_handler = EventHandler(config_file=self)
-        self.observer = Observer()
-        self.observer.schedule(self.event_handler, self.folder_path())
-        self.observer.start()
-        self.monitoring = True
-        ColorTerminal().success('ConfigFile started monitoring {0}'.format(self.path()))
-
-    def stop_monitoring(self):
-        self.observer.stop()
-        self.observer.join()
-        self.observer = None
-        self.monitoring = False
-        ColorTerminal().success('ConfigFile stopped monitoring {0}'.format(self.path()))
 
     def exists(self):
         return os.path.isfile(self.path())
@@ -162,3 +119,9 @@ class ConfigFile:
                 return None
             data = data[name]
         return data
+
+    def backup(self, backup_path=None):
+        if not backup_path:
+            backup_path = self.path() + '.bak.' + time.strftime('%Y%m%d.%H%M%S')
+
+        shutil.copy(self.path(), backup_path)

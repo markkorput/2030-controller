@@ -1,9 +1,6 @@
 #!/usr/bin/env python
-import sys
-
-from py2030.controller import Controller
-from py2030.client import Client
 from py2030.utils.color_terminal import ColorTerminal
+from py2030.app import App
 
 class Launcher:
     def __init__(self, options = {}):
@@ -18,34 +15,41 @@ class Launcher:
             self.setup()
 
     def setup(self):
-        if self.do_client():
-            self.client = Client()
-            self._update_children.append(self.client)
-            ColorTerminal().green('2030 Client Started')
+        self.app = App({'profile': options.profile})
+        ColorTerminal().green('py2030 App instance started with profile: ' + self.app.profile)
 
-        if self.do_controller():
-            self.controller = Controller()
-            self._update_children.append(self.controller)
-            ColorTerminal().green('2030 Controller Started')
-
-    def do_client(self):
-        if 'argv' in self.options:
-            if '-c' in self.options['argv'] or '--client' in self.options['argv']:
-                return True
-        return False
-
-    def do_controller(self):
-        return not self.do_client()
+    def destroy(self):
+        self.app.destroy()
 
     def update(self):
-        for child in self._update_children:
-            child.update()
+        self.app.update()
 
 if __name__ == '__main__':
-    launcher = Launcher({'argv': sys.argv})
+    from optparse import OptionParser
+    parser = OptionParser()
+    parser.add_option('-p', '--profile', dest='profile', default="client")
+    parser.add_option('-c', '--client', dest='client', action="store_true", default=False)
+    parser.add_option('--install', dest='install', action="store_true", default=False)
+    parser.add_option('--bootstrap', dest='bootstrap', action="store_true", default=False)
+    options, remainder = parser.parse_args()
+    del OptionParser
+
+    if options.install:
+        ColorTerminal().red('--install not implemented yet')
+
+    if options.bootstrap:
+        ColorTerminal().red('--bootstrap not implemented yet')
+
+    if options.install or options.bootstrap:
+        # we're done
+        exit(0)
+
+    launcher = Launcher({'profile': options.profile})
 
     try:
         while True:
             launcher.update()
     except KeyboardInterrupt:
         ColorTerminal().yellow('KeyboardInterrupt. Quitting.')
+
+    launcher.destroy()

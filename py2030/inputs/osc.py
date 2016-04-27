@@ -68,8 +68,12 @@ class Osc:
 
         # handle all pending requests then return
         while not self.osc_server.timed_out and count < limit:
-            self.osc_server.handle_request()
-            count += 1
+            try:
+                self.osc_server.handle_request()
+                count += 1
+            except Exception as exc:
+                ColorTerminal().fail("Something went wrong while handling incoming OSC messages:")
+                print exc
 
     def port(self):
         # default is 2030
@@ -109,6 +113,8 @@ class Osc:
         self.osc_server.handle_timeout = self._onTimeout
         # register specific OSC messages callback(s)
         self.osc_server.addMsgHandler('/change', self._onChange)
+        self.osc_server.addMsgHandler('/event', self._onEvent)
+        self.osc_server.addMsgHandler('/effect', self._onEffect)
         self.osc_server.addMsgHandler('default', self._onUnknownMessage)
 
         # set internal connected flag
@@ -145,3 +151,13 @@ class Osc:
     def _onUnknownMessage(self, addr, tags, data, client_address):
         ColorTerminal().warn('Got unknown OSC Message {0}'.format((addr, tags, data, client_address)))
         self.unknownMessageEvent(addr, tags, data, client_address, self)
+
+    def _onEvent(self, addr, tags, data, client_address):
+        print 'OSC-in /event:', addr, tags, data, client_address
+        params = json.loads(data[0])
+        self.interface.genericEvent(params)
+
+    def _onEffect(self, addr, tags, data, client_address):
+        params = json.loads(data[0])
+        self.interface.effectEvent(params)
+        print 'OSC-in /effect:', addr, tags, data, client_address

@@ -96,7 +96,7 @@ class Osc(Output):
             msg.append(item)
 
         if self.connected:
-            # print('py2030.outputs.osc.Osc sending message: ', tag, content)
+            print('py2030.outputs.osc.Osc sending message: ', tag, data)
             try:
                 self.client.send(msg)
             except OSC.OSCClientError as err:
@@ -106,3 +106,6 @@ class Osc(Output):
                 # try to connect when we send the next message
 
         self.messageEvent(msg, self)
+
+    def trigger(self, event, data):
+        self._sendMessage('/'+event, [json.dumps(data)])
