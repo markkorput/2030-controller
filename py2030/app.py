@@ -11,11 +11,13 @@ class App:
         self.config_file = ConfigFile.instance()
         self.profile = 'client'
 
+        self.interface = Interface.instance() # use global interface singleton instance
+
         self.config_file_monitor = None
         self.midi_effect_input = None
         self.osc_output = None
+        self.osc_input = None
 
-        self.interface = Interface.instance() # use global interface singleton instance
         self.interval_broadcast = None
         self.http_server = None
         self.config_broadcaster = None # ConfigBroadcaster()
@@ -55,6 +57,10 @@ class App:
             self.osc_output.stop()
             self.osc_output = None
 
+        if self.osc_input:
+            self.osc_input.stop()
+            self.osc_input = None
+
         # stop monitoring config file file system changes
         if self.config_file_monitor and self.config_file_monitor.started:
             self.config_file_monitor.stop()
@@ -69,6 +75,9 @@ class App:
             self.http_server = None
 
     def update(self):
+        if self.osc_input:
+            self.osc_input.update()
+
         if self.midi_effect_input:
             self.midi_effect_input.update()
 
@@ -117,10 +126,8 @@ class App:
                 self.midi_effect_input.destroy()
 
         #
-        # OSC Broadcast/Multicast output
+        # OSC output
         #
-        opts = {'autoStart': True}
-
         port = profile_data['osc_out_port'] if 'osc_out_port' in profile_data else None
         ip = profile_data['osc_out_ip'] if 'osc_out_ip' in profile_data else None
         if ip and port:
@@ -135,6 +142,28 @@ class App:
             if self.osc_output:
                 self.osc_output.stop()
 
+        #
+        # osc Broadcast/Multicast input
+        #
+        port = profile_data['osc_in_port'] if 'osc_in_port' in profile_data else None
+        ip = profile_data['osc_in_ip'] if 'osc_in_ip' in profile_data else None
+        multicast = profile_data['osc_in_multicast'] if 'osc_in_multicast' in profile_data else None
+
+        if ip and port:
+            if self.osc_input:
+                if self.osc_input.port() != port or self.osc_input.host() != ip or self.osc_input.multicast() != multicast:
+                    self.osc_input.stop()
+                    self.osc_input = OscInput({'port': port, 'host': ip, 'multicast': multicast}) # auto-starts
+                else:
+                    # no changes, just heck if its running
+                    if not self.osc_input.running:
+                        self.osc_input.start()
+            else:
+                from py2030.inputs.osc import Osc as OscInput
+                self.osc_input = OscInput({'port': port, 'host': ip, 'multicast': multicast}) # auto-starts
+        else:
+            if self.osc_input and self.osc_input.running:
+                self.osc_input.stop()
 
         # #
         # # Interval broadcaster
