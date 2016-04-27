@@ -2,7 +2,6 @@ from py2030.utils.color_terminal import ColorTerminal
 from py2030.interface import Interface
 from py2030.interval_broadcast import IntervalBroadcast
 from py2030.config_file import ConfigFile
-from py2030.http_server import HttpServer
 from py2030.config_broadcaster import ConfigBroadcaster
 
 class App:
@@ -17,9 +16,9 @@ class App:
         self.midi_effect_input = None
         self.osc_output = None
         self.osc_input = None
+        self.http_server = None
 
         self.interval_broadcast = None
-        self.http_server = None
         self.config_broadcaster = None # ConfigBroadcaster()
 
         # configuration
@@ -165,6 +164,28 @@ class App:
             if self.osc_input and self.osc_input.running:
                 self.osc_input.stop()
 
+        #
+        # http server
+        #
+        port = profile_data['http_server_port'] if 'http_server_port' in profile_data else None
+        if port:
+            if self.http_server and self.http_server.port != port:
+                # stop running http server
+                self.http_server.stop()
+                self.http_server = None
+
+            # if server not initialized already (or just shutdown)
+            if not self.http_server:
+                # start http server on (new) port
+                from py2030.http_server import HttpServer
+                self.http_server = HttpServer({'port': port})
+                self.http_server.start()
+                del HttpServer
+
+        elif not port and self.http_server:
+            self.http_server.stop()
+
+
         # #
         # # Interval broadcaster
         # #
@@ -180,22 +201,4 @@ class App:
         #     else:
         #         self.interval_broadcast = IntervalBroadcast({'interval': interval, 'data': 'TODO: controller info JSON'})
         #         ColorTerminal().yellow('started broadcast interval at {0}'.format(interval))
-        #
-        # #
-        # # http server
-        # #
-        # port = self.config_file.get_value('py2030.controller.http_port')
-        # if port:
-        #     if self.http_server and self.http_server.port != port:
-        #         # stop running http server
-        #         self.http_server.stop()
-        #         self.http_server = None
-        #
-        #     # if server not initialized already (or just shutdown)
-        #     if not self.http_server:
-        #         # start http server on (new) port
-        #         self.http_server = HttpServer({'port': port})
-        #         self.http_server.start()
-        # elif not port and self.http_server:
-        #     self.http_server.stop()
         #
