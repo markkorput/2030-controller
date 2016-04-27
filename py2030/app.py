@@ -2,6 +2,8 @@ from py2030.utils.color_terminal import ColorTerminal
 from py2030.interface import Interface
 from py2030.config_file import ConfigFile
 
+# from py2030.client_side.client_info import ClientInfo
+
 class App:
     def __init__(self, options = {}):
         # attributes
