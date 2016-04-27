@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-import sys
-
 from py2030.utils.color_terminal import ColorTerminal
+from py2030.app import App
 
 class Launcher:
     def __init__(self, options = {}):
@@ -16,35 +15,19 @@ class Launcher:
             self.setup()
 
     def setup(self):
-        if self.do_client():
-            from py2030.client import Client
-            self.client = Client()
-            self._update_children.append(self.client)
-            ColorTerminal().green('2030 Client Started')
-
-        if self.do_controller():
-            from py2030.controller import Controller
-            self.controller = Controller()
-            self._update_children.append(self.controller)
-            ColorTerminal().green('2030 Controller Started')
+        self.app = App({'profile': options.profile})
+        ColorTerminal().green('py2030 App instance started with profile: ' + self.app.profile)
 
     def destroy(self):
-        if self.do_controller():
-            self.controller.destroy()
-
-    def do_client(self):
-        return 'client' in self.options and self.options['client']
-
-    def do_controller(self):
-        return not self.do_client()
+        self.app.destroy()
 
     def update(self):
-        for child in self._update_children:
-            child.update()
+        self.app.update()
 
 if __name__ == '__main__':
     from optparse import OptionParser
     parser = OptionParser()
+    parser.add_option('-p', '--profile', dest='profile', default="client")
     parser.add_option('-c', '--client', dest='client', action="store_true", default=False)
     parser.add_option('--install', dest='install', action="store_true", default=False)
     parser.add_option('--bootstrap', dest='bootstrap', action="store_true", default=False)
@@ -61,7 +44,7 @@ if __name__ == '__main__':
         # we're done
         exit(0)
 
-    launcher = Launcher({'client': options.client})
+    launcher = Launcher({'profile': options.profile})
 
     try:
         while True:

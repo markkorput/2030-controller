@@ -17,6 +17,7 @@ class MidiEffectInput:
         self.midiin = None
         self.port_name = None
         self.limit = 10
+        self.connected = False
 
         # setup
         if 'setup' in options and options['setup']:
@@ -26,12 +27,6 @@ class MidiEffectInput:
         self.destroy()
 
     def setup(self):
-        # make sure our config file instance has loaded its data
-        # (won't reload when already loaded)
-        self.config_file.load()
-        # get port from config file if not specified by caller
-        if not self.port:
-            self.port = self.config_file.get_value('py2030.controller.midi_in_port')
         # get the data we need from the config file
         self.midi_effect_map = self._get_midi_effect_map()
         # start listening for midi messages
@@ -69,14 +64,22 @@ class MidiEffectInput:
             print "Failed to initialize MIDI interface:", err
             self.midiin = None
             self.port_name = None
+            self.connected = False
+            return
         except EOFError as err:
             print("Failed to initialize MIDI interface")
             self.midiin = None
             self.port_name = None
+            self.connected = False
+            return
+        print("Midi input initialized on port: " + self.port_name)
+        self.connected = True
+        return
 
     def _disconnect(self):
         self.midiin.close_port()
         self.midiin = None
+        self.connected = False
 
     def update(self):
         if not self.midiin:
@@ -86,6 +89,7 @@ class MidiEffectInput:
             # get next incoming midi message
             msg = self.midiin.get_message()
             # no more messages; we're done
+
             if not msg:
                 return
 
@@ -95,7 +99,7 @@ class MidiEffectInput:
             effect_data = self.midi_message_to_effect(msg[0])
             if effect_data:
                 self.interface.effectEvent(effect_data)
-                # print('[MidiEffectInput] triggered interface effectEvent with: ', effect_data)
+                print('[MidiEffectInput] triggered interface effectEvent with: ', effect_data)
 
             # debugging
             # print("[%s] @%0.6f %r" % (self.port_name, self.time, message))

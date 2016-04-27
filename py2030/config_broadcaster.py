@@ -15,15 +15,19 @@ class ConfigBroadcaster:
 
     def __del__(self):
         # tear down
+        self.destroy()
+
+    def destroy(self):
         self.registerCallback(False)
 
     def registerCallback(self, register=True):
         if register:
-            # print '[ConfigBroadcaster] registered'
+            print '[ConfigBroadcaster] registered'
             self.config_file.dataChangeEvent += self._onConfigDataChange
         else:
-            # print '[ConfigBroadcaster] unregistered'
-            self.config_file.dataChangeEvent -= self._onConfigDataChange
+            if self._onConfigDataChange in self.config_file.dataChangeEvent:
+                print '[ConfigBroadcaster] unregistered'
+                self.config_file.dataChangeEvent -= self._onConfigDataChange
 
     def url(self):
         if hasattr(self, '__url'):
