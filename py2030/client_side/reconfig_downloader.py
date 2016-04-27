@@ -20,10 +20,13 @@ class ReconfigDownloader:
         self.destroy()
 
     def setup(self):
-        self.interface.genericEvent += self._onGenericEvent
+        if not self._onGenericEvent in self.interface.genericEvent:
+            print 'ReconfigDownloader registered'
+            self.interface.genericEvent += self._onGenericEvent
 
     def destroy(self):
         if self._onGenericEvent in self.interface.genericEvent:
+            print 'ReconfigDownloader de-registered'
             self.interface.genericEvent -= self._onGenericEvent
 
     def _onGenericEvent(self, data):

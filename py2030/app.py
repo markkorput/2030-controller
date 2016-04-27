@@ -18,6 +18,7 @@ class App:
 
         self.interval_broadcast = None
         self.config_broadcaster = None
+        self.reconfig_downloader = None
 
         # configuration
         self.options = {}
@@ -46,7 +47,7 @@ class App:
         self.config_file.dataChangeEvent += self._onConfigDataChange
 
     def _onConfigDataChange(self, data, config_file):
-        ColorTerminal().yellow('config change: {0}'.format(data))
+        # ColorTerminal().yellow('config change: {0}'.format(data))
         self._apply_config(self.config_file)
 
     def destroy(self):
@@ -146,7 +147,7 @@ class App:
         ip = profile_data['osc_in_ip'] if 'osc_in_ip' in profile_data else None
         multicast = profile_data['osc_in_multicast'] if 'osc_in_multicast' in profile_data else None
 
-        if ip and port:
+        if ip and port or multicast and port:
             if self.osc_input:
                 if self.osc_input.port() != port or self.osc_input.host() != ip or self.osc_input.multicast() != multicast:
                     self.osc_input.stop()
@@ -196,6 +197,22 @@ class App:
             if self.config_broadcaster:
                 self.config_broadcaster.destroy()
                 self.config_broadcaster = None
+
+        #
+        # Reconfig Downloader
+        #
+        enabled = profile_data['download_reconfig'] if 'download_reconfig' in profile_data else None
+        if enabled:
+            if self.reconfig_downloader:
+                self.reconfig_downloader.setup()
+            else:
+                from py2030.client_side.reconfig_downloader import ReconfigDownloader
+                self.reconfig_downloader = ReconfigDownloader()
+                self.reconfig_downloader.setup()
+                del ReconfigDownloader
+        else:
+            if self.reconfig_downloader:
+                self.reconfig_downloader.destroy()
 
         #
         # Interval broadcaster
