@@ -108,8 +108,8 @@ class App:
                     # start receiving incoming midi message and map them to effect events
                     self.midi_effect_input.setup()
                 else:
-                    if not self.self.midi_effect_input.connected:
-                        self.self.midi_effect_input.setup()
+                    if not self.midi_effect_input.connected:
+                        self.midi_effect_input.setup()
             else:
                 from py2030.inputs.midi import MidiEffectInput
                 self.midi_effect_input = MidiEffectInput({'port': port, 'setup': True})
