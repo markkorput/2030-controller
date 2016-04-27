@@ -1,7 +1,6 @@
 from py2030.utils.color_terminal import ColorTerminal
 from py2030.interface import Interface
 from py2030.config_file import ConfigFile
-from py2030.config_broadcaster import ConfigBroadcaster
 
 class App:
     def __init__(self, options = {}):
@@ -18,7 +17,7 @@ class App:
         self.http_server = None
 
         self.interval_broadcast = None
-        self.config_broadcaster = None # ConfigBroadcaster()
+        self.config_broadcaster = None
 
         # configuration
         self.options = {}
@@ -183,6 +182,20 @@ class App:
 
         elif not port and self.http_server:
             self.http_server.stop()
+
+        #
+        # Config broadcaster
+        #
+        enabled = profile_data['broadcast_reconfig'] if 'broadcast_reconfig' in profile_data else None
+        if enabled:
+            if not self.config_broadcaster:
+                from py2030.config_broadcaster import ConfigBroadcaster
+                self.config_broadcaster = ConfigBroadcaster()
+                # del ConfigBroadcaster
+        else:
+            if self.config_broadcaster:
+                self.config_broadcaster.destroy()
+                self.config_broadcaster = None
 
         #
         # Interval broadcaster

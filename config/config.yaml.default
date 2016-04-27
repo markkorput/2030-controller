@@ -1,26 +1,28 @@
 py2030:
   profiles:
     client:
-      monitor_config: true
+      monitor_config: false
       # midi_input_port: 1
       # osc_out_ip: '127.0.0.1' #'224.0.20.30'
       # osc_out_port: 2030
       osc_in_port: 2030
-      osc_in_ip: '127.0.0.1'
+      # osc_in_ip: '127.0.0.1'
       osc_in_multicast: '224.0.20.30'
-      # http_server_port: 2031
+      # http_server_port: 2032
       # broadcast_interval: 2.0
+      # broadcast_reconfig: true
 
     controller:
       monitor_config: true
-      # midi_input_port: 1
+      midi_input_port: 0
       osc_out_ip: '224.0.20.30' # '127.0.0.1'
       osc_out_port: 2030
       # osc_in_port: 2030
       # osc_in_ip: '127.0.0.1'
       # osc_in_multicast: '224.0.20.30'
-      http_server_port: 2031
+      # http_server_port: 2031
       # broadcast_interval: 2.0
+      broadcast_reconfig: true
 
   midi_triggers:
     48: # C2
