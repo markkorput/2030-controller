@@ -16,7 +16,7 @@ class Launcher:
 
     def setup(self):
         self.app = App({'profile': options.profile})
-        ColorTerminal().green('py2030 App instance started with profile: ' + options.profile)
+        ColorTerminal().green('py2030 App instance started with profile: ' + self.app.profile)
 
     def destroy(self):
         self.app.destroy()
@@ -27,7 +27,7 @@ class Launcher:
 if __name__ == '__main__':
     from optparse import OptionParser
     parser = OptionParser()
-    parser.add_option('-p', '--profile', dest='profile', action="store_true", default="client")
+    parser.add_option('-p', '--profile', dest='profile', default="client")
     parser.add_option('-c', '--client', dest='client', action="store_true", default=False)
     parser.add_option('--install', dest='install', action="store_true", default=False)
     parser.add_option('--bootstrap', dest='bootstrap', action="store_true", default=False)

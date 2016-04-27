@@ -1,7 +1,6 @@
 from py2030.utils.color_terminal import ColorTerminal
 from py2030.interface import Interface
 from py2030.interval_broadcast import IntervalBroadcast
-from py2030.outputs.osc import Osc
 from py2030.config_file import ConfigFile
 from py2030.http_server import HttpServer
 from py2030.config_broadcaster import ConfigBroadcaster
@@ -14,10 +13,10 @@ class App:
 
         self.config_file_monitor = None
         self.midi_effect_input = None
+        self.osc_output = None
 
         self.interface = Interface.instance() # use global interface singleton instance
         self.interval_broadcast = None
-        self.broadcast_osc_output = None
         self.http_server = None
         self.config_broadcaster = None # ConfigBroadcaster()
 
@@ -52,9 +51,9 @@ class App:
         self._apply_config(self.config_file)
 
     def destroy(self):
-        if self.broadcast_osc_output:
-            self.broadcast_osc_output.stop()
-            self.broadcast_osc_output = None
+        if self.osc_output:
+            self.osc_output.stop()
+            self.osc_output = None
 
         # stop monitoring config file file system changes
         if self.config_file_monitor and self.config_file_monitor.started:
@@ -117,24 +116,26 @@ class App:
             if self.midi_effect_input:
                 self.midi_effect_input.destroy()
 
-        # #
-        # # OSC Broadcast/Multicast output
-        # #
-        # opts = {'autoStart': True}
         #
-        # if self.config_file.get_value('py2030.multicast_ip'):
-        #     opts['host'] = self.config_file.get_value('py2030.multicast_ip')
-        # elif self.config_file.get_value('py2030.broadcast_ip'):
-        #     opts['host'] = self.config_file.get_value('py2030.broadcast_ip')
+        # OSC Broadcast/Multicast output
         #
-        # if self.config_file.get_value('py2030.multicast_port'):
-        #     opts['port'] = self.config_file.get_value('py2030.multicast_port')
-        #
-        # if not self.broadcast_osc_output:
-        #     self.broadcast_osc_output = Osc(opts)
-        # else:
-        #     self.broadcast_osc_output.configure(opts)
-        #
+        opts = {'autoStart': True}
+
+        port = profile_data['osc_out_port'] if 'osc_out_port' in profile_data else None
+        ip = profile_data['osc_out_ip'] if 'osc_out_ip' in profile_data else None
+        if ip and port:
+            if self.osc_output:
+                self.osc_output.configure({'port': port, 'host': ip})
+                if not self.osc_output.running:
+                    self.osc_output.start()
+            else:
+                from py2030.outputs.osc import Osc as OscOutput
+                self.osc_output = OscOutput({'port': port, 'host': ip}) # auto-starts
+        else:
+            if self.osc_output:
+                self.osc_output.stop()
+
+
         # #
         # # Interval broadcaster
         # #
