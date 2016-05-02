@@ -159,14 +159,7 @@ class App:
             self.osc_outputs = []
 
             for data in profile_data['osc_outputs'].values():
-                try:
-                    opts = {'port': data['port'], 'host': data['ip']}
-                except:
-                    ColorTerminal().fail("badly formed osc output data:")
-                    print data
-                    continue
-
-                self.osc_outputs.append(OscOutput(opts)) # auto-starts
+                self.osc_outputs.append(OscOutput(data)) # auto-starts
 
             del OscOutput
 
