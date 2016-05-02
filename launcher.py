@@ -16,7 +16,7 @@ class Launcher:
 
     def setup(self):
         self.app = App({'profile': options.profile})
-        ColorTerminal().green('py2030 App instance started with profile: ' + self.app.profile)
+        # ColorTerminal().green('py2030 App instance started with profile: ' + self.app.profile)
 
     def destroy(self):
         self.app.destroy()

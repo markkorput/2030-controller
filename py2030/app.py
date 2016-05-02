@@ -15,7 +15,7 @@ class App:
         self.config_file_monitor = None
         self.midi_effect_input = None
         self.osc_output = None
-        self.osc_input = None
+        self.osc_inputs = []
         self.http_server = None
 
         self.interval_broadcast = None
@@ -57,9 +57,9 @@ class App:
             self.osc_output.stop()
             self.osc_output = None
 
-        if self.osc_input:
-            self.osc_input.stop()
-            self.osc_input = None
+        for osc_input in self.osc_inputs:
+            osc_input.stop()
+        self.osc_inputs = []
 
         # stop monitoring config file file system changes
         if self.config_file_monitor and self.config_file_monitor.started:
@@ -75,8 +75,8 @@ class App:
             self.http_server = None
 
     def update(self):
-        if self.osc_input:
-            self.osc_input.update()
+        for osc_input in self.osc_inputs:
+            osc_input.update()
 
         if self.midi_effect_input:
             self.midi_effect_input.update()
@@ -143,27 +143,31 @@ class App:
                 self.osc_output.stop()
 
         #
-        # osc Broadcast/Multicast input
+        # OSC inputs
         #
-        port = profile_data['osc_in_port'] if 'osc_in_port' in profile_data else None
-        ip = profile_data['osc_in_ip'] if 'osc_in_ip' in profile_data else None
-        multicast = profile_data['osc_in_multicast'] if 'osc_in_multicast' in profile_data else None
+        if 'osc_inputs' in profile_data:
+            from py2030.inputs.osc import Osc as OscInput
 
-        if ip and port or multicast and port:
-            if self.osc_input:
-                if self.osc_input.port() != port or self.osc_input.host() != ip or self.osc_input.multicast() != multicast:
-                    self.osc_input.stop()
-                    self.osc_input = OscInput({'port': port, 'host': ip, 'multicast': multicast}) # auto-starts
-                else:
-                    # no changes, just heck if its running
-                    if not self.osc_input.running:
-                        self.osc_input.start()
-            else:
-                from py2030.inputs.osc import Osc as OscInput
-                self.osc_input = OscInput({'port': port, 'host': ip, 'multicast': multicast}) # auto-starts
-        else:
-            if self.osc_input and self.osc_input.running:
-                self.osc_input.stop()
+            # stop and destroy existing osc inputs
+            for osc_input in self.osc_inputs:
+                osc_input.stop()
+            self.osc_inputs = []
+
+            for osc_input_data in profile_data['osc_inputs'].values():
+                try:
+                    opts = {'port': osc_input_data['port']}
+                    if 'shared' in osc_input_data and osc_input_data['shared']:
+                        opts['multicast'] = osc_input_data['ip']
+                    else:
+                        opts['host'] = osc_input_data['ip']
+                except:
+                    ColorTerminal().fail("badly formed osc input data:")
+                    print osc_input_data
+                    continue
+
+                self.osc_inputs.append(OscInput(opts)) # auto-starts
+
+            del OscInput
 
         #
         # http server
