@@ -28,7 +28,8 @@ class OscBroadcastServer(OSC.OSCServer):
         try:
             self.socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
         except socket.error as err:
-            ColorTerminal().fail("{0}\nOscBroadcastServer - got invalid IP address for broadcasting ({1})\nContinuing...".format(err, server_address[0]))
+            ColorTerminal().fail("{0}\nOscBroadcastServer - got invalid IP address for multicasting ({1})".format(err, server_address[0]))
+            ColorTerminal().fail("Continuing...")
 
         # self.socket.bind((self.host, self.port))
         # NOW we can bind and activate

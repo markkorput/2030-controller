@@ -17,6 +17,7 @@ class Osc(Output):
         self.client = None
         self.connected = False
         self.running = False
+        self.verbose = False
 
         # events
         self.connectEvent = Event()
@@ -37,7 +38,7 @@ class Osc(Output):
 
         # new host or port configs? We need to reconnect, but only if we're running
         if self.connected:
-            if 'host' in options and self.host() != self.client.client_address[0]:
+            if 'ip' in options and self.host() != self.client.client_address[0]:
                 self.stop()
                 self.start()
             # also check for port change. if both host and port changed,
@@ -45,6 +46,9 @@ class Osc(Output):
             if 'port' in options and self.port() != self.client.client_address[1]:
                 self.stop()
                 self.start()
+
+        if 'verbose' in options:
+            self.verbose = options['verbose']
 
     def start(self):
         if self._connect():
@@ -60,7 +64,7 @@ class Osc(Output):
 
     def host(self):
         # default is localhost
-        return self.options['host'] if 'host' in self.options else '127.0.0.1'
+        return self.options['ip'] if 'ip' in self.options else '127.0.0.1'
 
     def _connect(self):
         try:
@@ -96,16 +100,20 @@ class Osc(Output):
             msg.append(item)
 
         if self.connected:
-            print('py2030.outputs.osc.Osc sending message: ', tag, data)
             try:
                 self.client.send(msg)
             except OSC.OSCClientError as err:
                 pass
-                # ColorTerminal().warn("OSC failure: {0}".format(err))
-                # no need to call connect again on the client, it will automatically
-                # try to connect when we send the next message
+            except AttributeError as err:
+                ColorTerminal().fail('[osc-out {0}:{1}] error:'.format(self.host(), self.port()))
+                print err
+                self.stop()
 
         self.messageEvent(msg, self)
+
+        if self.verbose:
+            print '[osc-out {0}:{1}]: '.format(self.host(), self.port()), tag, data
+
 
     def trigger(self, event, data):
         self._sendMessage('/'+event, [json.dumps(data)])

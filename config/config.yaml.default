@@ -3,11 +3,24 @@ py2030:
     client:
       monitor_config: false
       # midi_input_port: 1
-      # osc_out_ip: '127.0.0.1' #'224.0.20.30'
-      # osc_out_port: 2030
-      osc_in_port: 2030
-      # osc_in_ip: '127.0.0.1'
-      osc_in_multicast: '224.0.20.30'
+      # osc_outputs:
+      #   local:
+      #     ip: '127.0.0.1'
+      #     port: 2030
+      #   multi:
+      #     ip: '224.0.20.30'
+      #     port: 2030
+      osc_inputs:
+        local:
+          ip: '127.0.0.1'
+          port: 2030
+          shared: false
+          verbose: true
+        multi:
+          ip: '224.0.20.30'
+          port: 2030
+          shared: true
+          verbose: true
       # http_server_port: 2032
       # broadcast_interval: 2.0
       # broadcast_reconfig: true
@@ -15,11 +28,24 @@ py2030:
     controller:
       monitor_config: true
       midi_input_port: 0
-      osc_out_ip: '224.0.20.30' # '127.0.0.1'
-      osc_out_port: 2030
-      # osc_in_port: 2030
-      # osc_in_ip: '127.0.0.1'
-      # osc_in_multicast: '224.0.20.30'
+      osc_outputs:
+        local:
+          ip: '127.0.0.1'
+          port: 2030
+          verbose: false
+        multi:
+          ip: '224.0.20.30'
+          port: 2030
+          verbose: true
+      # osc_inputs:
+      #   local:
+      #     ip: '127.0.0.1'
+      #     port: 2030
+      #     shared: false
+      #   multi:
+      #     ip: '224.0.20.30'
+      #     port: 2030
+      #     shared: true
       # http_server_port: 2031
       # broadcast_interval: 2.0
       broadcast_reconfig: true

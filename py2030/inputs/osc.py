@@ -17,6 +17,7 @@ class Osc:
         self.osc_server = None
         self.connected = False
         self.running = False
+        self.verbose = False
 
         self.connectEvent = Event()
         self.disconnectEvent = Event()
@@ -43,6 +44,9 @@ class Osc:
 
         if 'interface' in options:
             self.interface = options['interface']
+
+        if 'verbose' in options:
+            self.verbose = options['verbose']
 
     def start(self):
         if self._connect():
@@ -81,10 +85,10 @@ class Osc:
 
     def host(self):
         # default is localhost
-        return self.options['host'] if 'host' in self.options else '127.0.0.1'
+        return self.options['ip'] if 'ip' in self.options else '127.0.0.1'
 
-    def multicast(self):
-        return self.options['multicast'] if 'multicast' in self.options else None
+    def shared_port(self):
+        return 'shared' in self.options and self.options['shared']
 
     def _connect(self):
         if self.connected:
@@ -93,17 +97,17 @@ class Osc:
 
         try:
             # create server instance
-            if self.multicast():
-                self.osc_server = OscBroadcastServer((self.multicast(), int(self.port())))
+            if self.shared_port():
+                self.osc_server = OscBroadcastServer((self.host(), self.port()))
             else:
-                self.osc_server = OSCServer((self.host(), int(self.port())))
+                self.osc_server = OSCServer((self.host(), self.port()))
         except Exception as err:
             # something went wrong, cleanup
             self.connected = False
             self.osc_server = None
             # notify
-            if self.multicast():
-                ColorTerminal().fail("{0}\nOSC Broadcast Server could not start @ {1}:{2}".format(err, self.multicast(), str(self.port())))
+            if self.shred_port():
+                ColorTerminal().fail("{0}\nOSC Broadcast Server could not start @ {1}:{2}".format(err, self.host(), str(self.port())))
             else:
                 ColorTerminal().fail("{0}\nOSC Server could not start @ {1}:{2}".format(err, self.host(), str(self.port())))
             # abort
@@ -123,7 +127,7 @@ class Osc:
         self.connectEvent(self)
 
         if self.osc_server.__class__ == OscBroadcastServer:
-            ColorTerminal().success("OSC Broadcast Server running @ {0}:{1}".format(self.multicast(), str(self.port())))
+            ColorTerminal().success("OSC Broadcast Server running @ {0}:{1}".format(self.host(), str(self.port())))
         else:
             ColorTerminal().success("OSC Server running @ {0}:{1}".format(self.host(), str(self.port())))
 
@@ -141,8 +145,11 @@ class Osc:
         if len(data) < 1:
             ColorTerminal().warn('Got /change OSC message without data')
             return
-        print('received /change, data:', data)
+
         self.interface.updates.create(json.loads(data[0]))
+
+        if self.verbose:
+            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
     def _onTimeout(self):
         if hasattr(self, 'osc_server') and self.osc_server:
@@ -153,11 +160,13 @@ class Osc:
         self.unknownMessageEvent(addr, tags, data, client_address, self)
 
     def _onEvent(self, addr, tags, data, client_address):
-        print 'OSC-in /event:', addr, tags, data, client_address
         params = json.loads(data[0])
         self.interface.genericEvent(params)
+        if self.verbose:
+            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
     def _onEffect(self, addr, tags, data, client_address):
         params = json.loads(data[0])
         self.interface.effectEvent(params)
-        print 'OSC-in /effect:', addr, tags, data, client_address
+        if self.verbose:
+            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
