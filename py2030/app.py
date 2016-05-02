@@ -15,6 +15,7 @@ class App:
         self.config_file_monitor = None
         self.midi_effect_input = None
         self.osc_output = None
+        self.osc_outputs = []
         self.osc_inputs = []
         self.http_server = None
 
@@ -56,6 +57,10 @@ class App:
         if self.osc_output:
             self.osc_output.stop()
             self.osc_output = None
+
+        for osc_output in self.osc_outputs:
+            osc_output.stop()
+        self.osc_outputs = []
 
         for osc_input in self.osc_inputs:
             osc_input.stop()
@@ -141,6 +146,30 @@ class App:
         else:
             if self.osc_output:
                 self.osc_output.stop()
+
+        #
+        # OSC outputs
+        #
+        if 'osc_outputs' in profile_data:
+            from py2030.outputs.osc import Osc as OscOutput
+
+            # stop and destroy existing osc outputs
+            for osc in self.osc_outputs:
+                osc.stop()
+            self.osc_outputs = []
+
+            for data in profile_data['osc_outputs'].values():
+                try:
+                    opts = {'port': data['port'], 'host': data['ip']}
+                except:
+                    ColorTerminal().fail("badly formed osc output data:")
+                    print data
+                    continue
+
+                self.osc_outputs.append(OscOutput(opts)) # auto-starts
+
+            del OscOutput
+
 
         #
         # OSC inputs
