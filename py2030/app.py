@@ -14,7 +14,6 @@ class App:
 
         self.config_file_monitor = None
         self.midi_effect_input = None
-        self.osc_output = None
         self.osc_outputs = []
         self.osc_inputs = []
         self.http_server = None
@@ -54,10 +53,6 @@ class App:
         self._apply_config(self.config_file)
 
     def destroy(self):
-        if self.osc_output:
-            self.osc_output.stop()
-            self.osc_output = None
-
         for osc_output in self.osc_outputs:
             osc_output.stop()
         self.osc_outputs = []
@@ -129,23 +124,6 @@ class App:
         else:
             if self.midi_effect_input:
                 self.midi_effect_input.destroy()
-
-        #
-        # OSC output
-        #
-        port = profile_data['osc_out_port'] if 'osc_out_port' in profile_data else None
-        ip = profile_data['osc_out_ip'] if 'osc_out_ip' in profile_data else None
-        if ip and port:
-            if self.osc_output:
-                self.osc_output.configure({'port': port, 'host': ip})
-                if not self.osc_output.running:
-                    self.osc_output.start()
-            else:
-                from py2030.outputs.osc import Osc as OscOutput
-                self.osc_output = OscOutput({'port': port, 'host': ip}) # auto-starts
-        else:
-            if self.osc_output:
-                self.osc_output.stop()
 
         #
         # OSC outputs
