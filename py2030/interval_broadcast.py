@@ -34,7 +34,8 @@ class IntervalBroadcast:
             self.nextBroadcastTime += self.interval()
 
     def broadcast(self):
-        self.interface.broadcasts.create(self.data())
+        # self.interface.broadcasts.create(self.data())
+        self.interface.genericEvent({'type': 'broadcast', 'url': self.data()})
 
     # option readers
     def data(self):

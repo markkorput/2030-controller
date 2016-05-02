@@ -224,7 +224,7 @@ class App:
                 ColorTerminal().yellow('set broadcast interval to {0}'.format(interval))
             else:
                 from py2030.interval_broadcast import IntervalBroadcast
-                self.interval_broadcast = IntervalBroadcast({'interval': interval, 'data': 'TODO: controller info JSON'})
+                self.interval_broadcast = IntervalBroadcast({'interval': interval, 'data': {'ip': self._ip()}})
                 ColorTerminal().yellow('started broadcast interval at {0}'.format(interval))
                 del IntervalBroadcast
 
