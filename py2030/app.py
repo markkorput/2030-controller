@@ -153,6 +153,8 @@ class App:
             self.osc_inputs = []
 
             for data in profile_data['osc_inputs'].values():
+                if 'ip' in data and data['ip'] == 'self':
+                    data['ip'] = self._ip()
                 self.osc_inputs.append(OscInput(data)) # auto-starts
 
             del OscInput
@@ -225,3 +227,11 @@ class App:
                 self.interval_broadcast = IntervalBroadcast({'interval': interval, 'data': 'TODO: controller info JSON'})
                 ColorTerminal().yellow('started broadcast interval at {0}'.format(interval))
                 del IntervalBroadcast
+
+    def _ip(self):
+        if hasattr(self, '__ip_address'):
+            return self.__ip_address
+        import socket
+        self.__ip_address = socket.gethostbyname(socket.gethostname())
+        del socket
+        return self.__ip_address

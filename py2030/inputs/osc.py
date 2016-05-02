@@ -106,7 +106,7 @@ class Osc:
             self.connected = False
             self.osc_server = None
             # notify
-            if self.shred_port():
+            if self.shared_port():
                 ColorTerminal().fail("{0}\nOSC Broadcast Server could not start @ {1}:{2}".format(err, self.host(), str(self.port())))
             else:
                 ColorTerminal().fail("{0}\nOSC Server could not start @ {1}:{2}".format(err, self.host(), str(self.port())))
