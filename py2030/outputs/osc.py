@@ -100,18 +100,20 @@ class Osc(Output):
             msg.append(item)
 
         if self.connected:
-            if self.verbose:
-                print '[osc-out {0}:{1}]: '.format(self.host(), self.port()), tag, data
-
             try:
                 self.client.send(msg)
             except OSC.OSCClientError as err:
                 pass
-                # ColorTerminal().warn("OSC failure: {0}".format(err))
-                # no need to call connect again on the client, it will automatically
-                # try to connect when we send the next message
+            except AttributeError as err:
+                ColorTerminal().fail('[osc-out {0}:{1}] error:'.format(self.host(), self.port()))
+                print err
+                self.stop()
 
         self.messageEvent(msg, self)
+
+        if self.verbose:
+            print '[osc-out {0}:{1}]: '.format(self.host(), self.port()), tag, data
+
 
     def trigger(self, event, data):
         self._sendMessage('/'+event, [json.dumps(data)])
