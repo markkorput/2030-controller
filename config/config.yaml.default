@@ -15,10 +15,12 @@ py2030:
           ip: '127.0.0.1'
           port: 2030
           shared: false
+          verbose: true
         multi:
           ip: '224.0.20.30'
           port: 2030
           shared: true
+          verbose: true
       # http_server_port: 2032
       # broadcast_interval: 2.0
       # broadcast_reconfig: true
@@ -30,9 +32,11 @@ py2030:
         local:
           ip: '127.0.0.1'
           port: 2030
+          verbose: false
         multi:
           ip: '224.0.20.30'
           port: 2030
+          verbose: true
       # osc_inputs:
       #   local:
       #     ip: '127.0.0.1'

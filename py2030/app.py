@@ -141,7 +141,6 @@ class App:
 
             del OscOutput
 
-
         #
         # OSC inputs
         #
@@ -153,19 +152,8 @@ class App:
                 osc_input.stop()
             self.osc_inputs = []
 
-            for osc_input_data in profile_data['osc_inputs'].values():
-                try:
-                    opts = {'port': osc_input_data['port']}
-                    if 'shared' in osc_input_data and osc_input_data['shared']:
-                        opts['multicast'] = osc_input_data['ip']
-                    else:
-                        opts['host'] = osc_input_data['ip']
-                except:
-                    ColorTerminal().fail("badly formed osc input data:")
-                    print osc_input_data
-                    continue
-
-                self.osc_inputs.append(OscInput(opts)) # auto-starts
+            for data in profile_data['osc_inputs'].values():
+                self.osc_inputs.append(OscInput(data)) # auto-starts
 
             del OscInput
 
