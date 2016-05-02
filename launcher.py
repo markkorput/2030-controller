@@ -29,7 +29,7 @@ def main(options, args):
         from py2030.config_file import ConfigFile
         cfile = ConfigFile.instance()
         cfile.load()
-        ip = args[0] if len(args) > 0 else cfile.get_value('py2030.profiles.controller.osc_out_ip')
+        ip = args[0] if len(args) > 0 else None
         interface = args[1] if len(args) > 1 else 'en0'
 
         if ip:
@@ -38,7 +38,7 @@ def main(options, args):
             ColorTerminal().success("Routed IP address {0} to interface {1}".format(ip, interface))
             ColorTerminal().success("run `netstat -r` to check")
         else:
-            ColorTerminal().fail("IP address could not be found in the config file, can't route")
+            ColorTerminal().fail("USAGE: launcher.py --route-ip <ip-address> [<interface>]")
 
         return
 
