@@ -75,4 +75,4 @@ class Output:
             self.trigger('join', join_data)
 
     def outputJoin(self):
-        return not 'outputs' in self.options or self.options['outputs'].count('joins') > 0
+        return 'outputs' in self.options and self.options['outputs'].count('joins') > 0

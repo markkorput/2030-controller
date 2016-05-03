@@ -19,6 +19,7 @@ class App:
         self.http_server = None
 
         self.interval_broadcast = None
+        self.interval_joiner = None
         self.config_broadcaster = None
         self.reconfig_downloader = None
 
@@ -80,6 +81,9 @@ class App:
 
         if self.midi_effect_input:
             self.midi_effect_input.update()
+
+        if self.interval_joiner:
+            self.interval_joiner.update()
 
         if self.interval_broadcast:
             self.interval_broadcast.update()
@@ -227,6 +231,24 @@ class App:
                 self.interval_broadcast = IntervalBroadcast({'interval': interval, 'data': {'ip': self._ip(), 'role': 'controller'}})
                 ColorTerminal().yellow('started broadcast interval at {0}'.format(interval))
                 del IntervalBroadcast
+
+        #
+        # Interval joiner
+        #
+        interval = profile_data['join_interval'] if 'join_interval' in profile_data else None
+        if (not interval or interval <= 0) and self.interval_joiner:
+            self.interval_joiner = None
+            ColorTerminal().yellow('joiner interval disabled')
+
+        if interval and interval > 0:
+            if self.interval_joiner:
+                self.interval_joiner.configure({'interval': interval})
+                ColorTerminal().yellow('set joiner interval to {0}'.format(interval))
+            else:
+                from py2030.client_side.interval_joiner import IntervalJoiner
+                self.interval_joiner = IntervalJoiner({'interval': interval, 'data': {'ip': self._ip(), 'port': 2030}}) # TODO; determine port from osc listeners?
+                ColorTerminal().yellow('started joiner interval at {0}'.format(interval))
+                del IntervalJoiner
 
     def _ip(self):
         if hasattr(self, '__ip_address'):
