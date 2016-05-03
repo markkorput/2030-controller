@@ -16,6 +16,14 @@ py2030:
           ip: '224.0.20.30'
           port: 2030
           shared: true
+      osc_outputs:
+        controller_joiner:
+          ip: '127.0.0.1'
+          port: 2028
+          outputs:
+            - joins
+          verbose: true
+      join_interval: 2.0
       download_reconfig: true
 
     controller:
@@ -43,6 +51,9 @@ py2030:
       # http_server_port: 2031
       # broadcast_interval: 2.0
       broadcast_reconfig: true
+      osc_to_joins:
+        enabled: true
+        verbose: true
 
   midi_triggers:
     48: # C2

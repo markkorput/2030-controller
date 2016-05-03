@@ -9,6 +9,7 @@ class App:
         # attributes
         self.config_file = ConfigFile.instance()
         self.profile = 'client'
+        self.profile_data = {}
         self.queue = []
 
         # components
@@ -16,6 +17,7 @@ class App:
         self.config_file_monitor = None
         self.midi_effect_input = None
         self.osc_outputs = []
+        self.joined_osc_outputs = []
         self.osc_inputs = []
         self.http_server = None
         self.interval_broadcast = None
@@ -26,6 +28,8 @@ class App:
         # configuration
         self.options = {}
         self.configure(options)
+
+        self.interface.joinEvent += self._onJoin
 
         # autoStart is True by default
         if not 'setup' in options or options['setup']:
@@ -61,6 +65,10 @@ class App:
         for osc_output in self.osc_outputs:
             osc_output.stop()
         self.osc_outputs = []
+
+        for osc_output in self.joined_osc_outputs:
+            osc_output.stop()
+        self.joined_osc_outputs = []
 
         for osc_input in self.osc_inputs:
             osc_input.stop()
@@ -99,6 +107,7 @@ class App:
 
     def _apply_config(self, config_file):
         profile_data = config_file.get_value('py2030.profiles.'+self.profile)
+        self.profile_data = profile_data
         # print 'Profile Data: ', profile_data
 
         #
@@ -266,3 +275,40 @@ class App:
         self.__ip_address = socket.gethostbyname(socket.gethostname())
         del socket
         return self.__ip_address
+
+    def _onJoin(self, join_data):
+        if not 'osc_to_joins' in self.profile_data:
+            return
+
+        joins_config = self.profile_data['osc_to_joins']
+        if not 'enabled' in joins_config or not joins_config['enabled']:
+            return
+
+        # check we got all required params
+        if not 'ip' in join_data or not 'port' in join_data:
+            ColorTerminal().warn('Got incomplete join data')
+            print join_data
+            return
+
+        # don't register if already outputting to this address/port
+        for out in self.osc_outputs:
+            if out.host() == join_data['ip'] and out.port() == join_data['port']:
+                ColorTerminal().warn('Got join with already registered osc-output specs')
+                print join_data
+                return
+
+        # don't register if already outputting to this address/port
+        for out in self.joined_osc_outputs:
+            if out.host() == join_data['ip'] and out.port() == join_data['port']:
+                ColorTerminal().warn('Got join with already registered osc-output specs')
+                print join_data
+                return
+
+        # prep params
+        opts = {'ip':join_data['ip'], 'port':join_data['port']}
+        if 'verbose' in joins_config:
+            opts['verbose'] = joins_config['verbose']
+
+        from py2030.outputs.osc import Osc as OscOutput
+        self.joined_osc_outputs.append(OscOutput(opts)) # auto-starts
+        del OscOutput

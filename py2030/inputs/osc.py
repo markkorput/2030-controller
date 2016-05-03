@@ -163,12 +163,14 @@ class Osc:
     def _onEvent(self, addr, tags, data, client_address):
         params = json.loads(data[0])
         self.interface.genericEvent(params)
+
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
     def _onEffect(self, addr, tags, data, client_address):
         params = json.loads(data[0])
         self.interface.effectEvent(params)
+
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
@@ -177,6 +179,8 @@ class Osc:
             return
 
         params = json.loads(data[0])
+        self.interface.joinEvent(params)
+
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
