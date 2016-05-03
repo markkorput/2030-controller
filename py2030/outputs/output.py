@@ -65,14 +65,22 @@ class Output:
         pass
 
     def _onGenericEvent(self, effect_data):
-        self.trigger('event', effect_data)
+        if self.outputGenericEvent():
+            self.trigger('event', effect_data)
 
     def _onEffect(self, effect_data):
-        self.trigger('effect', effect_data)
+        if self.outputEffect():
+            self.trigger('effect', effect_data)
 
     def _onJoin(self, join_data):
         if self.outputJoin():
             self.trigger('join', join_data)
+
+    def outputGenericEvent(self):
+        return not 'outputs' in self.options or self.options['outputs'].count('events') > 0
+
+    def outputEffect(self):
+        return not 'outputs' in self.options or self.options['outputs'].count('effects') > 0
 
     def outputJoin(self):
         return 'outputs' in self.options and self.options['outputs'].count('joins') > 0
