@@ -9,22 +9,30 @@ class App:
         # attributes
         self.config_file = ConfigFile.instance()
         self.profile = 'client'
+        self.profile_data = {}
+        self.queue = []
+        self.joined = False
 
+        # components
         self.interface = Interface.instance() # use global interface singleton instance
-
         self.config_file_monitor = None
         self.midi_effect_input = None
-        self.osc_output = None
-        self.osc_input = None
+        self.osc_outputs = []
+        self.joined_osc_outputs = []
+        self.osc_inputs = []
         self.http_server = None
-
         self.interval_broadcast = None
+        self.interval_joiner = None
         self.config_broadcaster = None
         self.reconfig_downloader = None
 
         # configuration
         self.options = {}
         self.configure(options)
+
+        self.interface.joinEvent += self._onJoin
+        self.interface.genericEvent += self._onGenericEvent
+        self.interface.effectEvent += self._onEffect
 
         # autoStart is True by default
         if not 'setup' in options or options['setup']:
@@ -50,16 +58,24 @@ class App:
 
     def _onConfigDataChange(self, data, config_file):
         # ColorTerminal().yellow('config change: {0}'.format(data))
-        self._apply_config(self.config_file)
+        # self._apply_config(self.config_file)
+
+        # don't do apply config directly; add an instruction to the queue,
+        # so it gets process in the update loop
+        self.queue.append('reconfig')
 
     def destroy(self):
-        if self.osc_output:
-            self.osc_output.stop()
-            self.osc_output = None
+        for osc_output in self.osc_outputs:
+            osc_output.stop()
+        self.osc_outputs = []
 
-        if self.osc_input:
-            self.osc_input.stop()
-            self.osc_input = None
+        for osc_output in self.joined_osc_outputs:
+            osc_output.stop()
+        self.joined_osc_outputs = []
+
+        for osc_input in self.osc_inputs:
+            osc_input.stop()
+        self.osc_inputs = []
 
         # stop monitoring config file file system changes
         if self.config_file_monitor and self.config_file_monitor.started:
@@ -75,17 +91,26 @@ class App:
             self.http_server = None
 
     def update(self):
-        if self.osc_input:
-            self.osc_input.update()
+        for instruction in self.queue:
+            if instruction == 'reconfig':
+                self._apply_config(self.config_file)
+        self.queue = []
+
+        for osc_input in self.osc_inputs:
+            osc_input.update()
 
         if self.midi_effect_input:
             self.midi_effect_input.update()
+
+        if self.interval_joiner:
+            self.interval_joiner.update()
 
         if self.interval_broadcast:
             self.interval_broadcast.update()
 
     def _apply_config(self, config_file):
         profile_data = config_file.get_value('py2030.profiles.'+self.profile)
+        self.profile_data = profile_data
         # print 'Profile Data: ', profile_data
 
         #
@@ -126,44 +151,38 @@ class App:
                 self.midi_effect_input.destroy()
 
         #
-        # OSC output
+        # OSC outputs
         #
-        port = profile_data['osc_out_port'] if 'osc_out_port' in profile_data else None
-        ip = profile_data['osc_out_ip'] if 'osc_out_ip' in profile_data else None
-        if ip and port:
-            if self.osc_output:
-                self.osc_output.configure({'port': port, 'host': ip})
-                if not self.osc_output.running:
-                    self.osc_output.start()
-            else:
-                from py2030.outputs.osc import Osc as OscOutput
-                self.osc_output = OscOutput({'port': port, 'host': ip}) # auto-starts
-        else:
-            if self.osc_output:
-                self.osc_output.stop()
+        if 'osc_outputs' in profile_data:
+            from py2030.outputs.osc import Osc as OscOutput
+
+            # stop and destroy existing osc outputs
+            for osc in self.osc_outputs:
+                osc.stop()
+            self.osc_outputs = []
+
+            for data in profile_data['osc_outputs'].values():
+                self.osc_outputs.append(OscOutput(data)) # auto-starts
+
+            del OscOutput
 
         #
-        # osc Broadcast/Multicast input
+        # OSC inputs
         #
-        port = profile_data['osc_in_port'] if 'osc_in_port' in profile_data else None
-        ip = profile_data['osc_in_ip'] if 'osc_in_ip' in profile_data else None
-        multicast = profile_data['osc_in_multicast'] if 'osc_in_multicast' in profile_data else None
+        if 'osc_inputs' in profile_data:
+            from py2030.inputs.osc import Osc as OscInput
 
-        if ip and port or multicast and port:
-            if self.osc_input:
-                if self.osc_input.port() != port or self.osc_input.host() != ip or self.osc_input.multicast() != multicast:
-                    self.osc_input.stop()
-                    self.osc_input = OscInput({'port': port, 'host': ip, 'multicast': multicast}) # auto-starts
-                else:
-                    # no changes, just heck if its running
-                    if not self.osc_input.running:
-                        self.osc_input.start()
-            else:
-                from py2030.inputs.osc import Osc as OscInput
-                self.osc_input = OscInput({'port': port, 'host': ip, 'multicast': multicast}) # auto-starts
-        else:
-            if self.osc_input and self.osc_input.running:
-                self.osc_input.stop()
+            # stop and destroy existing osc inputs
+            for osc_input in self.osc_inputs:
+                osc_input.stop()
+            self.osc_inputs = []
+
+            for data in profile_data['osc_inputs'].values():
+                if 'ip' in data and data['ip'] == 'self':
+                    data['ip'] = self._ip()
+                self.osc_inputs.append(OscInput(data)) # auto-starts
+
+            del OscInput
 
         #
         # http server
@@ -230,6 +249,81 @@ class App:
                 ColorTerminal().yellow('set broadcast interval to {0}'.format(interval))
             else:
                 from py2030.interval_broadcast import IntervalBroadcast
-                self.interval_broadcast = IntervalBroadcast({'interval': interval, 'data': 'TODO: controller info JSON'})
+                self.interval_broadcast = IntervalBroadcast({'interval': interval, 'data': {'ip': self._ip(), 'role': 'controller'}})
                 ColorTerminal().yellow('started broadcast interval at {0}'.format(interval))
                 del IntervalBroadcast
+
+        #
+        # Interval joiner
+        #
+        interval = profile_data['join_interval'] if 'join_interval' in profile_data else None
+        if (not interval or interval <= 0) and self.interval_joiner:
+            self.interval_joiner = None
+            ColorTerminal().yellow('joiner interval disabled')
+
+        if interval and interval > 0:
+            if self.interval_joiner:
+                self.interval_joiner.configure({'interval': interval})
+                ColorTerminal().yellow('set joiner interval to {0}'.format(interval))
+            else:
+                from py2030.client_side.interval_joiner import IntervalJoiner
+                self.interval_joiner = IntervalJoiner({'interval': interval, 'data': {'ip': self._ip(), 'port': 2030}}) # TODO; determine port from osc listeners?
+                ColorTerminal().yellow('started joiner interval at {0}'.format(interval))
+                del IntervalJoiner
+
+    def _ip(self):
+        if hasattr(self, '__ip_address'):
+            return self.__ip_address
+        import socket
+        self.__ip_address = socket.gethostbyname(socket.gethostname())
+        del socket
+        return self.__ip_address
+
+    def _onJoin(self, join_data):
+        if not 'osc_to_joins' in self.profile_data:
+            return
+
+        joins_config = self.profile_data['osc_to_joins']
+        if not 'enabled' in joins_config or not joins_config['enabled']:
+            return
+
+        # check we got all required params
+        if not 'ip' in join_data or not 'port' in join_data:
+            ColorTerminal().warn('Got incomplete join data')
+            print join_data
+            return
+
+        # don't register if already outputting to this address/port
+        for out in self.osc_outputs:
+            if out.host() == join_data['ip'] and out.port() == join_data['port']:
+                ColorTerminal().warn('Got join with already registered osc-output specs')
+                print join_data
+                return
+
+        # don't register if already outputting to this address/port
+        for out in self.joined_osc_outputs:
+            if out.host() == join_data['ip'] and out.port() == join_data['port']:
+                ColorTerminal().warn('Got join with already registered osc-output specs')
+                print join_data
+                return
+
+        # prep params
+        opts = {'ip':join_data['ip'], 'port':join_data['port']}
+        if 'verbose' in joins_config:
+            opts['verbose'] = joins_config['verbose']
+
+        from py2030.outputs.osc import Osc as OscOutput
+        self.joined_osc_outputs.append(OscOutput(opts)) # auto-starts
+        del OscOutput
+
+    def _onGenericEvent(self, data):
+        if self.interval_joiner and self.interval_joiner.running:
+            ColorTerminal().yellow('Got genericEvent, stopping interval joiner')
+            self.interval_joiner.stop()
+        self.joined = True
+
+    def _onEffect(self, data):
+        if self.interval_joiner and self.interval_joiner.running:
+            ColorTerminal().yellow('Got effectEvent, stopping interval joiner')
+            self.interval_joiner.stop()
+        self.joined = True

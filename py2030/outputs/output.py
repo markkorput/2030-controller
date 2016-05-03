@@ -29,6 +29,7 @@ class Output:
                 self.interface.changes.newModelEvent -= self._onChange
                 self.interface.genericEvent -= self._onGenericEvent
                 self.interface.effectEvent -= self._onEffect
+                self.interface.joinEvent -= self._onJoin
 
             # set interface as attribute
             self.interface = options['interface']
@@ -38,6 +39,7 @@ class Output:
                 self.interface.changes.newModelEvent += self._onChange
                 self.interface.genericEvent += self._onGenericEvent
                 self.interface.effectEvent += self._onEffect
+                self.interface.joinEvent += self._onJoin
 
         if ('accept_types' in options or 'ignore_types' in options) and 'accept_types' in self.options and 'ignore_types' in self.options:
             both = list(set(self.options['accept_types']) & set(self.options['ignore_types']))
@@ -63,7 +65,22 @@ class Output:
         pass
 
     def _onGenericEvent(self, effect_data):
-        self.trigger('event', effect_data)
+        if self.outputGenericEvent():
+            self.trigger('event', effect_data)
 
     def _onEffect(self, effect_data):
-        self.trigger('effect', effect_data)
+        if self.outputEffect():
+            self.trigger('effect', effect_data)
+
+    def _onJoin(self, join_data):
+        if self.outputJoin():
+            self.trigger('join', join_data)
+
+    def outputGenericEvent(self):
+        return not 'outputs' in self.options or self.options['outputs'].count('events') > 0
+
+    def outputEffect(self):
+        return not 'outputs' in self.options or self.options['outputs'].count('effects') > 0
+
+    def outputJoin(self):
+        return 'outputs' in self.options and self.options['outputs'].count('joins') > 0
