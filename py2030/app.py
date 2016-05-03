@@ -11,6 +11,7 @@ class App:
         self.profile = 'client'
         self.profile_data = {}
         self.queue = []
+        self.joined = False
 
         # components
         self.interface = Interface.instance() # use global interface singleton instance
@@ -30,6 +31,8 @@ class App:
         self.configure(options)
 
         self.interface.joinEvent += self._onJoin
+        self.interface.genericEvent += self._onGenericEvent
+        self.interface.effectEvent += self._onEffect
 
         # autoStart is True by default
         if not 'setup' in options or options['setup']:
@@ -312,3 +315,15 @@ class App:
         from py2030.outputs.osc import Osc as OscOutput
         self.joined_osc_outputs.append(OscOutput(opts)) # auto-starts
         del OscOutput
+
+    def _onGenericEvent(self, data):
+        if self.interval_joiner and self.interval_joiner.running:
+            ColorTerminal().yellow('Got genericEvent, stopping interval joiner')
+            self.interval_joiner.stop()
+        self.joined = True
+
+    def _onEffect(self, data):
+        if self.interval_joiner and self.interval_joiner.running:
+            ColorTerminal().yellow('Got effectEvent, stopping interval joiner')
+            self.interval_joiner.stop()
+        self.joined = True

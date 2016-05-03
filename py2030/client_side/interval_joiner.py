@@ -6,21 +6,32 @@ class IntervalJoiner:
     def __init__(self, options = {}):
         # attributes
         self.interface = Interface.instance() # use global interface singleton instance
+        self.running = False
 
         # configuration
         self.options = {}
         self.configure(options)
 
+        self.start()
+
+    def start(self):
         # schedule first broadcast; immediately
         self.startTime = datetime.now()
         self.nextBroadcastTime = self.interval()
         self.time = 0.0
+        self.running = True
+
+    def stop(self):
+        self.running = False
 
     def configure(self, options):
         previous_options = self.options
         self.options.update(options)
 
     def update(self, dt=None):
+        if not self.running:
+            return
+
         if dt:
             self.time = self.time + dt
         else:
