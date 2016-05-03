@@ -37,6 +37,7 @@ class Interface:
         # network distributed events
         self.genericEvent = Event()
         self.effectEvent = Event()
+        self.joinEvent = Event()
 
         # configuration
         self.options = {}

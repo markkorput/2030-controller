@@ -16,33 +16,51 @@ py2030:
           ip: '224.0.20.30'
           port: 2030
           shared: true
+      osc_outputs:
+        controller_joiner:
+          ip: '127.0.0.1'
+          port: 2028
+          outputs:
+            - joins
+          verbose: true
+      join_interval: 2.0
       download_reconfig: true
 
     controller:
       monitor_config: true
       midi_input_port: 0
-      osc_outputs:
-        local:
+      # osc_outputs:
+      #   local:
+      #     ip: '127.0.0.1'
+      #     port: 2030
+      #     verbose: true
+      #   multi:
+      #     ip: '224.0.20.30'
+      #     port: 2030
+      #     verbose: true
+      #   # lancast:
+      #   #   ip: '192.168.3.255'
+      #   #   port: 2030
+      #   bcast:
+      #     ip: '0.0.0.0'
+      #     port: 2030
+      #     verbose: true
+      #   # bcast2:
+      #   #   ip: '255.255.255.255'
+      #   #   port: 2030
+      osc_inputs:
+        client_join_receiver:
           ip: '127.0.0.1'
-          port: 2030
+          port: 2028
+          inputs:
+            - joins
           verbose: true
-        multi:
-          ip: '224.0.20.30'
-          port: 2030
-          verbose: true
-        # lancast:
-        #   ip: '192.168.3.255'
-        #   port: 2030
-        bcast:
-          ip: '0.0.0.0'
-          port: 2030
-          verbose: true
-        # bcast2:
-        #   ip: '255.255.255.255'
-        #   port: 2030
       # http_server_port: 2031
       # broadcast_interval: 2.0
       broadcast_reconfig: true
+      osc_to_joins:
+        enabled: true
+        verbose: true
 
   midi_triggers:
     48: # C2

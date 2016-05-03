@@ -119,6 +119,7 @@ class Osc:
         self.osc_server.addMsgHandler('/change', self._onChange)
         self.osc_server.addMsgHandler('/event', self._onEvent)
         self.osc_server.addMsgHandler('/effect', self._onEffect)
+        self.osc_server.addMsgHandler('/join', self._onJoin)
         self.osc_server.addMsgHandler('default', self._onUnknownMessage)
 
         # set internal connected flag
@@ -162,11 +163,26 @@ class Osc:
     def _onEvent(self, addr, tags, data, client_address):
         params = json.loads(data[0])
         self.interface.genericEvent(params)
+
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
     def _onEffect(self, addr, tags, data, client_address):
         params = json.loads(data[0])
         self.interface.effectEvent(params)
+
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
+    def _onJoin(self, addr, tags, data, client_address):
+        if not self.receiveJoins():
+            return
+
+        params = json.loads(data[0])
+        self.interface.joinEvent(params)
+
+        if self.verbose:
+            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
+    def receiveJoins(self):
+        return 'inputs' in self.options and self.options['inputs'].count('joins') > 0
