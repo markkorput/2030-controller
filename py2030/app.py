@@ -9,15 +9,15 @@ class App:
         # attributes
         self.config_file = ConfigFile.instance()
         self.profile = 'client'
+        self.queue = []
 
+        # components
         self.interface = Interface.instance() # use global interface singleton instance
-
         self.config_file_monitor = None
         self.midi_effect_input = None
         self.osc_outputs = []
         self.osc_inputs = []
         self.http_server = None
-
         self.interval_broadcast = None
         self.interval_joiner = None
         self.config_broadcaster = None
@@ -51,7 +51,11 @@ class App:
 
     def _onConfigDataChange(self, data, config_file):
         # ColorTerminal().yellow('config change: {0}'.format(data))
-        self._apply_config(self.config_file)
+        # self._apply_config(self.config_file)
+
+        # don't do apply config directly; add an instruction to the queue,
+        # so it gets process in the update loop
+        self.queue.append('reconfig')
 
     def destroy(self):
         for osc_output in self.osc_outputs:
@@ -76,6 +80,11 @@ class App:
             self.http_server = None
 
     def update(self):
+        for instruction in self.queue:
+            if instruction == 'reconfig':
+                self._apply_config(self.config_file)
+        self.queue = []
+
         for osc_input in self.osc_inputs:
             osc_input.update()
 
