@@ -149,10 +149,10 @@ class Osc:
             ColorTerminal().warn('Got /change OSC message without data')
             return
 
-        self.interface.updates.create(json.loads(data[0]))
-
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
+        self.interface.updates.create(json.loads(data[0]))
 
     def _onTimeout(self):
         if hasattr(self, 'osc_server') and self.osc_server:
@@ -166,40 +166,41 @@ class Osc:
         if not self._receiveType('events'):
             return
 
-        params = json.loads(data[0])
-        self.interface.genericEvent(params)
-
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
+        params = json.loads(data[0])
+        self.interface.genericEvent(params)
 
     def _onEffect(self, addr, tags, data, client_address):
         if not self._receiveType('effects'):
             return
 
-        params = json.loads(data[0])
-        self.interface.effectEvent(params)
-
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
+        params = json.loads(data[0])
+        self.interface.effectEvent(params)
 
     def _onJoin(self, addr, tags, data, client_address):
         if not self._receiveType('joins'):
             return
 
-        params = json.loads(data[0])
-        self.interface.joinEvent(params)
-
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
+        params = json.loads(data[0])
+        self.interface.joinEvent(params)
 
     def _onClip(self, addr, tags, data, client_address):
         if not self._receiveType('clips'):
             return
 
-        self.interface.clipEvent(data[0])
-
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
+        self.interface.clipEvent(data[0])
+
 
     def _onAck(self, addr, tags, data, client_address):
         self.interface.ackEvent()

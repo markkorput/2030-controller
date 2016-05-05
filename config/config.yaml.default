@@ -31,7 +31,7 @@ py2030:
       osc_outputs:
         controller_joiner:
           ip: '127.0.0.1'
-          port: 2028
+          port: 2031
           outputs:
             - joins
           verbose: true
@@ -61,9 +61,9 @@ py2030:
       #   #   ip: '255.255.255.255'
       #   #   port: 2030
       osc_inputs:
-        client_join_receiver:
+        client_join_and_clip_receiver:
           ip: '127.0.0.1'
-          port: 2028
+          port: 2031
           inputs:
             - joins
             - clips
