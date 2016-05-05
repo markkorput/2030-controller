@@ -121,6 +121,7 @@ class Osc:
         self.osc_server.addMsgHandler('/effect', self._onEffect)
         self.osc_server.addMsgHandler('/join', self._onJoin)
         self.osc_server.addMsgHandler('/clip', self._onClip)
+        self.osc_server.addMsgHandler('/ack', self._onAck)
         self.osc_server.addMsgHandler('default', self._onUnknownMessage)
 
         # set internal connected flag
@@ -199,6 +200,9 @@ class Osc:
 
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
+    def _onAck(self, addr, tags, data, client_address):
+        self.interface.ackEvent()
 
     def _receiveType(self, typ):
         return 'inputs' in self.options and self.options['inputs'].count(typ) > 0

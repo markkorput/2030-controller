@@ -31,8 +31,7 @@ class App:
         self.configure(options)
 
         self.interface.joinEvent += self._onJoin
-        self.interface.genericEvent += self._onGenericEvent
-        self.interface.effectEvent += self._onEffect
+        self.interface.ackEvent += self._onAck
 
         # autoStart is True by default
         if not 'setup' in options or options['setup']:
@@ -296,6 +295,7 @@ class App:
         # don't register if already outputting to this address/port
         for out in self.osc_outputs:
             if out.host() == join_data['ip'] and out.port() == join_data['port']:
+                out.trigger('ack', [])
                 ColorTerminal().warn('Got join with already registered osc-output specs')
                 print join_data
                 return
@@ -303,6 +303,7 @@ class App:
         # don't register if already outputting to this address/port
         for out in self.joined_osc_outputs:
             if out.host() == join_data['ip'] and out.port() == join_data['port']:
+                out.trigger('ack', [])
                 ColorTerminal().warn('Got join with already registered osc-output specs')
                 print join_data
                 return
@@ -313,17 +314,13 @@ class App:
             opts['verbose'] = joins_config['verbose']
 
         from py2030.outputs.osc import Osc as OscOutput
-        self.joined_osc_outputs.append(OscOutput(opts)) # auto-starts
+        osc_out = OscOutput(opts)
+        osc_out.trigger('ack', [])
+        self.joined_osc_outputs.append(osc_out) # auto-starts
         del OscOutput
 
-    def _onGenericEvent(self, data):
+    def _onAck(self):
         if self.interval_joiner and self.interval_joiner.running:
-            ColorTerminal().yellow('Got genericEvent, stopping interval joiner')
-            self.interval_joiner.stop()
-        self.joined = True
-
-    def _onEffect(self, data):
-        if self.interval_joiner and self.interval_joiner.running:
-            ColorTerminal().yellow('Got effectEvent, stopping interval joiner')
+            ColorTerminal().yellow('Got ackEvent, stopping interval joiner')
             self.interval_joiner.stop()
         self.joined = True
