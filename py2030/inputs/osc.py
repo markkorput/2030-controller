@@ -120,6 +120,8 @@ class Osc:
         self.osc_server.addMsgHandler('/event', self._onEvent)
         self.osc_server.addMsgHandler('/effect', self._onEffect)
         self.osc_server.addMsgHandler('/join', self._onJoin)
+        self.osc_server.addMsgHandler('/clip', self._onClip)
+        self.osc_server.addMsgHandler('/ack', self._onAck)
         self.osc_server.addMsgHandler('default', self._onUnknownMessage)
 
         # set internal connected flag
@@ -147,10 +149,10 @@ class Osc:
             ColorTerminal().warn('Got /change OSC message without data')
             return
 
-        self.interface.updates.create(json.loads(data[0]))
-
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
+        self.interface.updates.create(json.loads(data[0]))
 
     def _onTimeout(self):
         if hasattr(self, 'osc_server') and self.osc_server:
@@ -161,28 +163,47 @@ class Osc:
         self.unknownMessageEvent(addr, tags, data, client_address, self)
 
     def _onEvent(self, addr, tags, data, client_address):
+        if not self._receiveType('events'):
+            return
+
+        if self.verbose:
+            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
         params = json.loads(data[0])
         self.interface.genericEvent(params)
 
+    def _onEffect(self, addr, tags, data, client_address):
+        if not self._receiveType('effects'):
+            return
+
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
-    def _onEffect(self, addr, tags, data, client_address):
         params = json.loads(data[0])
         self.interface.effectEvent(params)
 
+    def _onJoin(self, addr, tags, data, client_address):
+        if not self._receiveType('joins'):
+            return
+
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
-
-    def _onJoin(self, addr, tags, data, client_address):
-        if not self.receiveJoins():
-            return
 
         params = json.loads(data[0])
         self.interface.joinEvent(params)
 
+    def _onClip(self, addr, tags, data, client_address):
+        if not self._receiveType('clips'):
+            return
+
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
-    def receiveJoins(self):
-        return 'inputs' in self.options and self.options['inputs'].count('joins') > 0
+        self.interface.clipEvent(data[0])
+
+
+    def _onAck(self, addr, tags, data, client_address):
+        self.interface.ackEvent()
+
+    def _receiveType(self, typ):
+        return 'inputs' in self.options and self.options['inputs'].count(typ) > 0

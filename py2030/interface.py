@@ -38,6 +38,8 @@ class Interface:
         self.genericEvent = Event()
         self.effectEvent = Event()
         self.joinEvent = Event()
+        self.clipEvent = Event()
+        self.ackEvent = Event()
 
         # configuration
         self.options = {}
