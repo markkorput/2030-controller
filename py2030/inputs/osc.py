@@ -162,6 +162,9 @@ class Osc:
         self.unknownMessageEvent(addr, tags, data, client_address, self)
 
     def _onEvent(self, addr, tags, data, client_address):
+        if not self._receiveType('events'):
+            return
+
         params = json.loads(data[0])
         self.interface.genericEvent(params)
 
@@ -169,6 +172,9 @@ class Osc:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
     def _onEffect(self, addr, tags, data, client_address):
+        if not self._receiveType('effects'):
+            return
+
         params = json.loads(data[0])
         self.interface.effectEvent(params)
 
@@ -176,7 +182,7 @@ class Osc:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
     def _onJoin(self, addr, tags, data, client_address):
-        if not self._receiveJoins():
+        if not self._receiveType('joins'):
             return
 
         params = json.loads(data[0])
@@ -184,9 +190,6 @@ class Osc:
 
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
-
-    def _receiveJoins(self):
-        return 'inputs' in self.options and self.options['inputs'].count('joins') > 0
 
     def _onClip(self, addr, tags, data, client_address):
         if not self._receiveType('clips'):

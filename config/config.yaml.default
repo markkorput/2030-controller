@@ -7,15 +7,27 @@ py2030:
           port: 2030
           shared: false
           verbose: true
+          inputs:
+            - effects
+            - events
+            - clips
         local:
           ip: '127.0.0.1'
           port: 2030
           shared: false
           verbose: true
+          inputs:
+            - effects
+            - events
+            - clips
         multi:
           ip: '224.0.20.30'
           port: 2030
           shared: true
+          inputs:
+            - effects
+            - events
+            - clips
       osc_outputs:
         controller_joiner:
           ip: '127.0.0.1'
