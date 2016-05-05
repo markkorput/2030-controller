@@ -2,6 +2,8 @@ from py2030.utils.color_terminal import ColorTerminal
 from py2030.interface import Interface
 from py2030.config_file import ConfigFile
 
+import copy
+
 # from py2030.client_side.client_info import ClientInfo
 
 class App:
@@ -161,7 +163,9 @@ class App:
             self.osc_outputs = []
 
             for data in profile_data['osc_outputs'].values():
-                self.osc_outputs.append(OscOutput(data)) # auto-starts
+                # this profile is for joining clients, don't initialize statically
+                if not 'ip' in data or data['ip'] != 'joiner':
+                    self.osc_outputs.append(OscOutput(data)) # auto-starts
 
             del OscOutput
 
@@ -278,12 +282,20 @@ class App:
         del socket
         return self.__ip_address
 
-    def _onJoin(self, join_data):
-        if not 'osc_to_joins' in self.profile_data:
-            return
+    def _getJoinerOscOutProfileData(self):
+        # find osc output profile for joining clients
+        if 'osc_outputs' in self.profile_data:
+            for data in self.profile_data['osc_outputs'].values():
+                # the 'ip' attribute must be 'joiner'
+                if 'ip' in data and data['ip'] == 'joiner':
+                    return copy.copy(data)
+        return None
 
-        joins_config = self.profile_data['osc_to_joins']
-        if not 'enabled' in joins_config or not joins_config['enabled']:
+    def _onJoin(self, join_data):
+        joined_config = self._getJoinerOscOutProfileData()
+
+        if not joined_config: # osc to joiners not enabled
+            ColorTerminal().warn('osc-to-joiners not enabled')
             return
 
         # check we got all required params
@@ -309,12 +321,12 @@ class App:
                 return
 
         # prep params
-        opts = {'ip':join_data['ip'], 'port':join_data['port']}
-        if 'verbose' in joins_config:
-            opts['verbose'] = joins_config['verbose']
+        joined_config['ip'] = join_data['ip']
+        if not 'port' in joined_config or joined_config['port'] == 'joiner':
+            joined_config['port'] = join_data['port']
 
         from py2030.outputs.osc import Osc as OscOutput
-        osc_out = OscOutput(opts)
+        osc_out = OscOutput(joined_config)
         osc_out.trigger('ack', [])
         self.joined_osc_outputs.append(osc_out) # auto-starts
         del OscOutput

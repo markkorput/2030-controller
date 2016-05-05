@@ -41,6 +41,15 @@ py2030:
     controller:
       monitor_config: true
       midi_input_port: 0
+      osc_outputs:
+        to_joiners:
+          ip: 'joiner'
+          port: 'joiner'
+          verbose: true
+          outputs:
+            - events
+            - effects
+            - clips
       # osc_outputs:
       #   local:
       #     ip: '127.0.0.1'
@@ -71,9 +80,6 @@ py2030:
       # http_server_port: 2031
       # broadcast_interval: 2.0
       broadcast_reconfig: true
-      osc_to_joins:
-        enabled: true
-        verbose: true
 
   midi_triggers:
     48: # C2

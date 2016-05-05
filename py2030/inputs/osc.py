@@ -206,4 +206,4 @@ class Osc:
         self.interface.ackEvent()
 
     def _receiveType(self, typ):
-        return 'inputs' in self.options and self.options['inputs'].count(typ) > 0
+        return not 'inputs' in self.options or self.options['inputs'].count(typ) > 0
