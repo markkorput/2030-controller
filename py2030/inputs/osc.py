@@ -120,6 +120,7 @@ class Osc:
         self.osc_server.addMsgHandler('/event', self._onEvent)
         self.osc_server.addMsgHandler('/effect', self._onEffect)
         self.osc_server.addMsgHandler('/join', self._onJoin)
+        self.osc_server.addMsgHandler('/TriggeredClipName', self._onTriggeredClipName)
         self.osc_server.addMsgHandler('default', self._onUnknownMessage)
 
         # set internal connected flag
@@ -175,7 +176,7 @@ class Osc:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
     def _onJoin(self, addr, tags, data, client_address):
-        if not self.receiveJoins():
+        if not self._receiveJoins():
             return
 
         params = json.loads(data[0])
@@ -184,5 +185,17 @@ class Osc:
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
-    def receiveJoins(self):
+    def _receiveJoins(self):
         return 'inputs' in self.options and self.options['inputs'].count('joins') > 0
+
+    def _onTriggeredClipName(self, addr, tags, data, client_address):
+        if not self._receiveTriggeredClipNames():
+            return
+
+        self.interface.clipNameEvent(data[0])
+
+        if self.verbose:
+            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
+    def _receiveTriggeredClipNames(self):
+        return 'inputs' in self.options and self.options['inputs'].count('clipNames') > 0
