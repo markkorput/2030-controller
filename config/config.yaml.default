@@ -54,7 +54,7 @@ py2030:
           port: 2028
           inputs:
             - joins
-            - clipNames
+            - clips
           verbose: true
       # http_server_port: 2031
       # broadcast_interval: 2.0
