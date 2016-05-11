@@ -280,7 +280,7 @@ class App:
     def _join_data_port(self):
         # find the first osc input (listener) that accepts 'acks'
         for osc_inputs in self.osc_inputs:
-            if osc_output.receivesType('acks'):
+            if osc_output.receivesType('ack'):
                 return osc_input.port()
         # default
         return 2030

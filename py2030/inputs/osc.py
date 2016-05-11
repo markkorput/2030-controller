@@ -116,12 +116,12 @@ class Osc:
         # register time out callback
         self.osc_server.handle_timeout = self._onTimeout
         # register specific OSC messages callback(s)
-        self.osc_server.addMsgHandler('/change', self._onChange)
-        self.osc_server.addMsgHandler('/event', self._onEvent)
-        self.osc_server.addMsgHandler('/effect', self._onEffect)
+        self.osc_server.addMsgHandler('/change', self._onChange) # deprecated
         self.osc_server.addMsgHandler('/join', self._onJoin)
-        self.osc_server.addMsgHandler('/clip', self._onClip)
         self.osc_server.addMsgHandler('/ack', self._onAck)
+        self.osc_server.addMsgHandler('/event', self._onEvent)
+        self.osc_server.addMsgHandler('/clip', self._onClip)
+        self.osc_server.addMsgHandler('/effect', self._onEffect)
         self.osc_server.addMsgHandler('default', self._onUnknownMessage)
 
         # set internal connected flag
@@ -163,7 +163,7 @@ class Osc:
         self.unknownMessageEvent(addr, tags, data, client_address, self)
 
     def _onEvent(self, addr, tags, data, client_address):
-        if not self.receivesType('events'):
+        if not self.receivesType(addr[1:]): # remove leading slash:
             return
 
         if self.verbose:
@@ -173,7 +173,7 @@ class Osc:
         self.interface.genericEvent(params)
 
     def _onEffect(self, addr, tags, data, client_address):
-        if not self.receivesType('effects'):
+        if not self.receivesType(addr[1:]): # remove leading slash:
             return
 
         if self.verbose:
@@ -183,7 +183,7 @@ class Osc:
         self.interface.effectEvent(params)
 
     def _onJoin(self, addr, tags, data, client_address):
-        if not self.receivesType('joins'):
+        if not self.receivesType(addr[1:]): # remove leading slash:
             return
 
         if self.verbose:
@@ -193,7 +193,7 @@ class Osc:
         self.interface.joinEvent(params)
 
     def _onClip(self, addr, tags, data, client_address):
-        if not self.receivesType('clips'):
+        if not self.receivesType(addr[1:]): # remove leading slash:
             return
 
         if self.verbose:
@@ -202,7 +202,7 @@ class Osc:
         self.interface.clipEvent(data[0])
 
     def _onAck(self, addr, tags, data, client_address):
-        if self.receivesType('ack'):
+        if not self.receivesType(addr[1:]): # remove leading slash:
             self.interface.ackEvent()
 
     def receivesType(self, typ):
