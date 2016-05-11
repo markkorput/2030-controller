@@ -316,15 +316,16 @@ class App:
             ColorTerminal().warn('osc-to-joiners not enabled')
             return
 
-        # check we got all required params
-        if not 'ip' in join_data or not 'port' in join_data:
-            ColorTerminal().warn('Got incomplete join data')
+        # check we got all required params. TODO; require hostname as well?
+        if not 'ip' in join_data or not 'port' in join_data or not 'hostname' in join_data:
+            ColorTerminal().warn('Got incomplete join data (require ip, port and hostname)')
             print join_data
             return
 
         # don't register if already outputting to this address/port
         for out in self.osc_outputs:
             if out.host() == join_data['ip'] and out.port() == join_data['port']:
+                # TODO trigger ackEvent on interface instead, with client id?
                 out.trigger('ack', [])
                 ColorTerminal().warn('Got join with already registered osc-output specs')
                 print join_data
@@ -333,6 +334,7 @@ class App:
         # don't register if already outputting to this address/port
         for out in self.joined_osc_outputs:
             if out.host() == join_data['ip'] and out.port() == join_data['port']:
+                # TODO trigger ackEvent on interface instead, with client id?
                 out.trigger('ack', [])
                 ColorTerminal().warn('Got join with already registered osc-output specs')
                 print join_data
@@ -340,16 +342,22 @@ class App:
 
         # prep params
         joined_config['ip'] = join_data['ip']
+        joined_config['client_id'] = join_data['hostname']
         if not 'port' in joined_config or joined_config['port'] == 'joiner':
             joined_config['port'] = join_data['port']
 
         from py2030.outputs.osc import Osc as OscOutput
         osc_out = OscOutput(joined_config)
+        # TODO trigger ackEvent on interface instead, with client id?
         osc_out.trigger('ack', [])
         self.joined_osc_outputs.append(osc_out) # auto-starts
         del OscOutput
 
     def _onAck(self):
+        # controller side;
+        # not triggered on controller-side (for now)
+
+        # client side
         if self.interval_joiner and self.interval_joiner.running:
             ColorTerminal().yellow('Got ackEvent, stopping interval joiner')
             self.interval_joiner.stop()

@@ -66,6 +66,9 @@ class Osc(Output):
         # default is localhost
         return self.options['ip'] if 'ip' in self.options else '127.0.0.1'
 
+    def client_id(self):
+        return self.options['client_id'] if 'client_id' in self.options else None
+
     def _connect(self):
         try:
             self.client = OSC.OSCClient()
