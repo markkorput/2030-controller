@@ -4,7 +4,9 @@ py2030:
       monitor_config: false
       download_reconfig: true
       join_interval: 2.0
-
+      syncer:
+        pong: true
+        ping: false
       osc_outputs:
         # local:
         #   ip: '127.0.0.1'
@@ -15,6 +17,7 @@ py2030:
           port: 2031
           outputs:
             - join
+            - pong
           verbose: true
 
       osc_inputs:
@@ -28,6 +31,7 @@ py2030:
             - effect
             - event
             - clip
+            - ping
 
     controller:
       monitor_config: true
@@ -36,6 +40,9 @@ py2030:
       # broadcast_interval: 2.0
       # broadcast_reconfig: true
       # download_reconfig: true
+      syncer:
+        pong: false
+        ping: true
 
       osc_inputs:
         client_join_and_clip_receiver:
@@ -44,6 +51,7 @@ py2030:
           inputs:
             - join
             - clip
+            - pong
           verbose: true
       osc_outputs:
         to_joiners:
@@ -54,6 +62,7 @@ py2030:
             - event
             - effect
             - clip
+            - ping
 
   midi_triggers:
     48: # C2

@@ -1,6 +1,7 @@
 from py2030.utils.color_terminal import ColorTerminal
 from py2030.interface import Interface
 from py2030.config_file import ConfigFile
+from py2030.syncer import Syncer
 
 import copy
 
@@ -27,6 +28,7 @@ class App:
         self.interval_joiner = None
         self.config_broadcaster = None
         self.reconfig_downloader = None
+        self.syncer = None
 
         # configuration
         self.options = {}
@@ -275,12 +277,19 @@ class App:
                 ColorTerminal().yellow('started joiner interval at {0}'.format(interval))
                 del IntervalJoiner
 
+        #
+        # Syncer
+        #
+        if 'syncer' in profile_data:
+            self.syncer = Syncer(profile_data['syncer'])
+            self.syncer.setup()
+
     # returns the port number to be send with the join dataChangeEvent
     # (this will be our incoming OSC port)
     def _join_data_port(self):
         # find the first osc input (listener) that accepts 'acks'
-        for osc_inputs in self.osc_inputs:
-            if osc_output.receivesType('ack'):
+        for osc_input in self.osc_inputs:
+            if osc_input.receivesType('ack'):
                 return osc_input.port()
         # default
         return 2030

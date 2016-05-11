@@ -41,11 +41,14 @@ class Interface:
         # clients; triggered to ask to join the network
         # controller; triggered when a join request comes in
         self.joinEvent = Event()
+        # triggered on client side when an ack message is received in response to join request
+        self.ackEvent = Event()
         # triggered on both controller and clients when ableton
         # stars a new clip (controller will forward this event over the network)
         self.clipEvent = Event()
-        
-        self.ackEvent = Event()
+        # ping/pong for syncing
+        self.pingEvent = Event() # triggered to ping/when being pinged
+        self.pongEvent = Event() # triggered to pong/when being ponged
 
         # configuration
         self.options = {}
