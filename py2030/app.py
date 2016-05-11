@@ -322,7 +322,7 @@ class App:
         joined_config = self._getJoinerOscOutProfileData()
 
         if not joined_config: # osc to joiners not enabled
-            ColorTerminal().warn('osc-to-joiners not enabled')
+            # ColorTerminal().warn('osc-to-joiners not enabled')
             return
 
         # check we got all required params. TODO; require hostname as well?
