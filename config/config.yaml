@@ -23,9 +23,11 @@ py2030:
           shared: false
           verbose: true
           inputs:
+            - acks
             - effects
             - events
             - clips
+
         # local:
         #   ip: '127.0.0.1'
         #   port: 2030

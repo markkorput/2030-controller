@@ -163,7 +163,7 @@ class Osc:
         self.unknownMessageEvent(addr, tags, data, client_address, self)
 
     def _onEvent(self, addr, tags, data, client_address):
-        if not self._receiveType('events'):
+        if not self.receivesType('events'):
             return
 
         if self.verbose:
@@ -173,7 +173,7 @@ class Osc:
         self.interface.genericEvent(params)
 
     def _onEffect(self, addr, tags, data, client_address):
-        if not self._receiveType('effects'):
+        if not self.receivesType('effects'):
             return
 
         if self.verbose:
@@ -183,7 +183,7 @@ class Osc:
         self.interface.effectEvent(params)
 
     def _onJoin(self, addr, tags, data, client_address):
-        if not self._receiveType('joins'):
+        if not self.receivesType('joins'):
             return
 
         if self.verbose:
@@ -193,7 +193,7 @@ class Osc:
         self.interface.joinEvent(params)
 
     def _onClip(self, addr, tags, data, client_address):
-        if not self._receiveType('clips'):
+        if not self.receivesType('clips'):
             return
 
         if self.verbose:
@@ -201,9 +201,9 @@ class Osc:
 
         self.interface.clipEvent(data[0])
 
-
     def _onAck(self, addr, tags, data, client_address):
-        self.interface.ackEvent()
+        if self.receivesType('ack'):
+            self.interface.ackEvent()
 
-    def _receiveType(self, typ):
+    def receivesType(self, typ):
         return not 'inputs' in self.options or self.options['inputs'].count(typ) > 0

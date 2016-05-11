@@ -35,10 +35,16 @@ class Interface:
         self.newModelEvent = Event()
 
         # network distributed events
-        self.genericEvent = Event()
-        self.effectEvent = Event()
+        self.genericEvent = Event() # for prototyping
+        self.effectEvent = Event() # for triggering realtime visual effects
+        # joinEvent;
+        # clients; triggered to ask to join the network
+        # controller; triggered when a join request comes in
         self.joinEvent = Event()
+        # triggered on both controller and clients when ableton
+        # stars a new clip (controller will forward this event over the network)
         self.clipEvent = Event()
+        
         self.ackEvent = Event()
 
         # configuration

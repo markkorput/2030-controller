@@ -270,17 +270,35 @@ class App:
                 ColorTerminal().yellow('set joiner interval to {0}'.format(interval))
             else:
                 from py2030.client_side.interval_joiner import IntervalJoiner
-                self.interval_joiner = IntervalJoiner({'interval': interval, 'data': {'ip': self._ip(), 'port': 2030}}) # TODO; determine port from osc listeners?
+                # TODO; determine port from osc listeners?
+                self.interval_joiner = IntervalJoiner({'interval': interval, 'data': {'ip': self._ip(), 'port': self._join_data_port(), 'hostname': self._hostname()}})
                 ColorTerminal().yellow('started joiner interval at {0}'.format(interval))
                 del IntervalJoiner
 
-    def _ip(self):
-        if hasattr(self, '__ip_address'):
-            return self.__ip_address
+    # returns the port number to be send with the join dataChangeEvent
+    # (this will be our incoming OSC port)
+    def _join_data_port(self):
+        # find the first osc input (listener) that accepts 'acks'
+        for osc_inputs in self.osc_inputs:
+            if osc_output.receivesType('acks'):
+                return osc_input.port()
+        # default
+        return 2030
+
+    def _host_info(self):
+        if hasattr(self, '__host_info'):
+            return self.__host_info
         import socket
-        self.__ip_address = socket.gethostbyname(socket.gethostname())
-        del socket
-        return self.__ip_address
+        hostname = socket.gethostname()
+        ip = socket.gethostbyname(hostname)
+        self.__host_info = {'hostname': hostname, 'ip': ip}
+        return self.__host_info
+
+    def _ip(self):
+        return self._host_info()['ip']
+
+    def _hostname(self):
+        return self._host_info()['hostname']
 
     def _getJoinerOscOutProfileData(self):
         # find osc output profile for joining clients
