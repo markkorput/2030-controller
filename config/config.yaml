@@ -14,7 +14,7 @@ py2030:
           ip: '127.0.0.1'
           port: 2031
           outputs:
-            - joins
+            - join
           verbose: true
 
       osc_inputs:
@@ -51,9 +51,9 @@ py2030:
           port: 'joiner'
           verbose: true
           outputs:
-            - events
-            - effects
-            - clips
+            - event
+            - effect
+            - clip
 
   midi_triggers:
     48: # C2

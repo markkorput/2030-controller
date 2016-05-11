@@ -67,20 +67,20 @@ class Output:
         pass
 
     def _onGenericEvent(self, effect_data):
-        if self._outputType('events'):
+        if self.outputsType('event'):
             self.trigger('event', effect_data)
 
     def _onEffect(self, effect_data):
-        if self._outputType('effects'):
+        if self.outputsType('effect'):
             self.trigger('effect', effect_data)
 
     def _onJoin(self, join_data):
-        if self._outputType('joins'):
+        if self.outputsType('join'):
             self.trigger('join', join_data)
 
     def _onClip(self, clip_name):
-        if self._outputType('clips'):
+        if self.outputsType('clip'):
             self.trigger('clip', clip_name)
 
-    def _outputType(self, output_type):
+    def outputsType(self, output_type):
         return not 'outputs' in self.options or self.options['outputs'].count(output_type) > 0
