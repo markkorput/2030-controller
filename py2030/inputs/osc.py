@@ -206,7 +206,12 @@ class Osc:
 
     def _onAck(self, addr, tags, data, client_address):
         if not self.receivesType(addr[1:]): # remove leading slash:
-            self.interface.ackEvent()
+            return
+
+        if self.verbose:
+            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
+        self.interface.ackEvent()
 
     def receivesType(self, typ):
         return not 'inputs' in self.options or self.options['inputs'].count(typ) > 0
