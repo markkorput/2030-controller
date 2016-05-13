@@ -31,6 +31,7 @@ class Output:
                 self.interface.effectEvent -= self._onEffect
                 self.interface.joinEvent -= self._onJoin
                 self.interface.clipEvent -= self._onClip
+                self.interface.oscMessageEvent -= self._onOscMessage
 
             # set interface as attribute
             self.interface = options['interface']
@@ -42,6 +43,7 @@ class Output:
                 self.interface.effectEvent += self._onEffect
                 self.interface.joinEvent += self._onJoin
                 self.interface.clipEvent += self._onClip
+                self.interface.oscMessageEvent += self._onOscMessage
 
         if ('accept_types' in options or 'ignore_types' in options) and 'accept_types' in self.options and 'ignore_types' in self.options:
             both = list(set(self.options['accept_types']) & set(self.options['ignore_types']))
@@ -81,6 +83,10 @@ class Output:
     def _onClip(self, clip_name):
         if self.outputsType('clip'):
             self.trigger('clip', clip_name)
+
+    def _onOscMessage(self, addr, data):
+        if self.outputsType('osc'):
+            self.trigger(addr, data)
 
     def outputsType(self, output_type):
         return not 'outputs' in self.options or self.options['outputs'].count(output_type) > 0

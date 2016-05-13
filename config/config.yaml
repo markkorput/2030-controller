@@ -14,7 +14,7 @@ py2030:
         #   # verbose: true
         controller_joiner:
           ip: '127.0.0.1'
-          port: 2031
+          port: 2030
           outputs:
             - join
             - pong
@@ -47,12 +47,16 @@ py2030:
       osc_inputs:
         client_join_and_clip_receiver:
           ip: '127.0.0.1'
-          port: 2031
+          port: 2030
           inputs:
             - join
             - clip
             - pong
           verbose: true
+        forwarder_for_all_osc_messages:
+          ip: '127.0.0.1'
+          port: 2031
+          forwarder: true
       osc_outputs:
         to_joiners:
           ip: 'joiner'
@@ -63,6 +67,7 @@ py2030:
             - effect
             - clip
             - ping
+            - osc
 
   midi_triggers:
     48: # C2

@@ -116,13 +116,16 @@ class Osc:
         # register time out callback
         self.osc_server.handle_timeout = self._onTimeout
         # register specific OSC messages callback(s)
-        self.osc_server.addMsgHandler('/change', self._onChange) # deprecated
-        self.osc_server.addMsgHandler('/join', self._onJoin)
-        self.osc_server.addMsgHandler('/ack', self._onAck)
-        self.osc_server.addMsgHandler('/event', self._onEvent)
-        self.osc_server.addMsgHandler('/clip', self._onClip)
-        self.osc_server.addMsgHandler('/effect', self._onEffect)
-        self.osc_server.addMsgHandler('default', self._onUnknownMessage)
+        if self.isForwarder():
+            self.osc_server.addMsgHandler('default', self._forwardOscMessage)
+        else:
+            self.osc_server.addMsgHandler('/change', self._onChange) # deprecated
+            self.osc_server.addMsgHandler('/join', self._onJoin)
+            self.osc_server.addMsgHandler('/ack', self._onAck)
+            self.osc_server.addMsgHandler('/event', self._onEvent)
+            self.osc_server.addMsgHandler('/clip', self._onClip)
+            self.osc_server.addMsgHandler('/effect', self._onEffect)
+            self.osc_server.addMsgHandler('default', self._onUnknownMessage)
 
         # set internal connected flag
         self.connected = True
@@ -203,7 +206,20 @@ class Osc:
 
     def _onAck(self, addr, tags, data, client_address):
         if not self.receivesType(addr[1:]): # remove leading slash:
-            self.interface.ackEvent()
+            return
+
+        if self.verbose:
+            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
+        self.interface.ackEvent()
 
     def receivesType(self, typ):
         return not 'inputs' in self.options or self.options['inputs'].count(typ) > 0
+
+    def isForwarder(self):
+        return 'forwarder' in self.options and self.options['forwarder']
+
+    def _forwardOscMessage(self, addr, tags, data, client_address):
+        # ColorTerminal().warn('Got unknown OSC Message {0}'.format((addr, tags, data, client_address)))
+        # self.unknownMessageEvent(addr, tags, data, client_address, self)
+        self.interface.oscMessageEvent(addr[1:], data)
