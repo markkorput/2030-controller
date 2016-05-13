@@ -27,7 +27,6 @@ class Syncer:
     def update(self):
         pass
 
-
     def ping_data(self, client_id):
         return {
             'client_id': client_id,
@@ -42,6 +41,7 @@ class Syncer:
         self.interface.pingEvent(self.ping_data(client_id))
 
     def _onPing(self, data):
+        
         # TODO;
         pass
 

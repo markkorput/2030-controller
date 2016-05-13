@@ -321,7 +321,7 @@ class App:
     def _onJoin(self, join_data):
         joined_config = self._getJoinerOscOutProfileData()
 
-        if not joined_config: # osc to joiners not enabled
+        if not joined_config: # osc to joiners not enabled (the case for clients)
             # ColorTerminal().warn('osc-to-joiners not enabled')
             return
 
