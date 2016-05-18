@@ -1,5 +1,5 @@
 from py2030.utils.color_terminal import ColorTerminal
-# from py2030.utils.event import Event
+from py2030.utils.event import Event
 
 import struct, os
 from datetime import datetime
@@ -15,32 +15,41 @@ class OscAsciiFile:
         self.write_file = None
 
         # last read frame info
-        self.currentFrame = None
-        self.currentFrameTime = None
-        self.currentFrameIndex = -1
+        self.last_line = None
+        self.last_timestamp = None
+        self.last_addr = None
+        self.last_tags = None
+        self.last_data = None
 
         # other attribute(s)
         self._separation_character = ','
 
         # events
-        # self.loopEvent = Event()
+        self.loopEvent = Event()
 
     def __del__(self):
         self.stop()
 
+    def _default_read_file_path(self):
+        # return 'data/ascii_osc_file.csv'
+        files = os.listdir('data/osc')
+        files = filter(lambda f: f.startswith('recording_') and f.endswith('.csv'), files)
+        files.sort()
+        return 'data/osc/'+files[-1] if files and len(files) > 0 else 'data/osc/clock_spot.csv'
+
     def start_reading(self):
-        self.stopReading()
+        self.stop_reading()
 
-        try:
-            if not self.path or self.path == 'auto':
-                self.path = 'data/ascii_osc_file.csv'
+        # try:
+        if self.path == None or self.path == 'auto':
+            self.path = self._default_read_file_path()
 
-            # self.read_file = open(self.path, 'rb')
-            self.read_file = open(self.path, 'r')
-            ColorTerminal().success("OscAsciiFile opened: %s" % self.path)
-        except:
-            ColorTerminal().fail("OscAsciiFile couldn't be opened: %s" % self.path)
-            self.read_file = None
+        # self.read_file = open(self.path, 'rb')
+        self.read_file = open(self.path, 'r')
+        ColorTerminal().success("OscAsciiFile opened: %s" % self.path)
+        # except:
+        #     ColorTerminal().fail("OscAsciiFile couldn't be opened: %s" % self.path)
+        #     self.read_file = None
 
     def stop_reading(self):
         if self.read_file:
@@ -52,7 +61,7 @@ class OscAsciiFile:
         self.stop_writing()
         try:
             if not self.path or self.path == 'auto':
-                self.path = 'data/ascii_osc_file_'+datetime.now().strftime('%Y_%m_%d_%H_%M_%S')+'.csv'
+                self.path = 'data/osc/recording_'+datetime.now().strftime('%Y_%m_%d_%H_%M_%S')+'.csv'
 
             # self.write_file = open(self.path, 'wb')
             self.write_file = open(self.path, 'w')
@@ -71,57 +80,57 @@ class OscAsciiFile:
         self.stop_reading()
         self.stop_writing()
 
+    def set_path(self, path):
+        self.path = path
+
     def set_loop(self, loop):
         self.loop = loop
 
-    def nextFrame(self):
-        pass
-        # bytecount = self._readFrameSize() # int: bytes
-        # self.currentFrameTime = self._readFrameTime() # float: seconds
-        #
-        # if bytecount == None or self.currentFrameTime == None:
-        #     return None
-        #
-        # self.currentFrame = self.read_file.read(bytecount)
-        # self.currentFrameIndex += 1
-        #
-        # return self.currentFrame
+    def next_line(self):
+        # read a line from the file
+        line = self.read_file.readline()
 
-    def _readFrameSize(self):
-        pass
-        # # int is 4 bytes
-        # value = self.read_file.read(4)
-        #
-        # # end-of-file?
-        # if not value:
-        #     if not self.loop:
-        #         return None
-        #
-        #     # reset file handle
-        #     self.read_file.seek(0)
-        #     self.currentFrame = None
-        #     self.currentFrameTime = None
-        #     self.currentFrameIndex = -1
-        #     # notify
-        #     self.loopEvent(self)
-        #     # try again
-        #     return self._readFrameSize()
-        #
-        # # 'unpack' 4 binary bytes into integer
-        # return struct.unpack('i', value)[0]
+        # end-of-file?
+        if line == '':
+            if not self.loop:
+                return False
 
-    def _readFrameTime(self):
-        pass
-        # # float of 4 bytes
-        # value = self.read_file.read(4)
-        #
-        # # end-of-file?
-        # if not value:
-        #     # TODO; raise format error?
-        #     return None
-        #
-        # # 'unpack' 4 binary bytes into float
-        # return struct.unpack('f', value)[0]
+            # rewind file handle te start of file
+            self.read_file.seek(0)
+            self.loopEvent(self)
+            # try again
+            # TODO; do check to avoid endless recursion for empty files?
+            return self.next_line()
+
+        self.last_line = line
+        # parse line into attributes; first separate the line into csv columns
+        columns = line.strip().split(self._separation_character)
+        # float timestamp
+        self.last_timestamp = float(columns[0])
+        # string address
+        self.last_addr = columns[1]
+        # params (param types and param values)
+        idx = 2
+        count = len(columns)
+        self.last_tags = []
+        self.last_data = []
+
+        while idx < (count-1): # need two more columns each iteration
+            tag = columns[idx]
+            value = columns[idx+1]
+            self.last_tags.append(tag)
+            if tag == 'f':
+                value = float(value)
+            elif tag == 'i':
+                value = int(value)
+            # elif tag == 'b':
+            #     ColorTerminal().warn("[OscAsciiFile] 'b' tag encountered; currently not supported")
+            # else: # if tag =='s' ## assume tring
+            #     value = str(value)
+            self.last_data.append(value)
+            idx += 2
+
+        return True
 
     def write_line(self, addr, tags, data, time=0.0):
         # Line format (each value separated by a comma)

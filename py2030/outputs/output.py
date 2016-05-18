@@ -50,10 +50,6 @@ class Output:
             if len(both) > 0:
                 ColorTerminal().warn("[Output] these types are specified to be both ignored and accepted, they will be ignored: {0}".format(both))
 
-    def output(self, change_model):
-        # overwrite this method with output-specific logic
-        pass
-
     def _onChange(self, change_model, collection):
         if 'accept_types' in self.options and not change_model.get('type') in self.options['accept_types']:
             return
@@ -63,10 +59,6 @@ class Output:
 
         self.output(change_model)
         self.outputEvent(change_model, self)
-
-    def trigger(self, event, data):
-        # overwrite this method with output-specific logic
-        pass
 
     def _onGenericEvent(self, effect_data):
         if self.outputsType('event'):
@@ -87,7 +79,20 @@ class Output:
     def _onOscMessage(self, addr, tags, data, client_address):
         if self.outputsType('osc'):
             # strip leading slash (which will be added by subclass)
-            self.trigger(addr[1:], data)
+            self.sendMessage(addr, data)
 
     def outputsType(self, output_type):
         return not 'outputs' in self.options or self.options['outputs'].count(output_type) > 0
+
+    # "virtual" methods
+    def output(self, change_model):
+        # overwrite this method with output-specific logic
+        pass
+
+    def trigger(self, event, data):
+        # overwrite this method with output-specific logic
+        pass
+
+    def sendMessage(self, addr, data):
+        # overwrite this method with output-specific logic
+        pass

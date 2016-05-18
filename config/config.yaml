@@ -76,10 +76,37 @@ py2030:
           port: 2031
           forwarder: true
       osc_ascii_output:
-        enabled: true
         path: auto
         verbose: true
         trim: true
+
+    oscplayer:
+      osc_ascii_input:
+        path: 'auto' # 'data/osc/clock_spot.csv'
+        # loop: true
+        # sync: true
+        verbose: true
+      osc_outputs:
+        playbacker:
+          ip: '127.0.0.1'
+          port: 2031
+          verbose: true
+          outputs:
+            - event
+            - effect
+            - clip
+            - ping
+            - osc
+        to_joiners:
+          ip: 'joiner'
+          port: 'joiner'
+          verbose: true
+          outputs:
+            - event
+            - effect
+            - clip
+            - ping
+            - osc
 
   midi_triggers:
     48: # C2
