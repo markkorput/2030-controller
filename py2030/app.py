@@ -1,7 +1,6 @@
 from py2030.utils.color_terminal import ColorTerminal
 from py2030.interface import Interface
 from py2030.config_file import ConfigFile
-from py2030.syncer import Syncer
 
 import copy
 
@@ -281,8 +280,19 @@ class App:
         # Syncer
         #
         if 'syncer' in profile_data:
+            from py2030.syncer import Syncer
             self.syncer = Syncer(profile_data['syncer'])
             self.syncer.setup()
+            del Syncer
+
+        #
+        # OscAscii recorder output
+        #
+        if 'osc_ascii_output' in profile_data:
+            from py2030.outputs.osc_ascii import OscAscii
+            self.osc_ascii_output = OscAscii(profile_data['osc_ascii_output'])
+            self.osc_ascii_output.start()
+            del OscAscii
 
     # returns the port number to be send with the join dataChangeEvent
     # (this will be our incoming OSC port)

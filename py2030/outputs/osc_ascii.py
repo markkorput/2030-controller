@@ -4,7 +4,7 @@ from py2030.utils.color_terminal import ColorTerminal
 
 from datetime import datetime
 
-class OscAscii(Output):
+class OscAscii:
     def __init__(self, options = {}):
         # attributes
         self.running = False
@@ -14,6 +14,9 @@ class OscAscii(Output):
         self.start_time = None
 
         # configuration
+        if not 'interface' in options:
+            options['interface'] = Interface.instance()
+
         self.options = {}
         self.configure(options)
 
@@ -40,11 +43,11 @@ class OscAscii(Output):
 
         # interface change?
         if 'interface' in options:
-            # unregister from previous manager
+            # unregister from previous interface
             if 'interface' in previous_options and previous_options['interface']:
-                self.previous_options['interface'].oscMessageEvent -= self._onOscMessage
+                previous_options['interface'].oscMessageEvent -= self._onOscMessage
 
-            # register with new manager
+            # register with new interface
             if options['interface']:
                 options['interface'].oscMessageEvent += self._onOscMessage
 
@@ -52,7 +55,7 @@ class OscAscii(Output):
             self.verbose = options['verbose']
 
     def start(self):
-        ColorTerminal().green('OscAscii writing to:' + str(self.file.path))
+        # ColorTerminal().green('OscAscii writing to: ' + str(self.file.path))
         self.file.start_writing()
         if not self.trimTimeBeforeFirstMessage():
             self.start_time = datetime.now()

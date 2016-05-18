@@ -23,7 +23,7 @@ class OscAsciiFile:
         self._separation_character = ','
 
         # events
-        self.loopEvent = Event()
+        # self.loopEvent = Event()
 
     def __del__(self):
         self.stop()
@@ -54,7 +54,8 @@ class OscAsciiFile:
             if not self.path or self.path == 'auto':
                 self.path = 'data/ascii_osc_file_'+datetime.now().strftime('%Y_%m_%d_%H_%M_%S')+'.csv'
 
-            # self.write_file = open(self.path, 'w')
+            # self.write_file = open(self.path, 'wb')
+            self.write_file = open(self.path, 'w')
             ColorTerminal().success("OscAsciiFile opened for writing: %s" % self.path)
         except:
             ColorTerminal().fail("OscAsciiFile couldn't be opened for writing: %s" % self.path)
@@ -122,7 +123,7 @@ class OscAsciiFile:
         # # 'unpack' 4 binary bytes into float
         # return struct.unpack('f', value)[0]
 
-    def write_line(self, addrs, tags, data, time=0.0):
+    def write_line(self, addr, tags, data, time=0.0):
         # Line format (each value separated by a comma)
         # - timestamp
         # - OSC message address string, ie. "/some/message" (without quotes)
@@ -131,13 +132,13 @@ class OscAsciiFile:
         # - param2 type
         # - param2 value
         # - etc. etc.
-        columns = [time, addr]
+        columns = [str(time), addr]
 
         try:
-            for idx, tag in tags:
+            for idx, tag in enumerate(tags):
                 columns.append(tag)
-                columns.append(data[idx])
+                columns.append(str(data[idx]))
         except IndexError:
-            ColorTerminal().error("OscAsciiFile.write_line: fewer data than tags given")
+            ColorTerminal().error("OscAsciiFile.write_line: fewer data values than tags given")
 
-        self.write_file.write(self.separation_character.join(columns))
+        self.write_file.write(self._separation_character.join(columns)+"\n")
