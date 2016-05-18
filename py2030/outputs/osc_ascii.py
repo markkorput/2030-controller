@@ -30,16 +30,10 @@ class OscAscii:
 
         # path change?
         if 'path' in options:
-            wasRunning = self.running
+            self.file.set_path(options['path'])
 
-            if wasRunning: # stop current file recording
-                self.stop()
-
-            # new output file (path)
-            self.file = OscAsciiFile(path=options['path'])
-
-            if wasRunning: # continue?
-                self.start()
+        if 'loop' in options:
+            self.file.set_loop(options['loop'])
 
         # interface change?
         if 'interface' in options:

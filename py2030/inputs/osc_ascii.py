@@ -29,7 +29,10 @@ class OscAsciiInput:
             # read next line
             if not self.file.next_line():
                 # reached end of file and we're not looping
+                if self.verbose:
+                    print '[OscAsciiInput] done'
                 self.stop()
+                return
 
         # frame-syncing enabled?
         if self.sync:

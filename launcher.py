@@ -3,7 +3,7 @@ from py2030.utils.color_terminal import ColorTerminal
 from py2030.app import App
 
 class Launcher:
-    def __init__(self, options = {}):
+    def __init__(self, options):
         # attributes
         self._update_children = []
 
@@ -12,7 +12,7 @@ class Launcher:
         self.setup()
 
     def setup(self):
-        self.app = App({'profile': options.profile, 'file': options.file})
+        self.app = App({'profile': options.profile, 'file': options.file, 'loop': options.loop})
         # ColorTerminal().green('py2030 App instance started with profile: ' + self.app.profile)
 
     def destroy(self):
@@ -65,6 +65,7 @@ if __name__ == '__main__':
     parser.add_option('-p', '--profile', dest='profile', default="client")
     # parser.add_option('-c', '--client', dest='client', action="store_true", default=False)
     parser.add_option('-f', '--file', dest='file', default=None)
+    parser.add_option('-l', '--loop', dest='loop', action="store_true", default=False)
     parser.add_option('--install', dest='install', action="store_true", default=False)
     parser.add_option('--bootstrap', dest='bootstrap', action="store_true", default=False)
     parser.add_option('--route-ip', dest="route_ip", action="store_true", help="Route IP address (default: the controller profile's osc_out_ip value from the config file) to specific interface (default: en0)", default=None)

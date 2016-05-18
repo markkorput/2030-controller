@@ -293,6 +293,8 @@ class App:
         if 'osc_ascii_output' in profile_data:
             from py2030.outputs.osc_ascii import OscAscii
             self.osc_ascii_output = OscAscii(profile_data['osc_ascii_output'])
+            if 'file' in self.options:
+                self.osc_ascii_output.configure({'path': self.options['file']})
             self.osc_ascii_output.start()
             del OscAscii
 
@@ -301,6 +303,8 @@ class App:
             self.osc_ascii_input = OscAsciiInput(profile_data['osc_ascii_input'])
             if 'file' in self.options:
                 self.osc_ascii_input.configure({'path': self.options['file']})
+            if 'loop' in self.options:
+                self.osc_ascii_input.configure({'loop': self.options['loop']})
             self.osc_ascii_input.start()
             del OscAsciiInput
 
