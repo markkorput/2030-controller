@@ -124,9 +124,7 @@ class App:
         #
         if 'monitor_config' in profile_data and profile_data['monitor_config']:
             if self.config_file_monitor:
-                if self.config_file_monitor.started:
-                    pass
-                else:
+                if not self.config_file_monitor.started:
                     self.config_file_monitor.start()
             else:
                 from py2030.config_file_monitor import ConfigFileMonitor

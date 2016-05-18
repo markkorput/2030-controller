@@ -33,8 +33,9 @@ class OscAsciiFile:
     def _default_read_file_path(self):
         # return 'data/ascii_osc_file.csv'
         files = os.listdir('data/osc')
-        files = filter(lambda f: f.startswith('recording_') and f.endswith('.csv'), files).sort()
-        return 'data/osc'+files[-1] if files and len(files) > 0 else 'data/osc/clock_spot.csv'
+        files = filter(lambda f: f.startswith('recording_') and f.endswith('.csv'), files)
+        files.sort()
+        return 'data/osc/'+files[-1] if files and len(files) > 0 else 'data/osc/clock_spot.csv'
 
     def start_reading(self):
         self.stop_reading()

@@ -82,7 +82,7 @@ py2030:
 
     oscplayer:
       osc_ascii_input:
-        path: 'auto'
+        path: 'auto' # 'data/osc/clock_spot.csv'
         # loop: true
         # sync: true
         verbose: true
