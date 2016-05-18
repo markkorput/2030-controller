@@ -69,6 +69,18 @@ py2030:
             - ping
             - osc
 
+    oscrecorder:
+      osc_inputs:
+        receiver:
+          ip: '127.0.0.1'
+          port: 2031
+          forwarder: true
+      osc_ascii_output:
+        enabled: true
+        path: auto
+        verbose: true
+        trim: true
+
   midi_triggers:
     48: # C2
       effect:

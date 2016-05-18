@@ -32,7 +32,7 @@ class OscAsciiFile:
         self.stopReading()
 
         try:
-            if not self.path:
+            if not self.path or self.path == 'auto':
                 self.path = 'data/ascii_osc_file.csv'
 
             # self.read_file = open(self.path, 'rb')
@@ -51,7 +51,7 @@ class OscAsciiFile:
     def start_writing(self):
         self.stop_writing()
         try:
-            if not self.path:
+            if not self.path or self.path == 'auto':
                 self.path = 'data/ascii_osc_file_'+datetime.now().strftime('%Y_%m_%d_%H_%M_%S')+'.csv'
 
             # self.write_file = open(self.path, 'w')
@@ -122,15 +122,16 @@ class OscAsciiFile:
         # # 'unpack' 4 binary bytes into float
         # return struct.unpack('f', value)[0]
 
-    def write_line(self, addrs, tags, data):
+    def write_line(self, addrs, tags, data, time=0.0):
         # Line format (each value separated by a comma)
+        # - timestamp
         # - OSC message address string, ie. "/some/message" (without quotes)
         # - param1 type
         # - param1 value
         # - param2 type
         # - param2 value
         # - etc. etc.
-        columns = [addr]
+        columns = [time, addr]
 
         try:
             for idx, tag in tags:

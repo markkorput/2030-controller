@@ -220,6 +220,7 @@ class Osc:
         return 'forwarder' in self.options and self.options['forwarder']
 
     def _forwardOscMessage(self, addr, tags, data, client_address):
+        # print 'py2030.inputs.Osc._forwardOscMessage with', addr, tags, data, client_address
         # ColorTerminal().warn('Got unknown OSC Message {0}'.format((addr, tags, data, client_address)))
         # self.unknownMessageEvent(addr, tags, data, client_address, self)
-        self.interface.oscMessageEvent(addr[1:], data)
+        self.interface.oscMessageEvent(addr, tags, data, client_address)

@@ -84,9 +84,10 @@ class Output:
         if self.outputsType('clip'):
             self.trigger('clip', clip_name)
 
-    def _onOscMessage(self, addr, data):
+    def _onOscMessage(self, addr, tags, data, client_address):
         if self.outputsType('osc'):
-            self.trigger(addr, data)
+            # strip leading slash (which will be added by subclass)
+            self.trigger(addr[1:], data)
 
     def outputsType(self, output_type):
         return not 'outputs' in self.options or self.options['outputs'].count(output_type) > 0
