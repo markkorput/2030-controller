@@ -27,6 +27,7 @@ class App:
         self.interval_joiner = None
         self.config_broadcaster = None
         self.reconfig_downloader = None
+        self.syncer = None
 
         # configuration
         self.options = {}
@@ -270,17 +271,53 @@ class App:
                 ColorTerminal().yellow('set joiner interval to {0}'.format(interval))
             else:
                 from py2030.client_side.interval_joiner import IntervalJoiner
-                self.interval_joiner = IntervalJoiner({'interval': interval, 'data': {'ip': self._ip(), 'port': 2030}}) # TODO; determine port from osc listeners?
+                # TODO; determine port from osc listeners?
+                self.interval_joiner = IntervalJoiner({'interval': interval, 'data': {'ip': self._ip(), 'port': self._join_data_port(), 'hostname': self._hostname()}})
                 ColorTerminal().yellow('started joiner interval at {0}'.format(interval))
                 del IntervalJoiner
 
-    def _ip(self):
-        if hasattr(self, '__ip_address'):
-            return self.__ip_address
+        #
+        # Syncer
+        #
+        if 'syncer' in profile_data:
+            from py2030.syncer import Syncer
+            self.syncer = Syncer(profile_data['syncer'])
+            self.syncer.setup()
+            del Syncer
+
+        #
+        # OscAscii recorder output
+        #
+        if 'osc_ascii_output' in profile_data:
+            from py2030.outputs.osc_ascii import OscAscii
+            self.osc_ascii_output = OscAscii(profile_data['osc_ascii_output'])
+            self.osc_ascii_output.start()
+            del OscAscii
+
+    # returns the port number to be send with the join dataChangeEvent
+    # (this will be our incoming OSC port)
+    def _join_data_port(self):
+        # find the first osc input (listener) that accepts 'acks'
+        for osc_input in self.osc_inputs:
+            if osc_input.receivesType('ack'):
+                return osc_input.port()
+        # default
+        return 2030
+
+    def _host_info(self):
+        if hasattr(self, '__host_info'):
+            return self.__host_info
         import socket
-        self.__ip_address = socket.gethostbyname(socket.gethostname())
-        del socket
-        return self.__ip_address
+        hostname = socket.gethostname()
+        ip = socket.gethostbyname(hostname)
+        self.__host_info = {'hostname': hostname, 'ip': ip}
+        return self.__host_info
+
+    def _ip(self):
+        return self._host_info()['ip']
+
+    def _hostname(self):
+        return self._host_info()['hostname']
 
     def _getJoinerOscOutProfileData(self):
         # find osc output profile for joining clients
@@ -294,19 +331,20 @@ class App:
     def _onJoin(self, join_data):
         joined_config = self._getJoinerOscOutProfileData()
 
-        if not joined_config: # osc to joiners not enabled
-            ColorTerminal().warn('osc-to-joiners not enabled')
+        if not joined_config: # osc to joiners not enabled (the case for clients)
+            # ColorTerminal().warn('osc-to-joiners not enabled')
             return
 
-        # check we got all required params
-        if not 'ip' in join_data or not 'port' in join_data:
-            ColorTerminal().warn('Got incomplete join data')
+        # check we got all required params. TODO; require hostname as well?
+        if not 'ip' in join_data or not 'port' in join_data or not 'hostname' in join_data:
+            ColorTerminal().warn('Got incomplete join data (require ip, port and hostname)')
             print join_data
             return
 
         # don't register if already outputting to this address/port
         for out in self.osc_outputs:
             if out.host() == join_data['ip'] and out.port() == join_data['port']:
+                # TODO trigger ackEvent on interface instead, with client id?
                 out.trigger('ack', [])
                 ColorTerminal().warn('Got join with already registered osc-output specs')
                 print join_data
@@ -315,6 +353,7 @@ class App:
         # don't register if already outputting to this address/port
         for out in self.joined_osc_outputs:
             if out.host() == join_data['ip'] and out.port() == join_data['port']:
+                # TODO trigger ackEvent on interface instead, with client id?
                 out.trigger('ack', [])
                 ColorTerminal().warn('Got join with already registered osc-output specs')
                 print join_data
@@ -322,16 +361,22 @@ class App:
 
         # prep params
         joined_config['ip'] = join_data['ip']
+        joined_config['client_id'] = join_data['hostname']
         if not 'port' in joined_config or joined_config['port'] == 'joiner':
             joined_config['port'] = join_data['port']
 
         from py2030.outputs.osc import Osc as OscOutput
         osc_out = OscOutput(joined_config)
+        # TODO trigger ackEvent on interface instead, with client id?
         osc_out.trigger('ack', [])
         self.joined_osc_outputs.append(osc_out) # auto-starts
         del OscOutput
 
     def _onAck(self):
+        # controller side;
+        # not triggered on controller-side (for now)
+
+        # client side
         if self.interval_joiner and self.interval_joiner.running:
             ColorTerminal().yellow('Got ackEvent, stopping interval joiner')
             self.interval_joiner.stop()

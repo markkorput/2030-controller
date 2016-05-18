@@ -31,6 +31,7 @@ class Output:
                 self.interface.effectEvent -= self._onEffect
                 self.interface.joinEvent -= self._onJoin
                 self.interface.clipEvent -= self._onClip
+                self.interface.oscMessageEvent -= self._onOscMessage
 
             # set interface as attribute
             self.interface = options['interface']
@@ -42,6 +43,7 @@ class Output:
                 self.interface.effectEvent += self._onEffect
                 self.interface.joinEvent += self._onJoin
                 self.interface.clipEvent += self._onClip
+                self.interface.oscMessageEvent += self._onOscMessage
 
         if ('accept_types' in options or 'ignore_types' in options) and 'accept_types' in self.options and 'ignore_types' in self.options:
             both = list(set(self.options['accept_types']) & set(self.options['ignore_types']))
@@ -67,20 +69,25 @@ class Output:
         pass
 
     def _onGenericEvent(self, effect_data):
-        if self._outputType('events'):
+        if self.outputsType('event'):
             self.trigger('event', effect_data)
 
     def _onEffect(self, effect_data):
-        if self._outputType('effects'):
+        if self.outputsType('effect'):
             self.trigger('effect', effect_data)
 
     def _onJoin(self, join_data):
-        if self._outputType('joins'):
+        if self.outputsType('join'):
             self.trigger('join', join_data)
 
     def _onClip(self, clip_name):
-        if self._outputType('clips'):
+        if self.outputsType('clip'):
             self.trigger('clip', clip_name)
 
-    def _outputType(self, output_type):
+    def _onOscMessage(self, addr, tags, data, client_address):
+        if self.outputsType('osc'):
+            # strip leading slash (which will be added by subclass)
+            self.trigger(addr[1:], data)
+
+    def outputsType(self, output_type):
         return not 'outputs' in self.options or self.options['outputs'].count(output_type) > 0

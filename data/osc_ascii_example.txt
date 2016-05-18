@@ -1,0 +1,11 @@
+# format (all values are comma-separated)
+# timestamp (float, in seconds)
+# OSC message address (string)
+# param1 type (character; i for integer, f for float, s for string and b for binary blob)
+# param1 value
+# param2 types
+# param2 value
+# etc. etc.
+#
+# example:
+0.0,/addr,i,1,f,1.5,s,the end

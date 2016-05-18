@@ -2,7 +2,11 @@ py2030:
   profiles:
     client:
       monitor_config: false
-      # midi_input_port: 1
+      download_reconfig: true
+      join_interval: 2.0
+      syncer:
+        pong: true
+        ping: false
       osc_outputs:
         # local:
         #   ip: '127.0.0.1'
@@ -10,11 +14,11 @@ py2030:
         #   # verbose: true
         controller_joiner:
           ip: '127.0.0.1'
-          port: 2031
+          port: 2030
           outputs:
-            - joins
+            - join
+            - pong
           verbose: true
-      join_interval: 2.0
 
       osc_inputs:
         self:
@@ -23,78 +27,59 @@ py2030:
           shared: false
           verbose: true
           inputs:
-            - effects
-            - events
-            - clips
-        # local:
-        #   ip: '127.0.0.1'
-        #   port: 2030
-        #   shared: false
-        #   verbose: true
-        #   inputs:
-        #     - effects
-        #     - events
-        #     - clips
-        # multi:
-        #   ip: '224.0.20.30'
-        #   port: 2030
-        #   shared: true
-        #   inputs:
-        #     - effects
-        #     - events
-        #     - clips
-      # http_server_port: 2032
-      # broadcast_interval: 2.0
-      # broadcast_reconfig: true
-      download_reconfig: true
+            - ack
+            - effect
+            - event
+            - clip
+            - ping
 
     controller:
       monitor_config: true
       # midi_input_port: 0
+      # http_server_port: 2031
+      # broadcast_interval: 2.0
+      # broadcast_reconfig: true
+      # download_reconfig: true
+      syncer:
+        pong: false
+        ping: true
+
       osc_inputs:
         client_join_and_clip_receiver:
           ip: '127.0.0.1'
-          port: 2031
+          port: 2030
           inputs:
-            - joins
-            - clips
+            - join
+            - clip
+            - pong
           verbose: true
+        forwarder_for_all_osc_messages:
+          ip: '127.0.0.1'
+          port: 2031
+          forwarder: true
       osc_outputs:
         to_joiners:
           ip: 'joiner'
           port: 'joiner'
           verbose: true
           outputs:
-            - events
-            - effects
-            - clips
-      # osc_outputs:
-        # local:
-        #   ip: '127.0.0.1'
-        #   port: 2030
-        #   verbose: true
-        # multi:
-        #   ip: '224.0.20.30'
-        #   port: 2030
-        #   verbose: true
-        # lancast:
-        #   ip: '192.168.3.255'
-        #   port: 2030
-        # bcast:
-        #   ip: '0.0.0.0'
-        #   port: 2040
-        #   verbose: true
-        # bcast2:
-        #   ip: '255.255.255.255'
-        #   port: 2030
-        # test1:
-        #   ip: '192.168.1.10'
-        #   port: 2030
-        #   verbose: true
-      # http_server_port: 2031
-      # broadcast_interval: 2.0
-      # broadcast_reconfig: true
-      # download_reconfig: true
+            - event
+            - effect
+            - clip
+            - ping
+            - osc
+
+    oscrecorder:
+      osc_inputs:
+        receiver:
+          ip: '127.0.0.1'
+          port: 2031
+          forwarder: true
+      osc_ascii_output:
+        enabled: true
+        path: auto
+        verbose: true
+        trim: true
 
   midi_triggers:
     48: # C2
@@ -109,13 +94,3 @@ py2030:
         r: 0
         g: 255
         b: 0
-  clients:
-    1:
-      ip: '192.168.1.13'
-      name: 'local-tester'
-    2:
-      ip: '192.168.1.13'
-      name: 'local-tester2'
-    3:
-      ip: '192.168.1.13'
-      name: 'local-tester3'

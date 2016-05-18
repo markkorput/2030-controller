@@ -35,11 +35,22 @@ class Interface:
         self.newModelEvent = Event()
 
         # network distributed events
-        self.genericEvent = Event()
-        self.effectEvent = Event()
+        self.genericEvent = Event() # for prototyping
+        self.effectEvent = Event() # for triggering realtime visual effects
+        # joinEvent;
+        # clients; triggered to ask to join the network
+        # controller; triggered when a join request comes in
         self.joinEvent = Event()
-        self.clipEvent = Event()
+        # triggered on client side when an ack message is received in response to join request
         self.ackEvent = Event()
+        # triggered on both controller and clients when ableton
+        # stars a new clip (controller will forward this event over the network)
+        self.clipEvent = Event()
+        # ping/pong for syncing
+        self.pingEvent = Event() # triggered to ping/when being pinged
+        self.pongEvent = Event() # triggered to pong/when being ponged
+        # triggered when an Osc message came in that simply has to be forwarded to all connected clients
+        self.oscMessageEvent = Event()
 
         # configuration
         self.options = {}
