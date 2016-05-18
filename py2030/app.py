@@ -299,6 +299,8 @@ class App:
         if 'osc_ascii_input' in profile_data:
             from py2030.inputs.osc_ascii import OscAsciiInput
             self.osc_ascii_input = OscAsciiInput(profile_data['osc_ascii_input'])
+            if 'file' in self.options:
+                self.osc_ascii_input.configure({'path': self.options['file']})
             self.osc_ascii_input.start()
             del OscAsciiInput
 

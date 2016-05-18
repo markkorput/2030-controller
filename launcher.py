@@ -9,13 +9,10 @@ class Launcher:
 
         # configuration
         self.options = options
-
-        # autoStart is True by default
-        if not 'setup' in options or options['setup']:
-            self.setup()
+        self.setup()
 
     def setup(self):
-        self.app = App({'profile': options.profile})
+        self.app = App({'profile': options.profile, 'file': options.file})
         # ColorTerminal().green('py2030 App instance started with profile: ' + self.app.profile)
 
     def destroy(self):
@@ -52,7 +49,7 @@ def main(options, args):
         # we're done
         exit(0)
 
-    launcher = Launcher({'profile': options.profile})
+    launcher = Launcher(options)
 
     try:
         while True:
@@ -66,7 +63,8 @@ if __name__ == '__main__':
     from optparse import OptionParser
     parser = OptionParser()
     parser.add_option('-p', '--profile', dest='profile', default="client")
-    parser.add_option('-c', '--client', dest='client', action="store_true", default=False)
+    # parser.add_option('-c', '--client', dest='client', action="store_true", default=False)
+    parser.add_option('-f', '--file', dest='file', default=None)
     parser.add_option('--install', dest='install', action="store_true", default=False)
     parser.add_option('--bootstrap', dest='bootstrap', action="store_true", default=False)
     parser.add_option('--route-ip', dest="route_ip", action="store_true", help="Route IP address (default: the controller profile's osc_out_ip value from the config file) to specific interface (default: en0)", default=None)
