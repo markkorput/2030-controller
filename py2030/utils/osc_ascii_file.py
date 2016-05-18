@@ -103,7 +103,7 @@ class OscAsciiFile:
 
         self.last_line = line
         # parse line into attributes; first separate the line into csv columns
-        columns = line.split(self._separation_character)
+        columns = line.strip().split(self._separation_character)
         # float timestamp
         self.last_timestamp = float(columns[0])
         # string address

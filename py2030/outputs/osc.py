@@ -95,9 +95,9 @@ class Osc(Output):
     def output(self, change_model):
         self._sendMessage('/change', [json.dumps(change_model.data)])
 
-    def _sendMessage(self, tag, data=[]):
+    def _sendMessage(self, addr, data=[]):
         msg = OSC.OSCMessage()
-        msg.setAddress(tag) # set OSC address
+        msg.setAddress(addr) # set OSC address
 
         for item in data:
             msg.append(item)
@@ -115,8 +115,10 @@ class Osc(Output):
         self.messageEvent(msg, self)
 
         if self.verbose:
-            print '[osc-out {0}:{1}]: '.format(self.host(), self.port()), tag, data
-
+            print '[osc-out {0}:{1}]:'.format(self.host(), self.port()), addr, data
 
     def trigger(self, event, data):
         self._sendMessage('/'+event, [json.dumps(data)])
+
+    def sendMessage(self, addr, data):
+        self._sendMessage(addr, data)
