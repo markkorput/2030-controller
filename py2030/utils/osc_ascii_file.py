@@ -1,5 +1,5 @@
 from py2030.utils.color_terminal import ColorTerminal
-# from py2030.utils.event import Event
+from py2030.utils.event import Event
 
 import struct, os
 from datetime import datetime
@@ -25,17 +25,23 @@ class OscAsciiFile:
         self._separation_character = ','
 
         # events
-        # self.loopEvent = Event()
+        self.loopEvent = Event()
 
     def __del__(self):
         self.stop()
+
+    def _default_read_file_path(self):
+        # return 'data/ascii_osc_file.csv'
+        files = os.listdir('dir')
+        files = filter(lambda f: f.startswith('ascii_osc_file_') and f.endswith('.csv'), files).sort()
+        return fs[-1] if len(fs) > 0 else 'data/ascii_osc_file.csv'
 
     def start_reading(self):
         self.stopReading()
 
         try:
             if not self.path or self.path == 'auto':
-                self.path = 'data/ascii_osc_file.csv'
+                self.path = self._default_read_file_path()
 
             # self.read_file = open(self.path, 'rb')
             self.read_file = open(self.path, 'r')
@@ -73,6 +79,9 @@ class OscAsciiFile:
         self.stop_reading()
         self.stop_writing()
 
+    def set_path(self, path):
+        self.path = path
+
     def set_loop(self, loop):
         self.loop = loop
 
@@ -87,7 +96,7 @@ class OscAsciiFile:
 
             # rewind file handle te start of file
             self.read_file.seek(0)
-            # self.loopEvent(self)
+            self.loopEvent(self)
             # try again
             # TODO; do check to avoid endless recursion for empty files?
             return self.next_line()
