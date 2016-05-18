@@ -28,6 +28,7 @@ class App:
         self.config_broadcaster = None
         self.reconfig_downloader = None
         self.syncer = None
+        self.osc_ascii_input = None
 
         # configuration
         self.options = {}
@@ -109,6 +110,9 @@ class App:
 
         if self.interval_broadcast:
             self.interval_broadcast.update()
+
+        if self.osc_ascii_input:
+            self.osc_ascii_input.update()
 
     def _apply_config(self, config_file):
         profile_data = config_file.get_value('py2030.profiles.'+self.profile)
@@ -293,6 +297,12 @@ class App:
             self.osc_ascii_output = OscAscii(profile_data['osc_ascii_output'])
             self.osc_ascii_output.start()
             del OscAscii
+
+        if 'osc_ascii_input' in profile_data:
+            from py2030.inputs.osc_ascii import OscAsciiInput
+            self.osc_ascii_input = OscAsciiInput(profile_data['osc_ascii_input'])
+            self.osc_ascii_input.start()
+            del OscAsciiInput
 
     # returns the port number to be send with the join dataChangeEvent
     # (this will be our incoming OSC port)

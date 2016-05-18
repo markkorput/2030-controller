@@ -32,23 +32,23 @@ class OscAsciiFile:
 
     def _default_read_file_path(self):
         # return 'data/ascii_osc_file.csv'
-        files = os.listdir('dir')
-        files = filter(lambda f: f.startswith('ascii_osc_file_') and f.endswith('.csv'), files).sort()
-        return fs[-1] if len(fs) > 0 else 'data/ascii_osc_file.csv'
+        files = os.listdir('data/osc')
+        files = filter(lambda f: f.startswith('recording_') and f.endswith('.csv'), files).sort()
+        return 'data/osc'+files[-1] if files and len(files) > 0 else 'data/osc/clock_spot.csv'
 
     def start_reading(self):
-        self.stopReading()
+        self.stop_reading()
 
-        try:
-            if not self.path or self.path == 'auto':
-                self.path = self._default_read_file_path()
+        # try:
+        if self.path == None or self.path == 'auto':
+            self.path = self._default_read_file_path()
 
-            # self.read_file = open(self.path, 'rb')
-            self.read_file = open(self.path, 'r')
-            ColorTerminal().success("OscAsciiFile opened: %s" % self.path)
-        except:
-            ColorTerminal().fail("OscAsciiFile couldn't be opened: %s" % self.path)
-            self.read_file = None
+        # self.read_file = open(self.path, 'rb')
+        self.read_file = open(self.path, 'r')
+        ColorTerminal().success("OscAsciiFile opened: %s" % self.path)
+        # except:
+        #     ColorTerminal().fail("OscAsciiFile couldn't be opened: %s" % self.path)
+        #     self.read_file = None
 
     def stop_reading(self):
         if self.read_file:
@@ -60,7 +60,7 @@ class OscAsciiFile:
         self.stop_writing()
         try:
             if not self.path or self.path == 'auto':
-                self.path = 'data/ascii_osc_file_'+datetime.now().strftime('%Y_%m_%d_%H_%M_%S')+'.csv'
+                self.path = 'data/osc/recording_'+datetime.now().strftime('%Y_%m_%d_%H_%M_%S')+'.csv'
 
             # self.write_file = open(self.path, 'wb')
             self.write_file = open(self.path, 'w')

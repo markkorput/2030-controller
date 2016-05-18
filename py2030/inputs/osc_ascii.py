@@ -21,7 +21,7 @@ class OscAsciiInput:
             self.stop()
 
     def update(self):
-        if not self.isRunning():
+        if not self.running:
             return
 
         # we're not waiting for loaded frame to go?
@@ -49,11 +49,12 @@ class OscAsciiInput:
         self.interface.oscMessageEvent(self.file.last_addr, self.file.last_tags, self.file.last_data, None)
         self.message_count += 1
         if self.verbose:
+            print '[OscAsciiInput] message count:', self.message_count
 
     def start(self):
         if self.running:
             self.stop()
-        self.natnet_file.loopEvent += self._onLoop
+        self.file.loopEvent += self._onLoop
         # self.frameSyncTimeShift = 0.0
         self.waitingForSync = False
         self.file.start_reading()
