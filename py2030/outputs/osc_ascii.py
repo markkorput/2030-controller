@@ -73,8 +73,10 @@ class OscAscii:
         if self.running:
             if not self.start_time:
                 self.start_time = datetime.now()
+                t = 0.0
+            else:
+                t = (datetime.now() - self.start_time).total_seconds()
 
-            t = (datetime.now() - self.start_time).total_seconds()
             self.file.write_line(addr, tags, data, t)
             self.line_count += 1
             if self.verbose:
