@@ -15,9 +15,11 @@ class OscAsciiFile:
         self.write_file = None
 
         # last read frame info
-        self.currentFrame = None
-        self.currentFrameTime = None
-        self.currentFrameIndex = -1
+        self.last_line = None
+        self.last_timestamp = None
+        self.last_addr = None
+        self.last_tags = None
+        self.last_data = None
 
         # other attribute(s)
         self._separation_character = ','
@@ -74,54 +76,51 @@ class OscAsciiFile:
     def set_loop(self, loop):
         self.loop = loop
 
-    def nextFrame(self):
-        pass
-        # bytecount = self._readFrameSize() # int: bytes
-        # self.currentFrameTime = self._readFrameTime() # float: seconds
-        #
-        # if bytecount == None or self.currentFrameTime == None:
-        #     return None
-        #
-        # self.currentFrame = self.read_file.read(bytecount)
-        # self.currentFrameIndex += 1
-        #
-        # return self.currentFrame
+    def next_line(self):
+        # read a line from the file
+        line = self.read_file.readline()
 
-    def _readFrameSize(self):
-        pass
-        # # int is 4 bytes
-        # value = self.read_file.read(4)
-        #
-        # # end-of-file?
-        # if not value:
-        #     if not self.loop:
-        #         return None
-        #
-        #     # reset file handle
-        #     self.read_file.seek(0)
-        #     self.currentFrame = None
-        #     self.currentFrameTime = None
-        #     self.currentFrameIndex = -1
-        #     # notify
-        #     self.loopEvent(self)
-        #     # try again
-        #     return self._readFrameSize()
-        #
-        # # 'unpack' 4 binary bytes into integer
-        # return struct.unpack('i', value)[0]
+        # end-of-file?
+        if line == '':
+            if not self.loop:
+                return False
 
-    def _readFrameTime(self):
-        pass
-        # # float of 4 bytes
-        # value = self.read_file.read(4)
-        #
-        # # end-of-file?
-        # if not value:
-        #     # TODO; raise format error?
-        #     return None
-        #
-        # # 'unpack' 4 binary bytes into float
-        # return struct.unpack('f', value)[0]
+            # rewind file handle te start of file
+            self.read_file.seek(0)
+            # self.loopEvent(self)
+            # try again
+            # TODO; do check to avoid endless recursion for empty files?
+            return self.next_line()
+
+        self.last_line = line
+        # parse line into attributes; first separate the line into csv columns
+        columns = line.split(self._separation_character)
+        # float timestamp
+        self.last_timestamp = float(columns[0])
+        # string address
+        self.last_addr = columns[1]
+        # params (param types and param values)
+        idx = 2
+        count = len(columns)
+        self.last_tags = []
+        self.last_data = []
+
+        while idx < (count-1): # need two more columns each iteration
+            tag = columns[idx]
+            value = columns[idx+1]
+            self.last_tags.append(tag)
+            if tag == 'f':
+                value = float(value)
+            elif tag == 'i':
+                value = int(value)
+            # elif tag == 'b':
+            #     ColorTerminal().warn("[OscAsciiFile] 'b' tag encountered; currently not supported")
+            # else: # if tag =='s' ## assume tring
+            #     value = str(value)
+            self.last_data.append(value)
+            idx += 2
+
+        return True
 
     def write_line(self, addr, tags, data, time=0.0):
         # Line format (each value separated by a comma)
