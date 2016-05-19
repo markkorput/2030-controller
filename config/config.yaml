@@ -127,8 +127,8 @@ py2030:
             - ping
             - osc
         playbackerRaspi:
-          ip: '192.168.2.14'
-          port: 2031
+          ip: '192.168.2.15'
+          port: 2030
           verbose: true
           outputs:
             - event
