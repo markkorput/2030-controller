@@ -1,10 +1,13 @@
 py2030:
-  version: 0.1.0
+  version: 0.0.0
 
   profiles:
     client:
       monitor_config: false
-      download_reconfig: true
+      downloader:
+        enabled: true
+        reconfig: true
+        version: true
       join_interval: 5.0
       syncer:
         pong: true
@@ -33,7 +36,10 @@ py2030:
 
     test:
       monitor_config: false
-      download_reconfig: true
+      downloader:
+        enabled: true
+        reconfig: true
+        version: true
       join_interval: 5.0
       syncer:
         pong: true

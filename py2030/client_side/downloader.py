@@ -1,10 +1,9 @@
+from py2030.utils.color_terminal import ColorTerminal
 from py2030.interface import Interface
 from py2030.config_file import ConfigFile
 from py2030.utils.event import Event
 
-import urllib2
-
-class ReconfigDownloader:
+class Downloader:
     def __init__(self, options = {}):
         # params
         self.options = options
@@ -19,10 +18,16 @@ class ReconfigDownloader:
     def __del__(self):
         self.destroy()
 
+    def configure(self, opts):
+        self.options.update(opts)
+
     def setup(self):
         if not self._onGenericEvent in self.interface.genericEvent:
             print 'ReconfigDownloader registered'
             self.interface.genericEvent += self._onGenericEvent
+
+        if not self._onAck in self.interface.ackEvent:
+            self.interface.ackEvent += self._onAck
 
     def destroy(self):
         if self._onGenericEvent in self.interface.genericEvent:
@@ -38,6 +43,8 @@ class ReconfigDownloader:
         # print '[ReconfigDownloader] reconfig event:', data
         url = data['url'] if 'url' in data and data['url'] else 'http://127.0.0.1:2031/config.yaml'
 
+        import urllib2
+
         try:
             response = urllib2.urlopen(url)
         except urllib2.URLError as err:
@@ -51,3 +58,34 @@ class ReconfigDownloader:
         self.config_file.write(content)
         # print 'Todo; apply new config settings at runtime'
         self.configUpdateEvent(self)
+
+    def _onAck(self, data):
+        my_version = self.config_file.get_value('py2030.version')
+        if not 'version' in data or data['version'] == my_version:
+            return
+
+        ColorTerminal().warn('ack response gave different version: ' + data['version'])
+
+        if not 'version_dowload_url' in data:
+            ColorTerminal().warn("didn't get version-download-url, staying on current version: " + my_version)
+            return
+
+        import urllib, os # subprocess
+
+        target_path = 'data/py2030-'+data['version']+'.tar.gz'
+        if os.path.isfile(target_path):
+            print 'other version already available'
+            # TODO; load other version
+
+        # blocking
+        # subprocess.call(['wget', data['version_download_url'])
+
+        print 'Downloading app version: ', data['version_download_url']
+        urllib.urlretrieve(data['version_download_url'], target_path)
+
+
+        if os.path.isfile(target_path):
+            print 'Download complete'
+        else:
+            print 'Download failed'
+            return

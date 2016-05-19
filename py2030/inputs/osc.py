@@ -214,7 +214,7 @@ class Osc:
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
-        self.interface.ackEvent()
+        self.interface.ackEvent(json.loads(data[0]))
 
     def receivesType(self, typ):
         return not 'inputs' in self.options or self.options['inputs'].count(typ) > 0

@@ -28,7 +28,7 @@ class App:
         self.interval_broadcast = None
         self.interval_joiner = None
         self.config_broadcaster = None
-        self.reconfig_downloader = None
+        self.downloader = None
         self.syncer = None
         self.osc_ascii_input = None
 
@@ -247,18 +247,19 @@ class App:
         #
         # Reconfig Downloader
         #
-        enabled = profile_data['download_reconfig'] if 'download_reconfig' in profile_data else None
-        if enabled:
-            if self.reconfig_downloader:
-                self.reconfig_downloader.setup()
+        if 'downloader' in profile_data:
+            opts = profile_data['downloader']
+            if self.downloader:
+                self.downloader.configure(opts)
             else:
-                from py2030.client_side.reconfig_downloader import ReconfigDownloader
-                self.reconfig_downloader = ReconfigDownloader()
-                self.reconfig_downloader.setup()
-                del ReconfigDownloader
+                from py2030.client_side.downloader import Downloader
+                self.downloader = Downloader(opts)
+                self.downloader.setup()
+                del Downloader
         else:
-            if self.reconfig_downloader:
-                self.reconfig_downloader.destroy()
+            if self.downloader:
+                self.downloader.destroy()
+                self.downloader = None
 
         #
         # Interval broadcaster
@@ -449,7 +450,7 @@ class App:
         self.joined_osc_outputs.append(osc_out) # auto-starts
         del OscOutput
 
-    def _onAck(self):
+    def _onAck(self, data):
         # controller side;
         # not triggered on controller-side (for now)
 
@@ -458,3 +459,5 @@ class App:
             ColorTerminal().yellow('Got ackEvent, stopping interval joiner')
             self.interval_joiner.stop()
         self.joined = True
+
+        # self.downloader will take care of the rest
