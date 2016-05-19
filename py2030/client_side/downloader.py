@@ -3,6 +3,8 @@ from py2030.interface import Interface
 from py2030.config_file import ConfigFile
 from py2030.utils.event import Event
 
+import os
+
 class Downloader:
     def __init__(self, options = {}):
         # params
@@ -14,6 +16,7 @@ class Downloader:
 
         # event(s)
         self.configUpdateEvent = Event()
+        self.newVersionEvent = Event()
 
     def __del__(self):
         self.destroy()
@@ -70,23 +73,43 @@ class Downloader:
             ColorTerminal().warn("didn't get version-download-url, staying on current version: " + my_version)
             return
 
-        import urllib, os # subprocess
+        import urllib
 
         target_path = 'data/py2030-'+data['version']+'.tar.gz'
         if os.path.isfile(target_path):
             print 'other version already available'
-            # TODO; load other version
-            return
-
-        # blocking
-        # subprocess.call(['wget', data['version_download_url'])
-
-        print 'Downloading app version: ', data['version_download_url']
-        urllib.urlretrieve(data['version_download_url'], target_path)
-
-
-        if os.path.isfile(target_path):
-            print 'Download complete'
         else:
-            print 'Download failed'
-            return
+            # blocking
+            # subprocess.call(['wget', data['version_download_url'])
+
+            print 'Downloading app version: ', data['version_download_url']
+            urllib.urlretrieve(data['version_download_url'], target_path)
+
+            if os.path.isfile(target_path):
+                print 'Download complete'
+            else:
+                print 'Download failed, continuing on current version'
+                return
+
+        self._applyVersionFile(target_path)
+
+        print('Downloader applying version to config file')
+        self.config_file.load() # make sure it's loaded with current content
+        self.config_file.set_version(data['version'])
+        self.config_file.write_yaml(self.config_file.data)
+
+        print 'Downloader triggering newVersionEvent'
+        self.newVersionEvent(data['version'], self)
+
+    def _applyVersionFile(self, path):
+        command = 'tar -zxf '+path+' -C data'
+        print '[Downloader] extracting new version with', command
+        os.system(command)
+
+        command = 'mv py2030 py2030.bak'
+        print '[Downloader] backing up existing module with', command
+        os.system(command)
+
+        command = 'mv data/py2030 ./'
+        print '[Downloader] moving downloaded module into position with', command
+        os.system(command)

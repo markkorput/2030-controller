@@ -110,6 +110,20 @@ class ConfigFile:
             data = data[name]
         return data
 
+    # def set_value(self, path, value):
+    #     if not self.data:
+    #         self.data = {}
+    #
+    #     parts = path.split('.')
+    #     for part in parts:
+
+    def set_version(self, version):
+        if not self.data:
+            self.data = {}
+        if not 'py2030' in self.data:
+            self.data['py2030'] = {}
+        self.data['py2030']['version'] = version
+
     def backup(self, backup_path=None):
         if not backup_path:
             backup_path = self.path() + '.bak.' + time.strftime('%Y%m%d.%H%M%S')
