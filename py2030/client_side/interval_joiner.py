@@ -17,7 +17,7 @@ class IntervalJoiner:
     def start(self):
         # schedule first broadcast; immediately
         self.startTime = datetime.now()
-        self.nextBroadcastTime = self.interval()
+        self.nextBroadcastTime = 0.0 #self.interval()
         self.time = 0.0
         self.running = True
 

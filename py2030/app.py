@@ -400,7 +400,7 @@ class App:
         for out in self.osc_outputs:
             if out.host() == join_data['ip'] and out.port() == join_data['port']:
                 # TODO trigger ackEvent on interface instead, with client id?
-                out.trigger('ack', [])
+                out.sendMessage('/ack', [])
                 ColorTerminal().warn('Got join with already registered osc-output specs')
                 print join_data
                 return
