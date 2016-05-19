@@ -3,11 +3,13 @@ from py2030.interface import Interface
 from py2030.config_file import ConfigFile
 
 import copy
+from datetime import datetime
 
 # from py2030.client_side.client_info import ClientInfo
 
 class App:
     def __init__(self, options = {}):
+        print "\n\n--------------------------------------- PY2030 -- " + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         # attributes
         self.config_file = ConfigFile.instance()
         self.profile = 'client'
