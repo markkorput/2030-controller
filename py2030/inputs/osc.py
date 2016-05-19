@@ -92,12 +92,15 @@ class Osc:
 
     def _connect(self):
         if self.connected:
-            ColorTerminal().warning('py2030.inputs.osc.Osc - Already connected')
+            ColorTerminal().warn('py2030.inputs.osc.Osc - Already connected')
             return False
 
         try:
             # create server instance
             if self.shared_port():
+                self.osc_server = OscBroadcastServer((self.host(), self.port()))
+            elif self.host().endswith('.255'):
+                ColorTerminal().warn('broadcast IP detected, using broadcast server')
                 self.osc_server = OscBroadcastServer((self.host(), self.port()))
             else:
                 self.osc_server = OSCServer((self.host(), self.port()))

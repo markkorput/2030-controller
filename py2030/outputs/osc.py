@@ -94,6 +94,11 @@ class Osc(Output):
     def _connect(self):
         try:
             self.client = OSC.OSCClient()
+
+            if self.host().endswith('.255'):
+                ColorTerminal().warn('Osc output detected broadcast IP')
+                self.client.socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+
             self.client.connect((self.host(), self.port()))
         except OSC.OSCClientError as err:
             ColorTerminal().fail("OSC connection failure: {0}".format(err))

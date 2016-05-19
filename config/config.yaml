@@ -34,11 +34,33 @@ py2030:
             - event
             - clip
             - ping
+        broadcast:
+          ip: '192.168.2.255'
+          port: 2030
+          # shared: false
+          verbose: true
+          inputs:
+            - ack
+            - effect
+            - event
+            - clip
+            - ping
+        broadcast2:
+          ip: ''
+          port: 2033
+          # shared: false
+          verbose: true
+          inputs:
+            - ack
+            - effect
+            - event
+            - clip
+            - ping
 
     test:
       monitor_config: false
       download_reconfig: true
-      join_interval: 5.0
+      # join_interval: 5.0
       syncer:
         pong: true
         ping: false
@@ -51,11 +73,12 @@ py2030:
             - join
             - pong
           verbose: true
+
       osc_inputs:
-        self:
-          ip: 'self'
-          port: 2025
-          shared: false
+        broadcast:
+          ip: '' #'''192.168.2.255'
+          port: 2033
+          # shared: false
           verbose: true
           inputs:
             - ack
@@ -63,12 +86,23 @@ py2030:
             - event
             - clip
             - ping
+        # self:
+        #   ip: 'self'
+        #   port: 2025
+        #   shared: false
+        #   verbose: true
+        #   inputs:
+        #     - ack
+        #     - effect
+        #     - event
+        #     - clip
+        #     - ping
 
     controller:
       monitor_config: true
       # midi_input_port: 0
       # http_server_port: 2040
-      broadcast_interval: 10.0
+      broadcast_interval: 3.0
       broadcast_reconfig: true
       # download_reconfig: true
       syncer:
@@ -90,8 +124,8 @@ py2030:
           forwarder: true
       osc_outputs:
         broadcast:
-          ip: '192.168.2.255'
-          port: 2030
+          ip: '255.255.255.255' #'192.168.2.255'
+          port: 2033
           verbose: true
           outputs:
             - event
