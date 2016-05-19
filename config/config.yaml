@@ -1,17 +1,17 @@
 py2030:
+  # version must have single quotes marks!
+  version: '0.1.0'
   profiles:
     client:
-      monitor_config: false
-      download_reconfig: true
+      downloader:
+        enabled: true
+        reconfig: true
+        version: true
       join_interval: 5.0
       syncer:
         pong: true
         ping: false
       osc_outputs:
-        # local:
-        #   ip: '127.0.0.1'
-        #   port: 2029
-        #   # verbose: true
         controller_joiner:
           # ip: '192.168.2.1'
           hostname: 'MarkBookPro.Home'
@@ -35,7 +35,10 @@ py2030:
 
     test:
       monitor_config: false
-      download_reconfig: true
+      downloader:
+        enabled: true
+        reconfig: true
+        version: true
       join_interval: 5.0
       syncer:
         pong: true
@@ -49,6 +52,7 @@ py2030:
             - join
             - pong
           verbose: true
+
       osc_inputs:
         self:
           ip: 'self'
@@ -63,10 +67,10 @@ py2030:
             - ping
 
     controller:
-      monitor_config: true
+      # monitor_config: true
       # midi_input_port: 0
-      # http_server_port: 2040
-      # broadcast_interval: 2.0
+      http_server_port: 2040
+      # broadcast_interval: 3.0
       broadcast_reconfig: true
       # download_reconfig: true
       syncer:
@@ -97,6 +101,10 @@ py2030:
             - clip
             - ping
             - osc
+      version_packager:
+        enabled: true # dummy attribute
+        source: 'py2030'
+        destination: 'data/py2030-{version}.tar.gz'
 
     oscrecorder:
       osc_inputs:

@@ -18,6 +18,7 @@ class App:
         # components
         self.__host_info_cache = None
         self.interface = Interface.instance() # use global interface singleton instance
+        self.version_packager = None
         self.config_file_monitor = None
         self.midi_effect_input = None
         self.osc_outputs = []
@@ -27,7 +28,7 @@ class App:
         self.interval_broadcast = None
         self.interval_joiner = None
         self.config_broadcaster = None
-        self.reconfig_downloader = None
+        self.downloader = None
         self.syncer = None
         self.osc_ascii_input = None
 
@@ -127,6 +128,17 @@ class App:
         # print 'Profile Data: ', profile_data
 
         #
+        # Version Packager
+        #
+        if 'version_packager' in profile_data:
+            from py2030.version_packager import VersionPackager
+            opts = profile_data['version_packager']
+            opts.update({'version': self._version()})
+            self.version_packager = VersionPackager(opts)
+            self.version_packager.package()
+            del VersionPackager
+
+        #
         # Config File Monitor
         #
         if 'monitor_config' in profile_data and profile_data['monitor_config']:
@@ -211,7 +223,7 @@ class App:
             if not self.http_server:
                 # start http server on (new) port
                 from py2030.http_server import HttpServer
-                self.http_server = HttpServer({'port': port})
+                self.http_server = HttpServer({'port': port, 'host_info': self._host_info()})
                 self.http_server.start()
                 del HttpServer
 
@@ -235,18 +247,19 @@ class App:
         #
         # Reconfig Downloader
         #
-        enabled = profile_data['download_reconfig'] if 'download_reconfig' in profile_data else None
-        if enabled:
-            if self.reconfig_downloader:
-                self.reconfig_downloader.setup()
+        if 'downloader' in profile_data:
+            opts = profile_data['downloader']
+            if self.downloader:
+                self.downloader.configure(opts)
             else:
-                from py2030.client_side.reconfig_downloader import ReconfigDownloader
-                self.reconfig_downloader = ReconfigDownloader()
-                self.reconfig_downloader.setup()
-                del ReconfigDownloader
+                from py2030.client_side.downloader import Downloader
+                self.downloader = Downloader(opts)
+                self.downloader.setup()
+                del Downloader
         else:
-            if self.reconfig_downloader:
-                self.reconfig_downloader.destroy()
+            if self.downloader:
+                self.downloader.destroy()
+                self.downloader = None
 
         #
         # Interval broadcaster
@@ -262,7 +275,7 @@ class App:
                 ColorTerminal().yellow('set broadcast interval to {0}'.format(interval))
             else:
                 from py2030.interval_broadcast import IntervalBroadcast
-                self.interval_broadcast = IntervalBroadcast({'interval': interval, 'data': {'ip': self._ip(), 'role': 'controller'}})
+                self.interval_broadcast = IntervalBroadcast({'interval': interval, 'data': {'ip': self._ip(), 'role': 'controller', 'version': config_file.get_value('py2030.version')}})
                 ColorTerminal().yellow('started broadcast interval at {0}'.format(interval))
                 del IntervalBroadcast
 
@@ -336,6 +349,11 @@ class App:
                 self.config_recorders.append(cfgrec)
             del ConfigRecorder
 
+
+
+
+
+
     # returns the port number to be send with the join dataChangeEvent
     # (this will be our incoming OSC port)
     def _join_data_port(self):
@@ -383,6 +401,9 @@ class App:
                     return copy.copy(data)
         return None
 
+    def _version(self):
+        return self.config_file.get_value('py2030.version')
+
     def _onJoin(self, join_data):
         joined_config = self._getJoinerOscOutProfileData()
 
@@ -396,11 +417,15 @@ class App:
             print join_data
             return
 
+        ack_data = {'version': self._version()}
+        if self.http_server:
+            ack_data['version_download_url'] = self.http_server.version_url(self._version())
+
         # don't register if already outputting to this address/port
         for out in self.osc_outputs:
             if out.host() == join_data['ip'] and out.port() == join_data['port']:
                 # TODO trigger ackEvent on interface instead, with client id?
-                out.sendMessage('/ack', [])
+                out.trigger('ack', ack_data)
                 ColorTerminal().warn('Got join with already registered osc-output specs')
                 print join_data
                 return
@@ -409,7 +434,7 @@ class App:
         for out in self.joined_osc_outputs:
             if out.host() == join_data['ip'] and out.port() == join_data['port']:
                 # TODO trigger ackEvent on interface instead, with client id?
-                out.sendMessage('/ack', [])
+                out.trigger('ack', ack_data)
                 ColorTerminal().warn('Got join with already registered osc-output specs')
                 print join_data
                 return
@@ -423,11 +448,11 @@ class App:
         from py2030.outputs.osc import Osc as OscOutput
         osc_out = OscOutput(joined_config)
         # TODO trigger ackEvent on interface instead, with client id?
-        osc_out.sendMessage('/ack', [])
+        osc_out.trigger('ack', ack_data)
         self.joined_osc_outputs.append(osc_out) # auto-starts
         del OscOutput
 
-    def _onAck(self):
+    def _onAck(self, data):
         # controller side;
         # not triggered on controller-side (for now)
 
@@ -436,3 +461,5 @@ class App:
             ColorTerminal().yellow('Got ackEvent, stopping interval joiner')
             self.interval_joiner.stop()
         self.joined = True
+
+        # self.downloader will take care of the rest

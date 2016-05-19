@@ -13,7 +13,7 @@ class IntervalBroadcast:
 
         # schedule first broadcast; immediately
         self.startTime = datetime.now()
-        self.nextBroadcastTime = self.interval()
+        self.nextBroadcastTime = 0.0 # self.interval()
         self.time = 0.0
 
     def configure(self, options):
@@ -27,11 +27,11 @@ class IntervalBroadcast:
             self.time = (datetime.now() - self.startTime).total_seconds()
 
         # using while to catch-up with any missed broadcasts (mainly for testing-purposes)
-        while self.time >= self.nextBroadcastTime:
+        if self.time >= self.nextBroadcastTime:
             # broadcast
             self.broadcast()
             # schedule next broadcast
-            self.nextBroadcastTime += self.interval()
+            self.nextBroadcastTime = self.time + self.interval()
 
     def broadcast(self):
         # self.interface.broadcasts.create(self.data())

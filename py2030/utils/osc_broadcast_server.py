@@ -23,13 +23,15 @@ class OscBroadcastServer(OSC.OSCServer):
 
         # self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        # self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        mreq = struct.pack("4sl", socket.inet_aton(server_address[0]), socket.INADDR_ANY)
-        try:
-            self.socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
-        except socket.error as err:
-            ColorTerminal().fail("{0}\nOscBroadcastServer - got invalid IP address for multicasting ({1})".format(err, server_address[0]))
-            ColorTerminal().fail("Continuing...")
+        if server_address[0].endswith('.255'):
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        else:
+            mreq = struct.pack("4sl", socket.inet_aton(server_address[0]), socket.INADDR_ANY)
+            try:
+                self.socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
+            except socket.error as err:
+                ColorTerminal().fail("{0}\nOscBroadcastServer - got invalid IP address for multicasting ({1})".format(err, server_address[0]))
+                ColorTerminal().fail("Continuing...")
 
         # self.socket.bind((self.host, self.port))
         # NOW we can bind and activate
