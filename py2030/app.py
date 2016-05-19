@@ -16,6 +16,7 @@ class App:
         self.joined = False
 
         # components
+        self.__host_info_cache = None
         self.interface = Interface.instance() # use global interface singleton instance
         self.config_file_monitor = None
         self.midi_effect_input = None
@@ -346,13 +347,26 @@ class App:
         return 2030
 
     def _host_info(self):
-        if hasattr(self, '__host_info'):
-            return self.__host_info
-        import socket
-        hostname = socket.gethostname()
-        ip = socket.gethostbyname(hostname)
-        self.__host_info = {'hostname': hostname, 'ip': ip}
-        return self.__host_info
+        if self.__host_info_cache:
+            return self.__host_info_cache
+
+        # import socket
+        import subprocess
+        platform = subprocess.Popen("uname", shell=True, stdout=subprocess.PIPE).stdout.read().strip()
+        hostname = subprocess.Popen("hostname", shell=True, stdout=subprocess.PIPE).stdout.read().strip()
+
+        if platform == 'Darwin': # Mac OSX
+            import socket
+            ip = socket.gethostbyname(hostname)
+            del socket
+        else: # linux
+            ip = subprocess.Popen("hostname -I", shell=True, stdout=subprocess.PIPE).stdout.read().strip()
+
+        del subprocess
+
+        self.__host_info_cache = {'hostname': hostname, 'ip': ip, 'platform': platform}
+        print 'host info: ', self.__host_info_cache
+        return self.__host_info_cache
 
     def _ip(self):
         return self._host_info()['ip']

@@ -13,12 +13,20 @@ py2030:
         #   port: 2029
         #   # verbose: true
         controller_joiner:
-          ip: '127.0.0.1'
+          # ip: '192.168.2.1'
+          hostname: 'MarkBookPro.Home'
           port: 2030
           outputs:
             - join
             - pong
           verbose: true
+        # local_controller_joiner:
+        #   ip: '127.0.0.1'
+        #   port: 2030
+        #   outputs:
+        #     - join
+        #     - pong
+        #   verbose: true
 
       osc_inputs:
         self:
@@ -36,9 +44,9 @@ py2030:
     controller:
       monitor_config: true
       # midi_input_port: 0
-      # http_server_port: 2031
+      http_server_port: 2040
       # broadcast_interval: 2.0
-      # broadcast_reconfig: true
+      broadcast_reconfig: true
       # download_reconfig: true
       syncer:
         pong: false
@@ -46,7 +54,7 @@ py2030:
 
       osc_inputs:
         client_join_and_clip_receiver:
-          ip: '127.0.0.1'
+          ip: 'self' #'127.0.0.1'
           port: 2030
           inputs:
             - join
@@ -89,6 +97,16 @@ py2030:
       osc_outputs:
         playbacker:
           ip: '127.0.0.1'
+          port: 2031
+          # verbose: true
+          outputs:
+            - event
+            - effect
+            - clip
+            - ping
+            - osc
+        playbackerRaspi:
+          ip: '192.168.2.14'
           port: 2031
           verbose: true
           outputs:
