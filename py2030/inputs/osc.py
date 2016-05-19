@@ -223,4 +223,7 @@ class Osc:
         # print 'py2030.inputs.Osc._forwardOscMessage with', addr, tags, data, client_address
         # ColorTerminal().warn('Got unknown OSC Message {0}'.format((addr, tags, data, client_address)))
         # self.unknownMessageEvent(addr, tags, data, client_address, self)
+        if self.verbose:
+            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
         self.interface.oscMessageEvent(addr, tags, data, client_address)

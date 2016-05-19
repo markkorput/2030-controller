@@ -116,6 +116,8 @@ class App:
 
     def _apply_config(self, config_file):
         profile_data = config_file.get_value('py2030.profiles.'+self.profile)
+        if not profile_data:
+            profile_data = {}
         self.profile_data = profile_data
         # print 'Profile Data: ', profile_data
 
