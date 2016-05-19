@@ -1,6 +1,6 @@
 py2030:
+  # version must have single quotes marks!
   version: '0.1.0'
-
   profiles:
     client:
       downloader:
