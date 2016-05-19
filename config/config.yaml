@@ -3,6 +3,9 @@ py2030:
   version: '0.1.0'
   profiles:
     client:
+      # alive_notifier:
+      #   file: 'last-alive.txt'
+      #   interval: 15.0
       downloader:
         enabled: true
         reconfig: true
@@ -20,6 +23,14 @@ py2030:
             - join
             - pong
           verbose: true
+        of2030:
+          ip: '127.0.0.1'
+          port: 2031
+          verbose: true
+          outputs:
+            - clip
+            - song
+            - osc
       osc_inputs:
         self:
           ip: 'self'
@@ -34,7 +45,9 @@ py2030:
             - ping
 
     test:
-      monitor_config: false
+      # alive_notifier:
+      #   file: 'last-alive.txt'
+      #   interval: 15.0
       downloader:
         enabled: true
         reconfig: true
@@ -52,19 +65,31 @@ py2030:
             - join
             - pong
           verbose: true
-
+        of2030:
+          ip: '127.0.0.1'
+          port: 2031
+          outputs:
+            - clip
+            - song
+            - osc
       osc_inputs:
         self:
           ip: 'self'
           port: 2025
           shared: false
-          verbose: true
+          # verbose: true
           inputs:
             - ack
             - effect
             - event
             - clip
             - ping
+        of2030:
+          ip: '127.0.0.1'
+          port: 2033
+          shared: false
+          verbose: true
+          forwarder: true
 
     controller:
       # monitor_config: true
@@ -86,10 +111,10 @@ py2030:
             - clip
             - pong
           verbose: true
-        forwarder_for_all_osc_messages:
-          ip: '127.0.0.1'
-          port: 2031
-          forwarder: true
+        # forwarder_for_all_osc_messages:
+        #   ip: '127.0.0.1'
+        #   port: 2031
+        #   forwarder: true
       osc_outputs:
         to_joiners:
           ip: 'joiner'
