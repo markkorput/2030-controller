@@ -1,4 +1,4 @@
-class ConfigsFiles:
+class ConfigsFile:
     def __init__(self, options = {}):
         # configure
         self.options = {}
@@ -23,11 +23,18 @@ class ConfigsFiles:
 
         # loop over each config element
         for cfgel in configels:
-            # gather all dat afor this config
-            cfgdata = {}
+            # loop over each param node in this config el
             for param in list(cfgel):
-                cfgdata[param.attrib['name']] = param.text
+                # set the param value for this config
+                self.update_param(param.attrib['name'], param.name, param.text)
 
-            if 'verbose' in self.options and self.options['verbose']:
-                print '[ConfigsFiles.load]', param.attrib['name'], cfgdata
-            self.configs_data[cfgel.name] = cfgdata
+        if 'verbose' in self.options and self.options['verbose']:
+            print '[ConfigsFiles.load] result:', self.configs_data
+
+    def save(self):
+        print 'TODO: ConfigsFile.save with: ', self.configs_data
+
+    def update_param(self, config_name, param_name, param_value):
+        if not config_name in self.configs_data:
+            self.configs_data[config_name] = {}
+        self.configs_name[param_name] = param_value

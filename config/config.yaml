@@ -134,6 +134,7 @@ py2030:
           - osc
       config_recorders:
         screens:
+          prefix: '/scr'
           path: 'data/screens.xml'
           configs_root_el: 'screens'
           config_el: 'screen'
