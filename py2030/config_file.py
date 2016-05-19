@@ -1,7 +1,7 @@
 from py2030.utils.event import Event
 from py2030.utils.color_terminal import ColorTerminal
 
-import os, json, yaml, time, shutil
+import os, yaml, time, shutil
 
 class ConfigFile:
     default_paths = ('config/config.yaml', '../config/config.yaml')
@@ -57,19 +57,9 @@ class ConfigFile:
 
         if self.path().endswith('.yaml'):
             self.loadYaml(content)
-        elif self.path().endswith('.json'):
-            self.loadJson(content)
         else:
             ColorTerminal().warn('[ConfigFile] could not determine config file data format from file name ({0}), assuming yaml'.format(self.path()))
             self.loadYaml(content)
-
-    def loadJson(self, content):
-        try:
-            new_data = json.loads(content)
-        except:
-            ColorTerminal().warn("[ConfigFile] json corrupted ({0}), can't load data".format(self.path()))
-            return
-        self.setData(new_data)
 
     def loadYaml(self, content):
         try:
