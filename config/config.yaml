@@ -109,6 +109,10 @@ py2030:
         #     - clip
         #     - ping
         #     - osc
+      version_packager:
+        enabled: true # dummy attribute
+        source: 'py2030'
+        destination: 'data/py2030-{version}.tar.gz'
 
     oscrecorder:
       osc_inputs:

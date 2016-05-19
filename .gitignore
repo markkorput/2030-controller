@@ -67,3 +67,4 @@ config/*.png
 test.py
 
 data/osc/*.csv
+data/*.tar.gz

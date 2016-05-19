@@ -18,6 +18,7 @@ class App:
         # components
         self.__host_info_cache = None
         self.interface = Interface.instance() # use global interface singleton instance
+        self.version_packager = None
         self.config_file_monitor = None
         self.midi_effect_input = None
         self.osc_outputs = []
@@ -125,6 +126,17 @@ class App:
             profile_data = {}
         self.profile_data = profile_data
         # print 'Profile Data: ', profile_data
+
+        #
+        # Version Packager
+        #
+        if 'version_packager' in profile_data:
+            from py2030.version_packager import VersionPackager
+            opts = profile_data['version_packager']
+            opts.update({'version': self._version()})
+            self.version_packager = VersionPackager(opts)
+            self.version_packager.package()
+            del VersionPackager
 
         #
         # Config File Monitor
@@ -336,6 +348,11 @@ class App:
                 self.config_recorders.append(cfgrec)
             del ConfigRecorder
 
+
+
+
+
+
     # returns the port number to be send with the join dataChangeEvent
     # (this will be our incoming OSC port)
     def _join_data_port(self):
@@ -382,6 +399,9 @@ class App:
                 if 'ip' in data and data['ip'] == 'joiner':
                     return copy.copy(data)
         return None
+
+    def _version(self):
+        return self.config_file.get_value('py2030.version')
 
     def _onJoin(self, join_data):
         joined_config = self._getJoinerOscOutProfileData()
