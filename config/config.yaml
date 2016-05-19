@@ -10,10 +10,6 @@ py2030:
         pong: true
         ping: false
       osc_outputs:
-        # local:
-        #   ip: '127.0.0.1'
-        #   port: 2029
-        #   # verbose: true
         controller_joiner:
           # ip: '192.168.2.1'
           hostname: 'MarkBookPro.Home'
@@ -34,33 +30,11 @@ py2030:
             - event
             - clip
             - ping
-        broadcast:
-          ip: '192.168.2.255'
-          port: 2030
-          # shared: false
-          verbose: true
-          inputs:
-            - ack
-            - effect
-            - event
-            - clip
-            - ping
-        broadcast2:
-          ip: ''
-          port: 2033
-          # shared: false
-          verbose: true
-          inputs:
-            - ack
-            - effect
-            - event
-            - clip
-            - ping
 
     test:
       monitor_config: false
       download_reconfig: true
-      # join_interval: 5.0
+      join_interval: 5.0
       syncer:
         pong: true
         ping: false
@@ -75,10 +49,10 @@ py2030:
           verbose: true
 
       osc_inputs:
-        broadcast:
-          ip: '' #'''192.168.2.255'
-          port: 2033
-          # shared: false
+        self:
+          ip: 'self'
+          port: 2025
+          shared: false
           verbose: true
           inputs:
             - ack
@@ -86,23 +60,12 @@ py2030:
             - event
             - clip
             - ping
-        # self:
-        #   ip: 'self'
-        #   port: 2025
-        #   shared: false
-        #   verbose: true
-        #   inputs:
-        #     - ack
-        #     - effect
-        #     - event
-        #     - clip
-        #     - ping
 
     controller:
       monitor_config: true
       # midi_input_port: 0
       # http_server_port: 2040
-      broadcast_interval: 3.0
+      # broadcast_interval: 3.0
       broadcast_reconfig: true
       # download_reconfig: true
       syncer:
@@ -123,9 +86,9 @@ py2030:
           port: 2031
           forwarder: true
       osc_outputs:
-        broadcast:
-          ip: '255.255.255.255' #'192.168.2.255'
-          port: 2033
+        to_joiners:
+          ip: 'joiner'
+          port: 'joiner'
           verbose: true
           outputs:
             - event
@@ -133,16 +96,6 @@ py2030:
             - clip
             - ping
             - osc
-        # to_joiners:
-        #   ip: 'joiner'
-        #   port: 'joiner'
-        #   verbose: true
-        #   outputs:
-        #     - event
-        #     - effect
-        #     - clip
-        #     - ping
-        #     - osc
       version_packager:
         enabled: true # dummy attribute
         source: 'py2030'

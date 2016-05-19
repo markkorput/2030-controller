@@ -416,11 +416,13 @@ class App:
             print join_data
             return
 
+        ack_data = {'version': self.config_file.get_value('py2030.version')}
+
         # don't register if already outputting to this address/port
         for out in self.osc_outputs:
             if out.host() == join_data['ip'] and out.port() == join_data['port']:
                 # TODO trigger ackEvent on interface instead, with client id?
-                out.sendMessage('/ack', [])
+                out.trigger('ack', ack_data)
                 ColorTerminal().warn('Got join with already registered osc-output specs')
                 print join_data
                 return
@@ -429,7 +431,7 @@ class App:
         for out in self.joined_osc_outputs:
             if out.host() == join_data['ip'] and out.port() == join_data['port']:
                 # TODO trigger ackEvent on interface instead, with client id?
-                out.sendMessage('/ack', [])
+                out.trigger('ack', ack_data)
                 ColorTerminal().warn('Got join with already registered osc-output specs')
                 print join_data
                 return
@@ -443,7 +445,7 @@ class App:
         from py2030.outputs.osc import Osc as OscOutput
         osc_out = OscOutput(joined_config)
         # TODO trigger ackEvent on interface instead, with client id?
-        osc_out.sendMessage('/ack', [])
+        osc_out.trigger('ack', ack_data)
         self.joined_osc_outputs.append(osc_out) # auto-starts
         del OscOutput
 
