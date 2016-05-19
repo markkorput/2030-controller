@@ -3,7 +3,7 @@ py2030:
     client:
       monitor_config: false
       download_reconfig: true
-      join_interval: 2.0
+      join_interval: 5.0
       syncer:
         pong: true
         ping: false
@@ -20,14 +20,6 @@ py2030:
             - join
             - pong
           verbose: true
-        # local_controller_joiner:
-        #   ip: '127.0.0.1'
-        #   port: 2030
-        #   outputs:
-        #     - join
-        #     - pong
-        #   verbose: true
-
       osc_inputs:
         self:
           ip: 'self'
@@ -41,10 +33,39 @@ py2030:
             - clip
             - ping
 
+    test:
+      monitor_config: false
+      download_reconfig: true
+      join_interval: 5.0
+      syncer:
+        pong: true
+        ping: false
+      osc_outputs:
+        controller_joiner:
+          # ip: '127.0.0.1'
+          hostname: 'MarkBookPro.Home'
+          port: 2030
+          outputs:
+            - join
+            - pong
+          verbose: true
+      osc_inputs:
+        self:
+          ip: 'self'
+          port: 2025
+          shared: false
+          verbose: true
+          inputs:
+            - ack
+            - effect
+            - event
+            - clip
+            - ping
+
     controller:
       monitor_config: true
       # midi_input_port: 0
-      http_server_port: 2040
+      # http_server_port: 2040
       # broadcast_interval: 2.0
       broadcast_reconfig: true
       # download_reconfig: true
