@@ -94,9 +94,9 @@ class Downloader:
         self._applyVersionFile(target_path)
 
         print('Downloader applying version to config file')
-        self.config_file.load() # make sure it's loaded with current content
-        self.config_file.set_version(data['version'])
-        self.config_file.write_yaml(self.config_file.data)
+        content = self.config_file.read() # make sure it's loaded with current content
+        content = content.replace("version: '"+my_version+"'", "version: '"+data['version']+"'")
+        self.config_file.write(content)
 
         print 'Downloader triggering newVersionEvent'
         self.newVersionEvent(data['version'], self)

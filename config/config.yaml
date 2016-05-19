@@ -1,9 +1,8 @@
 py2030:
-  version: 0.1.0
+  version: '0.1.0'
 
   profiles:
     client:
-      monitor_config: false
       downloader:
         enabled: true
         reconfig: true
@@ -68,7 +67,7 @@ py2030:
             - ping
 
     controller:
-      monitor_config: true
+      # monitor_config: true
       # midi_input_port: 0
       http_server_port: 2040
       # broadcast_interval: 3.0
