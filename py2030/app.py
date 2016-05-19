@@ -93,6 +93,10 @@ class App:
             self.http_server.stop()
             self.http_server = None
 
+        if hasattr(self, 'config_recorders'):
+            for cfgrec in self.config_recorders:
+                cfgrec.stop()
+
     def update(self):
         for instruction in self.queue:
             if instruction == 'reconfig':
@@ -290,7 +294,7 @@ class App:
             del Syncer
 
         #
-        # OscAscii recorder output
+        # OscAscii recorder
         #
         if 'osc_ascii_output' in profile_data:
             from py2030.outputs.osc_ascii import OscAscii
@@ -309,6 +313,27 @@ class App:
                 self.osc_ascii_input.configure({'loop': self.options['loop']})
             self.osc_ascii_input.start()
             del OscAsciiInput
+
+        #
+        # Config recorder
+        #
+        if 'config_recorders' in profile_data:
+            # initialize attribute
+            if not hasattr(self, 'config_recorders'):
+                self.config_recorders = []
+
+            # cleanup existing recorders
+            for cfgrec in self.config_recorders:
+                cfgrec.stop()
+            self.config_recorders = []
+
+            # create recorders according to configuration profiles
+            from py2030.config_recorder import ConfigRecorder
+            for rec_profile in profile_data['config_recorders'].values():
+                cfgrec = ConfigRecorder(rec_profile)
+                cfgrec.start()
+                self.config_recorders.append(cfgrec)
+            del ConfigRecorder
 
     # returns the port number to be send with the join dataChangeEvent
     # (this will be our incoming OSC port)

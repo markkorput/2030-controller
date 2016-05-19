@@ -138,6 +138,7 @@ py2030:
           path: 'data/screens.xml'
           configs_root_el: 'screens'
           config_el: 'screen'
+          verbose: true
 
 
 

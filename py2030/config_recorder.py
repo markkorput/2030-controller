@@ -9,9 +9,11 @@ class ConfigRecorder:
         self.prefix = '/cfg'
 
         self.options = {}
+        print 'ConfigRecorder opts: ', options
         self.configure(options)
 
     def __del__(self):
+        # print 'ConfigRecorder.__del__'
         if self.running:
             self.stop()
 
@@ -40,12 +42,13 @@ class ConfigRecorder:
         self.running = True
 
     def stop(self):
+        # print 'ConfigRecorder.stop'
         self.file.save()
         self.interface.oscMessageEvent -= self._onOscMessage
         self.running = False
 
     def _onOscMessage(self, addr, tags, data, client_addr = None):
-        if not addr.starswith(self.prefix+'/'):
+        if not addr.startswith(self.prefix+'/'):
             return
 
         sub = addr[len(self.prefix)+1:]
