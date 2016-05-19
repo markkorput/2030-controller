@@ -54,7 +54,7 @@ class ConfigRecorder:
         sub = addr[len(self.prefix)+1:]
         parts = sub.split('/')
 
-        if parts[1] == 2 and addr.endswith('pos'):
+        if len(data) == 2 and addr.endswith('pos'):
             self.file.update_param(parts[0], parts[1]+'_x', data[0])
             self.file.update_param(parts[0], parts[1]+'_y', data[1])
             return
