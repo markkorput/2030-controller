@@ -1,0 +1,238 @@
+py2030:
+  # version must have single quotes marks!
+  version: '0.1.0'
+  profiles:
+    client:
+      # alive_notifier:
+      #   file: 'last-alive.txt'
+      #   interval: 15.0
+      downloader:
+        enabled: true
+        reconfig: true
+        version: true
+      join_interval: 5.0
+      syncer:
+        pong: true
+        ping: false
+      osc_outputs:
+        controller_joiner:
+          # ip: '192.168.2.1'
+          hostname: 'MarkBookPro.Home'
+          port: 2030
+          outputs:
+            - join
+            - pong
+          verbose: true
+        of2030:
+          ip: '127.0.0.1'
+          port: 2031
+          verbose: true
+          outputs:
+            - clip
+            - song
+            - osc
+      osc_inputs:
+        self:
+          ip: 'self'
+          port: 2030
+          shared: false
+          verbose: true
+          inputs:
+            - ack
+            - effect
+            - event
+            - clip
+            - ping
+
+    test:
+      # alive_notifier:
+      #   file: 'last-alive.txt'
+      #   interval: 15.0
+      downloader:
+        enabled: true
+        reconfig: true
+        version: true
+      join_interval: 5.0
+      syncer:
+        pong: true
+        ping: false
+      osc_outputs:
+        controller_joiner:
+          # ip: '127.0.0.1'
+          hostname: 'MarkBookPro.Home'
+          port: 2030
+          outputs:
+            - join
+            - pong
+          verbose: true
+        of2030:
+          ip: '127.0.0.1'
+          port: 2031
+          outputs:
+            - clip
+            - song
+            - osc
+      osc_inputs:
+        self:
+          ip: 'self'
+          port: 2025
+          shared: false
+          # verbose: true
+          inputs:
+            - ack
+            - effect
+            - event
+            - clip
+            - ping
+        of2030:
+          ip: '127.0.0.1'
+          port: 2033
+          shared: false
+          verbose: true
+          forwarder: true
+
+    controller:
+      # monitor_config: true
+      # midi_input_port: 0
+      http_server_port: 2040
+      # broadcast_interval: 3.0
+      broadcast_reconfig: true
+      # download_reconfig: true
+      syncer:
+        pong: false
+        ping: true
+
+      osc_inputs:
+        client_join_and_clip_receiver:
+          ip: 'self' #'127.0.0.1'
+          port: 2030
+          inputs:
+            - join
+            - clip
+            - pong
+          verbose: true
+        # forwarder_for_all_osc_messages:
+        #   ip: '127.0.0.1'
+        #   port: 2031
+        #   forwarder: true
+      osc_outputs:
+        to_joiners:
+          ip: 'joiner'
+          port: 'joiner'
+          verbose: true
+          outputs:
+            - event
+            - effect
+            - clip
+            - ping
+            - osc
+      version_packager:
+        enabled: true # dummy attribute
+        source: 'py2030'
+        destination: 'data/py2030-{version}.tar.gz'
+
+    oscrecorder:
+      osc_inputs:
+        receiver:
+          ip: '127.0.0.1'
+          port: 2031
+          forwarder: true
+      osc_ascii_output:
+        path: auto
+        verbose: true
+        trim: true
+
+    oscplayer:
+      osc_ascii_input:
+        path: 'auto' # 'data/osc/clock_spot.csv'
+        # loop: true
+        # sync: true
+        verbose: true
+      osc_outputs:
+        playbacker:
+          ip: '127.0.0.1'
+          port: 2031
+          # verbose: true
+          outputs:
+            - event
+            - effect
+            - clip
+            - ping
+            - osc
+        playbackerRaspi:
+          ip: '192.168.2.15'
+          port: 2030
+          verbose: true
+          outputs:
+            - event
+            - effect
+            - clip
+            - ping
+            - osc
+        to_joiners:
+          ip: 'joiner'
+          port: 'joiner'
+          verbose: true
+          outputs:
+            - event
+            - effect
+            - clip
+            - ping
+            - osc
+
+    osccfg:
+      osc_inputs:
+        remote_receiver:
+          ip: 'self' #'127.0.0.1'
+          port: 2029
+          forwarder: true
+          # verbose: true
+        local_receiver:
+          ip: '127.0.0.1'
+          port: 2029
+          forwarder: true
+          # verbose: true
+      osc_outputs:
+        forward_to_joiners:
+          ip: 'joiner'
+          port: 'joiner'
+          # verbose: true
+          outputs:
+            - event
+            - effect
+            - clip
+            - ping
+            - osc
+        forward_local:
+          ip: '127.0.0.1'
+          port: 2031
+          # verbose: true
+          outputs:
+          - osc
+      config_recorders:
+        screens:
+          prefix: '/scr'
+          path: 'data/screens.xml'
+          configs_root_el: 'screens'
+          config_el: 'screen'
+          # verbose: true
+        effects:
+          prefix: '/cfg'
+          path: 'data/effects.xml'
+          configs_root_el: 'effects'
+          config_el: 'effect'
+          # verbose: true
+
+  midi_triggers:
+    48: # C2
+      effect:
+        type: 'COLOR'
+        r: 255
+        g: 0
+        b: 0
+    60: # midi note: C3
+      effect:
+        type: 'COLOR'
+        r: 0
+        g: 255
+        b: 0

@@ -63,7 +63,11 @@ target/
 
 test/fixtures/dummy_config_file.txt
 config/config.json
-config/config.yaml
-config/config.yaml.bak.*
 config/*.png
 test.py
+
+log.txt
+data/osc/*.csv
+data/*.tar.gz
+*.bak
+last-alive.txt

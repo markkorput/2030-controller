@@ -64,7 +64,7 @@ class Osc:
         # we'll enforce a limit to the number of osc requests
         # we'll handle in a single iteration, otherwise we might
         # get stuck in processing an endless stream of data
-        limit = 10
+        limit = 50
         count = 0
 
         # clear timed_out flag
@@ -92,12 +92,15 @@ class Osc:
 
     def _connect(self):
         if self.connected:
-            ColorTerminal().warning('py2030.inputs.osc.Osc - Already connected')
+            ColorTerminal().warn('py2030.inputs.osc.Osc - Already connected')
             return False
 
         try:
             # create server instance
             if self.shared_port():
+                self.osc_server = OscBroadcastServer((self.host(), self.port()))
+            elif self.host().endswith('.255'):
+                ColorTerminal().warn('broadcast IP detected, using broadcast server')
                 self.osc_server = OscBroadcastServer((self.host(), self.port()))
             else:
                 self.osc_server = OSCServer((self.host(), self.port()))
@@ -116,11 +119,16 @@ class Osc:
         # register time out callback
         self.osc_server.handle_timeout = self._onTimeout
         # register specific OSC messages callback(s)
-        self.osc_server.addMsgHandler('/change', self._onChange)
-        self.osc_server.addMsgHandler('/event', self._onEvent)
-        self.osc_server.addMsgHandler('/effect', self._onEffect)
-        self.osc_server.addMsgHandler('/join', self._onJoin)
-        self.osc_server.addMsgHandler('default', self._onUnknownMessage)
+        if not self.isForwarder():
+            self.osc_server.addMsgHandler('/change', self._onChange) # deprecated
+            self.osc_server.addMsgHandler('/join', self._onJoin)
+            self.osc_server.addMsgHandler('/ack', self._onAck)
+            self.osc_server.addMsgHandler('/event', self._onEvent)
+            self.osc_server.addMsgHandler('/clip', self._onClip)
+            self.osc_server.addMsgHandler('/effect', self._onEffect)
+            # self.osc_server.addMsgHandler('default', self._onUnknownMessage)
+        self.osc_server.addMsgHandler('default', self._forwardOscMessage)
+
 
         # set internal connected flag
         self.connected = True
@@ -147,10 +155,10 @@ class Osc:
             ColorTerminal().warn('Got /change OSC message without data')
             return
 
-        self.interface.updates.create(json.loads(data[0]))
-
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
+        self.interface.updates.create(json.loads(data[0]))
 
     def _onTimeout(self):
         if hasattr(self, 'osc_server') and self.osc_server:
@@ -161,28 +169,64 @@ class Osc:
         self.unknownMessageEvent(addr, tags, data, client_address, self)
 
     def _onEvent(self, addr, tags, data, client_address):
+        if not self.receivesType(addr[1:]): # remove leading slash:
+            return
+
+        if self.verbose:
+            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
         params = json.loads(data[0])
         self.interface.genericEvent(params)
 
+    def _onEffect(self, addr, tags, data, client_address):
+        if not self.receivesType(addr[1:]): # remove leading slash:
+            return
+
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
-    def _onEffect(self, addr, tags, data, client_address):
         params = json.loads(data[0])
         self.interface.effectEvent(params)
 
+    def _onJoin(self, addr, tags, data, client_address):
+        if not self.receivesType(addr[1:]): # remove leading slash:
+            return
+
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
-
-    def _onJoin(self, addr, tags, data, client_address):
-        if not self.receiveJoins():
-            return
 
         params = json.loads(data[0])
         self.interface.joinEvent(params)
 
+    def _onClip(self, addr, tags, data, client_address):
+        if not self.receivesType(addr[1:]): # remove leading slash:
+            return
+
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
-    def receiveJoins(self):
-        return 'inputs' in self.options and self.options['inputs'].count('joins') > 0
+        self.interface.clipEvent(data[0])
+
+    def _onAck(self, addr, tags, data, client_address):
+        if not self.receivesType(addr[1:]): # remove leading slash:
+            return
+
+        if self.verbose:
+            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
+        self.interface.ackEvent(json.loads(data[0]))
+
+    def receivesType(self, typ):
+        return not 'inputs' in self.options or self.options['inputs'].count(typ) > 0
+
+    def isForwarder(self):
+        return 'forwarder' in self.options and self.options['forwarder']
+
+    def _forwardOscMessage(self, addr, tags, data, client_address):
+        # print 'py2030.inputs.Osc._forwardOscMessage with', addr, tags, data, client_address
+        # ColorTerminal().warn('Got unknown OSC Message {0}'.format((addr, tags, data, client_address)))
+        # self.unknownMessageEvent(addr, tags, data, client_address, self)
+        if self.verbose:
+            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
+        self.interface.oscMessageEvent(addr, tags, data, client_address)

@@ -2,10 +2,14 @@ from py2030.utils.color_terminal import ColorTerminal
 from py2030.interface import Interface
 from py2030.config_file import ConfigFile
 
+import copy
+from datetime import datetime
+
 # from py2030.client_side.client_info import ClientInfo
 
 class App:
     def __init__(self, options = {}):
+        print "\n\n--------------------------------------- PY2030 -- " + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         # attributes
         self.config_file = ConfigFile.instance()
         self.profile = 'client'
@@ -14,7 +18,10 @@ class App:
         self.joined = False
 
         # components
+        self.__host_info_cache = None
+        self.alive_notifier = None
         self.interface = Interface.instance() # use global interface singleton instance
+        self.version_packager = None
         self.config_file_monitor = None
         self.midi_effect_input = None
         self.osc_outputs = []
@@ -24,19 +31,16 @@ class App:
         self.interval_broadcast = None
         self.interval_joiner = None
         self.config_broadcaster = None
-        self.reconfig_downloader = None
+        self.downloader = None
+        self.syncer = None
+        self.osc_ascii_input = None
 
         # configuration
         self.options = {}
         self.configure(options)
 
         self.interface.joinEvent += self._onJoin
-        self.interface.genericEvent += self._onGenericEvent
-        self.interface.effectEvent += self._onEffect
-
-        # autoStart is True by default
-        if not 'setup' in options or options['setup']:
-            self.setup()
+        self.interface.ackEvent += self._onAck
 
     def __del__(self):
         self.destroy()
@@ -90,7 +94,14 @@ class App:
             self.http_server.stop()
             self.http_server = None
 
+        if hasattr(self, 'config_recorders'):
+            for cfgrec in self.config_recorders:
+                cfgrec.stop()
+
     def update(self):
+        if self.alive_notifier:
+            self.alive_notifier.update()
+
         for instruction in self.queue:
             if instruction == 'reconfig':
                 self._apply_config(self.config_file)
@@ -108,19 +119,41 @@ class App:
         if self.interval_broadcast:
             self.interval_broadcast.update()
 
+        if self.osc_ascii_input:
+            self.osc_ascii_input.update()
+
     def _apply_config(self, config_file):
         profile_data = config_file.get_value('py2030.profiles.'+self.profile)
+        if not profile_data:
+            profile_data = {}
         self.profile_data = profile_data
         # print 'Profile Data: ', profile_data
+
+        #
+        # alive-notifier
+        #
+        if 'alive_notifier' in profile_data:
+            from py2030.alive_notifier import AliveNotifier
+            self.alive_notifier = AliveNotifier(profile_data['alive_notifier'])
+            del AliveNotifier
+
+        #
+        # Version Packager
+        #
+        if 'version_packager' in profile_data:
+            from py2030.version_packager import VersionPackager
+            opts = profile_data['version_packager']
+            opts.update({'version': self._version()})
+            self.version_packager = VersionPackager(opts)
+            self.version_packager.package()
+            del VersionPackager
 
         #
         # Config File Monitor
         #
         if 'monitor_config' in profile_data and profile_data['monitor_config']:
             if self.config_file_monitor:
-                if self.config_file_monitor.started:
-                    pass
-                else:
+                if not self.config_file_monitor.started:
                     self.config_file_monitor.start()
             else:
                 from py2030.config_file_monitor import ConfigFileMonitor
@@ -162,7 +195,9 @@ class App:
             self.osc_outputs = []
 
             for data in profile_data['osc_outputs'].values():
-                self.osc_outputs.append(OscOutput(data)) # auto-starts
+                # this profile is for joining clients, don't initialize statically
+                if not 'ip' in data or data['ip'] != 'joiner':
+                    self.osc_outputs.append(OscOutput(data)) # auto-starts
 
             del OscOutput
 
@@ -198,7 +233,7 @@ class App:
             if not self.http_server:
                 # start http server on (new) port
                 from py2030.http_server import HttpServer
-                self.http_server = HttpServer({'port': port})
+                self.http_server = HttpServer({'port': port, 'host_info': self._host_info()})
                 self.http_server.start()
                 del HttpServer
 
@@ -222,18 +257,19 @@ class App:
         #
         # Reconfig Downloader
         #
-        enabled = profile_data['download_reconfig'] if 'download_reconfig' in profile_data else None
-        if enabled:
-            if self.reconfig_downloader:
-                self.reconfig_downloader.setup()
+        if 'downloader' in profile_data:
+            opts = profile_data['downloader']
+            if self.downloader:
+                self.downloader.configure(opts)
             else:
-                from py2030.client_side.reconfig_downloader import ReconfigDownloader
-                self.reconfig_downloader = ReconfigDownloader()
-                self.reconfig_downloader.setup()
-                del ReconfigDownloader
+                from py2030.client_side.downloader import Downloader
+                self.downloader = Downloader(opts)
+                self.downloader.setup()
+                del Downloader
         else:
-            if self.reconfig_downloader:
-                self.reconfig_downloader.destroy()
+            if self.downloader:
+                self.downloader.destroy()
+                self.downloader = None
 
         #
         # Interval broadcaster
@@ -249,7 +285,7 @@ class App:
                 ColorTerminal().yellow('set broadcast interval to {0}'.format(interval))
             else:
                 from py2030.interval_broadcast import IntervalBroadcast
-                self.interval_broadcast = IntervalBroadcast({'interval': interval, 'data': {'ip': self._ip(), 'role': 'controller'}})
+                self.interval_broadcast = IntervalBroadcast({'interval': interval, 'data': {'ip': self._ip(), 'role': 'controller', 'version': config_file.get_value('py2030.version')}})
                 ColorTerminal().yellow('started broadcast interval at {0}'.format(interval))
                 del IntervalBroadcast
 
@@ -267,35 +303,139 @@ class App:
                 ColorTerminal().yellow('set joiner interval to {0}'.format(interval))
             else:
                 from py2030.client_side.interval_joiner import IntervalJoiner
-                self.interval_joiner = IntervalJoiner({'interval': interval, 'data': {'ip': self._ip(), 'port': 2030}}) # TODO; determine port from osc listeners?
+                # TODO; determine port from osc listeners?
+                self.interval_joiner = IntervalJoiner({'interval': interval, 'data': {'ip': self._ip(), 'port': self._join_data_port(), 'hostname': self._hostname()}})
                 ColorTerminal().yellow('started joiner interval at {0}'.format(interval))
                 del IntervalJoiner
 
+        #
+        # Syncer
+        #
+        if 'syncer' in profile_data:
+            from py2030.syncer import Syncer
+            self.syncer = Syncer(profile_data['syncer'])
+            self.syncer.setup()
+            del Syncer
+
+        #
+        # OscAscii recorder
+        #
+        if 'osc_ascii_output' in profile_data:
+            from py2030.outputs.osc_ascii import OscAscii
+            self.osc_ascii_output = OscAscii(profile_data['osc_ascii_output'])
+            if 'file' in self.options:
+                self.osc_ascii_output.configure({'path': self.options['file']})
+            self.osc_ascii_output.start()
+            del OscAscii
+
+        if 'osc_ascii_input' in profile_data:
+            from py2030.inputs.osc_ascii import OscAsciiInput
+            self.osc_ascii_input = OscAsciiInput(profile_data['osc_ascii_input'])
+            if 'file' in self.options:
+                self.osc_ascii_input.configure({'path': self.options['file']})
+            if 'loop' in self.options:
+                self.osc_ascii_input.configure({'loop': self.options['loop']})
+            self.osc_ascii_input.start()
+            del OscAsciiInput
+
+        #
+        # Config recorder
+        #
+        if 'config_recorders' in profile_data:
+            # initialize attribute
+            if not hasattr(self, 'config_recorders'):
+                self.config_recorders = []
+
+            # cleanup existing recorders
+            for cfgrec in self.config_recorders:
+                cfgrec.stop()
+            self.config_recorders = []
+
+            # create recorders according to configuration profiles
+            from py2030.config_recorder import ConfigRecorder
+            for rec_profile in profile_data['config_recorders'].values():
+                cfgrec = ConfigRecorder(rec_profile)
+                cfgrec.start()
+                self.config_recorders.append(cfgrec)
+            del ConfigRecorder
+
+
+
+
+
+
+    # returns the port number to be send with the join dataChangeEvent
+    # (this will be our incoming OSC port)
+    def _join_data_port(self):
+        # find the first osc input (listener) that accepts 'acks'
+        for osc_input in self.osc_inputs:
+            if osc_input.receivesType('ack'):
+                return osc_input.port()
+        # default
+        return 2030
+
+    def _host_info(self):
+        if self.__host_info_cache:
+            return self.__host_info_cache
+
+        # import socket
+        import subprocess
+        platform = subprocess.Popen("uname", shell=True, stdout=subprocess.PIPE).stdout.read().strip()
+        hostname = subprocess.Popen("hostname", shell=True, stdout=subprocess.PIPE).stdout.read().strip()
+
+        if platform == 'Darwin': # Mac OSX
+            import socket
+            ip = socket.gethostbyname(hostname)
+            del socket
+        else: # linux
+            ip = subprocess.Popen("hostname -I", shell=True, stdout=subprocess.PIPE).stdout.read().strip()
+
+        del subprocess
+
+        self.__host_info_cache = {'hostname': hostname, 'ip': ip, 'platform': platform}
+        print 'host info: ', self.__host_info_cache
+        return self.__host_info_cache
+
     def _ip(self):
-        if hasattr(self, '__ip_address'):
-            return self.__ip_address
-        import socket
-        self.__ip_address = socket.gethostbyname(socket.gethostname())
-        del socket
-        return self.__ip_address
+        return self._host_info()['ip']
+
+    def _hostname(self):
+        return self._host_info()['hostname']
+
+    def _getJoinerOscOutProfileData(self):
+        # find osc output profile for joining clients
+        if 'osc_outputs' in self.profile_data:
+            for data in self.profile_data['osc_outputs'].values():
+                # the 'ip' attribute must be 'joiner'
+                if 'ip' in data and data['ip'] == 'joiner':
+                    return copy.copy(data)
+        return None
+
+    def _version(self):
+        return self.config_file.get_value('py2030.version')
 
     def _onJoin(self, join_data):
-        if not 'osc_to_joins' in self.profile_data:
+        joined_config = self._getJoinerOscOutProfileData()
+
+        if not joined_config: # osc to joiners not enabled (the case for clients)
+            # ColorTerminal().warn('osc-to-joiners not enabled')
             return
 
-        joins_config = self.profile_data['osc_to_joins']
-        if not 'enabled' in joins_config or not joins_config['enabled']:
-            return
-
-        # check we got all required params
-        if not 'ip' in join_data or not 'port' in join_data:
-            ColorTerminal().warn('Got incomplete join data')
+        # check we got all required params. TODO; require hostname as well?
+        if not 'ip' in join_data or not 'port' in join_data or not 'hostname' in join_data:
+            ColorTerminal().warn('Got incomplete join data (require ip, port and hostname)')
             print join_data
             return
+
+        ack_data = {'version': self._version()}
+        if self.http_server:
+            ack_data['version_download_url'] = self.http_server.version_url(self._version())
 
         # don't register if already outputting to this address/port
         for out in self.osc_outputs:
             if out.host() == join_data['ip'] and out.port() == join_data['port']:
+                # TODO trigger ackEvent on interface instead, with client id?
+                out.trigger('ack', ack_data)
                 ColorTerminal().warn('Got join with already registered osc-output specs')
                 print join_data
                 return
@@ -303,27 +443,33 @@ class App:
         # don't register if already outputting to this address/port
         for out in self.joined_osc_outputs:
             if out.host() == join_data['ip'] and out.port() == join_data['port']:
+                # TODO trigger ackEvent on interface instead, with client id?
+                out.trigger('ack', ack_data)
                 ColorTerminal().warn('Got join with already registered osc-output specs')
                 print join_data
                 return
 
         # prep params
-        opts = {'ip':join_data['ip'], 'port':join_data['port']}
-        if 'verbose' in joins_config:
-            opts['verbose'] = joins_config['verbose']
+        joined_config['ip'] = join_data['ip']
+        joined_config['client_id'] = join_data['hostname']
+        if not 'port' in joined_config or joined_config['port'] == 'joiner':
+            joined_config['port'] = join_data['port']
 
         from py2030.outputs.osc import Osc as OscOutput
-        self.joined_osc_outputs.append(OscOutput(opts)) # auto-starts
+        osc_out = OscOutput(joined_config)
+        # TODO trigger ackEvent on interface instead, with client id?
+        osc_out.trigger('ack', ack_data)
+        self.joined_osc_outputs.append(osc_out) # auto-starts
         del OscOutput
 
-    def _onGenericEvent(self, data):
+    def _onAck(self, data):
+        # controller side;
+        # not triggered on controller-side (for now)
+
+        # client side
         if self.interval_joiner and self.interval_joiner.running:
-            ColorTerminal().yellow('Got genericEvent, stopping interval joiner')
+            ColorTerminal().yellow('Got ackEvent, stopping interval joiner')
             self.interval_joiner.stop()
         self.joined = True
 
-    def _onEffect(self, data):
-        if self.interval_joiner and self.interval_joiner.running:
-            ColorTerminal().yellow('Got effectEvent, stopping interval joiner')
-            self.interval_joiner.stop()
-        self.joined = True
+        # self.downloader will take care of the rest
