@@ -3,6 +3,9 @@ py2030:
   version: '0.1.0'
   profiles:
     client:
+      alive_notifier:
+        file: 'last-alive.txt'
+        interval: 15.0
       downloader:
         enabled: true
         reconfig: true
@@ -34,7 +37,9 @@ py2030:
             - ping
 
     test:
-      monitor_config: false
+      alive_notifier:
+        file: 'last-alive.txt'
+        interval: 15.0
       downloader:
         enabled: true
         reconfig: true

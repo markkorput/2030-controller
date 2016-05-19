@@ -66,6 +66,8 @@ config/config.json
 config/*.png
 test.py
 
+log.txt
 data/osc/*.csv
 data/*.tar.gz
 *.bak
+last-alive.txt

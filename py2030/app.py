@@ -17,6 +17,7 @@ class App:
 
         # components
         self.__host_info_cache = None
+        self.alive_notifier = None
         self.interface = Interface.instance() # use global interface singleton instance
         self.version_packager = None
         self.config_file_monitor = None
@@ -96,6 +97,9 @@ class App:
                 cfgrec.stop()
 
     def update(self):
+        if self.alive_notifier:
+            self.alive_notifier.update()
+
         for instruction in self.queue:
             if instruction == 'reconfig':
                 self._apply_config(self.config_file)
@@ -122,6 +126,14 @@ class App:
             profile_data = {}
         self.profile_data = profile_data
         # print 'Profile Data: ', profile_data
+
+        #
+        # alive-notifier
+        #
+        if 'alive_notifier' in profile_data:
+            from py2030.alive_notifier import AliveNotifier
+            self.alive_notifier = AliveNotifier(profile_data['alive_notifier'])
+            del AliveNotifier
 
         #
         # Version Packager
