@@ -64,7 +64,7 @@ class Osc:
         # we'll enforce a limit to the number of osc requests
         # we'll handle in a single iteration, otherwise we might
         # get stuck in processing an endless stream of data
-        limit = 10
+        limit = 50
         count = 0
 
         # clear timed_out flag
@@ -119,16 +119,16 @@ class Osc:
         # register time out callback
         self.osc_server.handle_timeout = self._onTimeout
         # register specific OSC messages callback(s)
-        if self.isForwarder():
-            self.osc_server.addMsgHandler('default', self._forwardOscMessage)
-        else:
+        if not self.isForwarder():
             self.osc_server.addMsgHandler('/change', self._onChange) # deprecated
             self.osc_server.addMsgHandler('/join', self._onJoin)
             self.osc_server.addMsgHandler('/ack', self._onAck)
             self.osc_server.addMsgHandler('/event', self._onEvent)
             self.osc_server.addMsgHandler('/clip', self._onClip)
             self.osc_server.addMsgHandler('/effect', self._onEffect)
-            self.osc_server.addMsgHandler('default', self._onUnknownMessage)
+            # self.osc_server.addMsgHandler('default', self._onUnknownMessage)
+        self.osc_server.addMsgHandler('default', self._forwardOscMessage)
+
 
         # set internal connected flag
         self.connected = True
