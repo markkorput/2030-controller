@@ -1,4 +1,6 @@
 py2030:
+  version: 0.1.0
+
   profiles:
     client:
       monitor_config: false
@@ -66,7 +68,7 @@ py2030:
       monitor_config: true
       # midi_input_port: 0
       # http_server_port: 2040
-      # broadcast_interval: 2.0
+      broadcast_interval: 10.0
       broadcast_reconfig: true
       # download_reconfig: true
       syncer:
@@ -87,9 +89,9 @@ py2030:
           port: 2031
           forwarder: true
       osc_outputs:
-        to_joiners:
-          ip: 'joiner'
-          port: 'joiner'
+        broadcast:
+          ip: '192.168.2.255'
+          port: 2030
           verbose: true
           outputs:
             - event
@@ -97,6 +99,16 @@ py2030:
             - clip
             - ping
             - osc
+        # to_joiners:
+        #   ip: 'joiner'
+        #   port: 'joiner'
+        #   verbose: true
+        #   outputs:
+        #     - event
+        #     - effect
+        #     - clip
+        #     - ping
+        #     - osc
 
     oscrecorder:
       osc_inputs:
