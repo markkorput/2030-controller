@@ -108,6 +108,49 @@ py2030:
             - ping
             - osc
 
+    osccfg:
+      osc_inputs:
+        remote_receiver:
+          ip: 'self' #'127.0.0.1'
+          port: 2029
+          forwarder: true
+          # verbose: true
+        local_receiver:
+          ip: '127.0.0.1'
+          port: 2029
+          forwarder: true
+          # verbose: true
+      osc_outputs:
+        forward_to_joiners:
+          ip: 'joiner'
+          port: 'joiner'
+          # verbose: true
+          outputs:
+            - event
+            - effect
+            - clip
+            - ping
+            - osc
+        forward_local:
+          ip: '127.0.0.1'
+          port: 2031
+          # verbose: true
+          outputs:
+          - osc
+      config_recorders:
+        screens:
+          prefix: '/scr'
+          path: 'data/screens.xml'
+          configs_root_el: 'screens'
+          config_el: 'screen'
+          # verbose: true
+        effects:
+          prefix: '/cfg'
+          path: 'data/effects.xml'
+          configs_root_el: 'effects'
+          config_el: 'effect'
+          # verbose: true
+
   midi_triggers:
     48: # C2
       effect:
