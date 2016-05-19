@@ -223,7 +223,7 @@ class App:
             if not self.http_server:
                 # start http server on (new) port
                 from py2030.http_server import HttpServer
-                self.http_server = HttpServer({'port': port})
+                self.http_server = HttpServer({'port': port, 'host_info': self._host_info()})
                 self.http_server.start()
                 del HttpServer
 
@@ -417,7 +417,9 @@ class App:
             print join_data
             return
 
-        ack_data = {'version': self.config_file.get_value('py2030.version')}
+        ack_data = {'version': self._version()}
+        if self.http_server:
+            ack_data['version_download_url'] = self.http_server.version_url(self._version())
 
         # don't register if already outputting to this address/port
         for out in self.osc_outputs:

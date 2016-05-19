@@ -65,8 +65,8 @@ class Downloader:
             return
 
         ColorTerminal().warn('ack response gave different version: ' + data['version'])
-
-        if not 'version_dowload_url' in data:
+        print data
+        if not 'version_download_url' in data:
             ColorTerminal().warn("didn't get version-download-url, staying on current version: " + my_version)
             return
 
@@ -76,6 +76,7 @@ class Downloader:
         if os.path.isfile(target_path):
             print 'other version already available'
             # TODO; load other version
+            return
 
         # blocking
         # subprocess.call(['wget', data['version_download_url'])
