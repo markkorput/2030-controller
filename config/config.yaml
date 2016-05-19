@@ -114,22 +114,22 @@ py2030:
           ip: 'self' #'127.0.0.1'
           port: 2029
           forwarder: true
-          verbose: true
+          # verbose: true
       osc_outputs:
-        # to_joiners:
-        #   ip: 'joiner'
-        #   port: 'joiner'
-        #   verbose: true
-        #   outputs:
-        #     - event
-        #     - effect
-        #     - clip
-        #     - ping
-        #     - osc
+        to_joiners:
+          ip: 'joiner'
+          port: 'joiner'
+          # verbose: true
+          outputs:
+            - event
+            - effect
+            - clip
+            - ping
+            - osc
         local_cfg_forward:
           ip: '127.0.0.1'
           port: 2031
-          verbose: false
+          # verbose: true
           outputs:
           - osc
       config_recorders:
@@ -138,8 +138,13 @@ py2030:
           path: 'data/screens.xml'
           configs_root_el: 'screens'
           config_el: 'screen'
-          verbose: true
-
+          # verbose: true
+        effects:
+          prefix: '/cfg'
+          path: 'data/effects.xml'
+          configs_root_el: 'effects'
+          config_el: 'effect'
+          # verbose: true
 
 
   midi_triggers:

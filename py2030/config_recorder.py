@@ -9,7 +9,6 @@ class ConfigRecorder:
         self.prefix = '/cfg'
 
         self.options = {}
-        print 'ConfigRecorder opts: ', options
         self.configure(options)
 
     def __del__(self):
