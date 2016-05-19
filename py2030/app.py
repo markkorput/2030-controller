@@ -39,10 +39,6 @@ class App:
         self.interface.joinEvent += self._onJoin
         self.interface.ackEvent += self._onAck
 
-        # autoStart is True by default
-        if not 'setup' in options or options['setup']:
-            self.setup()
-
     def __del__(self):
         self.destroy()
 

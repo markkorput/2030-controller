@@ -6,6 +6,7 @@ class Launcher:
     def __init__(self, options):
         # attributes
         self._update_children = []
+        self.running = True
 
         # configuration
         self.options = options
@@ -14,12 +15,21 @@ class Launcher:
     def setup(self):
         self.app = App({'profile': options.profile, 'file': options.file, 'loop': options.loop})
         # ColorTerminal().green('py2030 App instance started with profile: ' + self.app.profile)
+        self.app.setup()
+        if self.app.downloader:
+            self.app.downloader.newVersionEvent += self._onNewVersion
 
     def destroy(self):
         self.app.destroy()
 
     def update(self):
         self.app.update()
+
+    def _onNewVersion(self, version, downloader):
+        ColorTerminal().warn('[Launcher] received new version notification: ' + version + ". Restarting!")
+        self.running = False
+
+
 
 def main(options, args):
     if options.route_ip:
@@ -52,7 +62,7 @@ def main(options, args):
     launcher = Launcher(options)
 
     try:
-        while True:
+        while launcher.running:
             launcher.update()
     except KeyboardInterrupt:
         ColorTerminal().yellow('KeyboardInterrupt. Quitting.')
