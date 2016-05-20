@@ -37,7 +37,7 @@ py2030:
             - osc
       osc_inputs:
         self:
-          ip: 'self'
+          ip: '' #'self'
           port: 2030
           shared: false
           verbose: true
@@ -81,7 +81,7 @@ py2030:
             - osc
       osc_inputs:
         self:
-          ip: 'self'
+          ip: '' # 'self'
           port: 2025
           shared: false
           # verbose: true
@@ -93,7 +93,7 @@ py2030:
             - ping
             - restart
         of2030:
-          ip: '127.0.0.1'
+          ip: '' # '127.0.0.1'
           port: 2033
           shared: false
           verbose: true
@@ -112,7 +112,7 @@ py2030:
 
       osc_inputs:
         client_join_and_clip_receiver:
-          ip: 'self' #'127.0.0.1'
+          ip: '' #'self' #'127.0.0.1'
           port: 2030
           inputs:
             - join
@@ -120,7 +120,7 @@ py2030:
             - pong
           verbose: true
         forwarder_for_all_osc_messages:
-          ip: '127.0.0.1'
+          ip: '' # '127.0.0.1'
           port: 2031
           forwarder: true
       osc_outputs:
@@ -166,8 +166,8 @@ py2030:
       osc_outputs:
         playbacker:
           ip: '127.0.0.1'
-          port: 2031
-          # verbose: true
+          port: 2025
+          verbose: true
           outputs:
             - event
             - effect
