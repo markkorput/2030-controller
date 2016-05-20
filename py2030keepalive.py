@@ -8,8 +8,8 @@ if __name__ == '__main__':
 
     try:
         while True:
-            # python /home/pi/py2030/launcher.py > /home/pi/py2030/log.txt 2>&1 &
-            command = './launcher.py >> ./log.txt 2>&1'
+            # python /home/pi/py2030/run2030.py > /home/pi/py2030/log.txt 2>&1 &
+            command = './run2030.py >> ./log.txt 2>&1'
             print 'Launching py2030 with command:', command
             os.system(command)
     except KeyboardInterrupt:
