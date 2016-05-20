@@ -80,14 +80,21 @@ class Of2030:
         return None
 
     def spawn_in_background(self):
-        cmd = self._get_of2030_binary_path()
+        p = self._get_of2030_binary_path()
 
-        if not cmd:
+        if not p:
             print "Could not find of2030 executable (neither debug nor release version), can't spawn"
             return
 
         # no blocking; run in background
-        cmd = cmd + " &"
+        original_pwd = os.path.abspath(os.path.curdir)
+
+        print '[Of2030] changing into dir:', os.path.dirname(p)
+        os.chdir(os.path.dirname(p))
+        cmd = "./"+p.split('/')[-1]+" &"
 
         print '[Of2030] spawning of2030 process with command:', cmd
         os.system(cmd)
+
+        print '[Of2030] changing back to original dir:', original_pwd
+        os.chdir(original_pwd)
