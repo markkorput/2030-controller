@@ -47,7 +47,7 @@ py2030:
             - event
             - clip
             - ping
-
+            - restart
     test:
       of2030:
         path: '/Users/mark/code/of_v0.9.3_osx_release/apps/of2030/of2030'
@@ -91,6 +91,7 @@ py2030:
             - event
             - clip
             - ping
+            - restart
         of2030:
           ip: '127.0.0.1'
           port: 2033

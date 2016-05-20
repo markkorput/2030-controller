@@ -49,6 +49,7 @@ class Interface:
         # ping/pong for syncing
         self.pingEvent = Event() # triggered to ping/when being pinged
         self.pongEvent = Event() # triggered to pong/when being ponged
+        self.restartEvent = Event() # triggered when receiving as restart command
         # triggered when an Osc message came in that simply has to be forwarded to all connected clients
         self.oscMessageEvent = Event()
 

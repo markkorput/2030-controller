@@ -126,6 +126,7 @@ class Osc:
             self.osc_server.addMsgHandler('/event', self._onEvent)
             self.osc_server.addMsgHandler('/clip', self._onClip)
             self.osc_server.addMsgHandler('/effect', self._onEffect)
+            self.osc_server.addMsgHandler('/restart', self._onRestart)
             # self.osc_server.addMsgHandler('default', self._onUnknownMessage)
         self.osc_server.addMsgHandler('default', self._forwardOscMessage)
 
@@ -230,3 +231,12 @@ class Osc:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
         self.interface.oscMessageEvent(addr, tags, data, client_address)
+
+    def _onRestart(self, addr, tags, data, client_address):
+        if not self.receivesType(addr[1:]):
+            return
+
+        if self.verbose:
+            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
+        self.interface.restartEvent()
