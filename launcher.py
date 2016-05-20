@@ -16,8 +16,8 @@ class Launcher:
 
         self.app.setup()
 
-        if self.app.downloader:
-            self.app.downloader.newVersionEvent += self._onNewVersion
+        if self.app.interface:
+            self.app.interface.restartEvent += self._onRestart
 
     def destroy(self):
         self.app.destroy()
@@ -25,8 +25,8 @@ class Launcher:
     def update(self):
         self.app.update()
 
-    def _onNewVersion(self, version, downloader):
-        print '[Launcher] received new version notification: ' + version + ". Restarting!"
+    def _onRestart(self):
+        print '[Launcher] received restart notification, Restarting!'
         self.running = False
 
 def main(options, args):

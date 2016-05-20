@@ -100,6 +100,7 @@ class Downloader:
 
         print 'Downloader triggering newVersionEvent'
         self.newVersionEvent(data['version'], self)
+        self.interface.restartEvent()
 
     def _applyVersionFile(self, path):
         command = 'tar -zxf '+path+' -C data'
