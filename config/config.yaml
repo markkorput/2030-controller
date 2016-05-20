@@ -3,6 +3,10 @@ py2030:
   version: '0.1.0'
   profiles:
     client:
+      of2030:
+        # path: '/home/pi/of2030' # default
+        log_monitor_interval: 15.0
+        log_monitor_treshold: 20.0
       # alive_notifier:
       #   file: 'last-alive.txt'
       #   interval: 15.0
@@ -17,7 +21,7 @@ py2030:
       osc_outputs:
         controller_joiner:
           # ip: '192.168.2.1'
-          hostname: 'MarkBookPro.Home'
+          hostname: 'MarkBookPro.local'
           port: 2030
           outputs:
             - join
@@ -59,7 +63,7 @@ py2030:
       osc_outputs:
         controller_joiner:
           # ip: '127.0.0.1'
-          hostname: 'MarkBookPro.Home'
+          hostname: 'MarkBookPro.local'
           port: 2030
           outputs:
             - join
