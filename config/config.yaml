@@ -101,7 +101,7 @@ py2030:
     controller:
       # monitor_config: true
       # midi_input_port: 0
-      http_server_port: 2040
+      # http_server_port: 2040
       # broadcast_interval: 3.0
       broadcast_reconfig: true
       # download_reconfig: true
@@ -118,10 +118,10 @@ py2030:
             - clip
             - pong
           verbose: true
-        # forwarder_for_all_osc_messages:
-        #   ip: '127.0.0.1'
-        #   port: 2031
-        #   forwarder: true
+        forwarder_for_all_osc_messages:
+          ip: '127.0.0.1'
+          port: 2031
+          forwarder: true
       osc_outputs:
         to_joiners:
           ip: 'joiner'
@@ -132,6 +132,13 @@ py2030:
             - effect
             - clip
             - ping
+            - osc
+        testpi:
+          # ip: 'joiner'
+          hostname: 'rpi2.local'
+          port: '2031'
+          # verbose: true
+          outputs:
             - osc
       version_packager:
         enabled: true # dummy attribute
@@ -167,8 +174,9 @@ py2030:
             - ping
             - osc
         playbackerRaspi:
-          ip: '192.168.2.15'
-          port: 2030
+          #ip: '192.168.2.14'
+          hostname: 'rpi2.local'
+          port: 2031
           verbose: true
           outputs:
             - event
