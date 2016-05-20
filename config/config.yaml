@@ -49,6 +49,9 @@ py2030:
             - ping
 
     test:
+      of2030:
+        path: '/Users/mark/code/of_v0.9.3_osx_release/apps/of2030/of2030'
+        bin_path: '/Users/mark/code/of_v0.9.3_osx_release/apps/of2030/of2030/bin/emptyExampleDebug.app/Contents/MacOS/emptyExampleDebug'
       # alive_notifier:
       #   file: 'last-alive.txt'
       #   interval: 15.0

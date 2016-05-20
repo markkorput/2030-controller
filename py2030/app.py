@@ -18,6 +18,7 @@ class App:
         self.joined = False
 
         # components
+        self.update_components = []
         self.__host_info_cache = None
         self.alive_notifier = None
         self.interface = Interface.instance() # use global interface singleton instance
@@ -99,6 +100,9 @@ class App:
                 cfgrec.stop()
 
     def update(self):
+        for comp in self.update_components:
+            comp.update()
+
         if self.alive_notifier:
             self.alive_notifier.update()
 
@@ -136,6 +140,19 @@ class App:
             from py2030.alive_notifier import AliveNotifier
             self.alive_notifier = AliveNotifier(profile_data['alive_notifier'])
             del AliveNotifier
+
+        #
+        # Of2030
+        #
+        if 'of2030' in profile_data:
+            if hasattr(self, 'of2030'):
+                self.update_components.remove(self.of2030)
+                del self.of2030
+
+            from py2030.of2030 import Of2030
+            self.of2030 = Of2030(profile_data['of2030'])
+            self.update_components.append(self.of2030)
+            del Of2030
 
         #
         # Version Packager

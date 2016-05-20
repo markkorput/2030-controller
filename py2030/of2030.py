@@ -1,9 +1,9 @@
 import os, time
 
 class Of2030:
-    def __init_(self, options={}):
+    def __init__(self, options={}):
         # attributes
-        self.start_time = 0.0
+        self.start_time = time.time()
         self.time = 0.0
         self.next_log_monitor_time = 0.0
 
@@ -28,10 +28,6 @@ class Of2030:
 
         if 'path' in options:
             self.path = options['path']
-
-    def setup(self):
-        self.next_log_monitor_time = 0.0
-        self.start_time = time.time()
 
     def update(self, dt=None):
         if dt:
@@ -68,12 +64,17 @@ class Of2030:
         return None
 
     def _get_of2030_binary_path(self):
+        if 'bin_path' in self.options:
+            p = self.options['bin_path']
+            if os.path.isfile(p):
+                return p
+
         p = self.path + '/bin/of2030'
         if os.path.isfile(p):
             return p
 
         p = self.path + '/bin/of2030_debug'
-        if os.path.isfile(exe_path):
+        if os.path.isfile(p):
             return p
 
         return None
