@@ -87,19 +87,20 @@ class SshInstaller:
 
         # todo; install pip if necessary?
 
-        self.client.exec_command('sudo pip install -r requirements_client.txt')
+        self.client.exec_command('sudo pip install -r requirements.txt')
         for line in stdout: pass
         for line in stderr: ColorTerminal().fail(str(line.strip('\n')))
 
         if bootstrap:
-            stdin, stdout, stderr = self.client.exec_command('./launcher.py --install --bootstrap')
+            stdin, stdout, stderr = self.client.exec_command('./run2030.py --install --bootstrap')
         else:
-            stdin, stdout, stderr = self.client.exec_command('./launcher.py --install')
+            stdin, stdout, stderr = self.client.exec_command('./run2030.py --install')
         for line in stdout: pass
         for line in stderr: ColorTerminal().fail(str(line.strip('\n')))
 
     def start_remotely(self):
         # launch daemon
+        pass
 
     def _connect(self):
         if self.connected:

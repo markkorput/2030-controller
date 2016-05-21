@@ -1,0 +1,4 @@
+.git
+*.pyc
+py2030.tar.gz
+*.DS_Store

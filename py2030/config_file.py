@@ -101,12 +101,12 @@ class ConfigFile:
     def exists(self):
         return os.path.isfile(self.path())
 
-    def get_value(self, path):
+    def get_value(self, path, default_value=None):
         data = self.data if self.data else {}
         names = path.split('.')
         for name in names:
             if not name in data:
-                return None
+                return default_value
             data = data[name]
         return data
 
