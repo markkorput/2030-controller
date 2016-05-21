@@ -1,5 +1,6 @@
 py2030:
   # local of2030 data
+  osc_folder: '/Users/mark/Dropbox/2030-mark/19-timelines/2-EXPORTS'
   of2030:
     path: '/Users/mark/code/of_v0.9.3_osx_release/apps/of2030/of2030'
 
