@@ -18,7 +18,7 @@ class Remote:
         self.ofpath = config_file.get_value(prefix+'.of2030.path', '/home/pi/openFrameworks/apps/of2030/of2030')
 
     def ofparentfolder(self):
-        return ','.join(self.ofpath.split('/')[0:-1])
+        return '/'.join(self.ofpath.split('/')[0:-1])
 
     def offoldername(self):
         return self.ofpath.split('/')[-1]
@@ -86,12 +86,12 @@ class Tool:
 
             tarfile='of2030-bin.tar.gz'
             location=remote.ofparentfolder()
-            folder='of2030-'+time.strftime('%Y%m%d_%H%M%S')
+            # folder='of2030-'+time.strftime('%Y%m%d_%H%M%S')
 
             # push package
             ssh.put(tarfile, tarfile)
             # install package
-            ssh.cmd(ShellScript('data/scripts/of2030_bin_tar_install.sh').get_script({'tarfile': tarfile, 'location': location, 'folder': folder}))
+            ssh.cmd(ShellScript('data/scripts/of2030_bin_tar_install.sh').get_script({'tarfile': tarfile, 'location': location}))
             # remove package
             ssh.cmd('rm '+tarfile)
             # done for this remote
