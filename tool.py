@@ -194,14 +194,14 @@ class Tool:
             # done for this remote
             ssh.disconnect()
 
-    def shutdown(self):
+    def cmd_all_remotes(self, cmd):
         for remote in self.remotes:
             ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
             if not ssh.connect():
                 # could not connect to current remote, move to next one
                 continue
 
-            ssh.cmd('sudo shutdown -h now')
+            ssh.cmd(cmd)
             ssh.disconnect()
 
 def main(opts, args):
@@ -254,13 +254,18 @@ def main(opts, args):
         print 'DONE, removing local copy;', tarfile
         subprocess.call(['rm', tarfile])
 
+    if opts.reboot:
+        tool.cmd_all_remotes('sudo reboot')
+
     if opts.shutdown:
-        tool.shutdown()
+        tool.cmd_all_remotes('sudo shutdown -h now')
 
 if __name__ == '__main__':
     from optparse import OptionParser
     parser = OptionParser()
     parser.add_option('--shutdown', dest='shutdown', action="store_true", default=False)
+    parser.add_option('--reboot', dest='reboot', action="store_true", default=False)
+
     parser.add_option('--get-of', dest='get_of', action="store_true", default=False)
     parser.add_option('--push-of', dest='push_of', action="store_true", default=False)
     parser.add_option('--update-of', dest='update_of', action="store_true", default=False)
