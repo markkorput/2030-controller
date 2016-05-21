@@ -46,8 +46,8 @@ class ShellScript:
             exe_lines.append(line)
         return "\n".join(exe_lines)
 
-    def execute(self):
-        script = self.get_script()
+    def execute(self, params = {}):
+        script = self.get_script(params)
         print "executing script:", script
         os.system(script)
 

@@ -100,6 +100,10 @@ class Tool:
             # done for this remote
             ssh.disconnect()
 
+    def create_py_tar(self):
+        tarfile='py2030.tar.gz'
+        ShellScript('data/scripts/py2030_tar_create.sh').execute({'tarfile': tarfile})
+
 
 def main(opts, args):
     tool = Tool()
@@ -108,7 +112,7 @@ def main(opts, args):
         tool.fetch_of_build()
         tool.push_of_build()
         tarfile='of2030-bin.tar.gz'
-        print 'DONE, removing local copy;', tarfile 
+        print 'DONE, removing local copy;', tarfile
 
         subprocess.call(['rm', tarfile])
 
@@ -118,13 +122,16 @@ def main(opts, args):
     if opts.push_of:
         tool.push_of_build()
 
+    if opts.get_py:
+        tool.create_py_tar()
+
 if __name__ == '__main__':
     from optparse import OptionParser
     parser = OptionParser()
     parser.add_option('--get-of', dest='get_of', action="store_true", default=False)
     parser.add_option('--push-of', dest='push_of', action="store_true", default=False)
     parser.add_option('--update-of', dest='update_of', action="store_true", default=False)
-
+    parser.add_option('--get-py', dest='get_py', action="store_true", default=False)
     # parser.add_option('-c', '--client', dest='client', action="store_true", default=False)
     # parser.add_option('-f', '--file', dest='file', default=None)
     # parser.add_option('-l', '--loop', dest='loop', action="store_true", default=False)
