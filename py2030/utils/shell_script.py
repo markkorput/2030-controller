@@ -37,10 +37,13 @@ class ShellScript:
         # this is never reached..
         return None
 
-    def get_script(self):
+    def get_script(self, params = {}):
         exe_lines = []
         while self.next_line():
-            exe_lines.append(self.last_line)
+            line = self.last_line
+            for key in params:
+                line = line.replace('{{'+key+'}}', params[key])
+            exe_lines.append(line)
         return "\n".join(exe_lines)
 
     def execute(self):
