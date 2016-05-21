@@ -23,10 +23,14 @@ class Remote:
     def offoldername(self):
         return self.ofpath.split('/')[-1]
 
+    def ofshadersfolder(self):
+        return self.ofpath+'/bin/data/shadersES2'
+
 class Of2030:
     def __init__(self, config_file):
         self.config_file = config_file
         self.path = config_file.get_value('py2030.of2030.path', '/home/pi/of2030')
+        self.raspi_shaders_folder_path = self.path + '/bin/data/shadersES2'
 
 class Tool:
     def __init__(self):
@@ -162,6 +166,34 @@ class Tool:
             ssh.cmd(startcmd, wait=False)
             ssh.cmd(stopcmd, wait=False)
 
+    def get_shaders(self, folder=None):
+        if not folder:
+            folder = Of2030(self.config_file).raspi_shaders_folder_path
+
+        tarfile = 'shadersES2.tar.gz'
+        ShellScript('data/scripts/shaders_tar_create.sh').execute({'tarfile': tarfile, 'folder': folder})
+
+    def push_shaders(self, skip_builders=False):
+        for remote in self.remotes:
+            if remote.ofbuilder and skip_builders:
+                continue
+
+            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+            if not ssh.connect():
+                # could not connect to current remote, move to next one
+                continue
+
+            tarfile='shadersES2.tar.gz'
+            location=remote.ofshadersfolder()
+            # push package
+            ssh.put(tarfile, tarfile)
+            # install package
+            ssh.cmd(ShellScript('data/scripts/shaders_tar_install.sh').get_script({'tarfile': tarfile, 'location': location}))
+            # remove package
+            ssh.cmd('rm '+tarfile)
+            # done for this remote
+            ssh.disconnect()
+
 def main(opts, args):
     tool = Tool()
 
@@ -199,6 +231,19 @@ def main(opts, args):
     if opts.restart:
         tool.restart()
 
+    if opts.get_shaders:
+        tool.get_shaders(opts.folder)
+
+    if opts.push_shaders:
+        tool.push_shaders()
+
+    if opts.update_shaders:
+        tool.get_shaders(opts.folder)
+        tool.push_shaders()
+        tarfile = 'shadersES2.tar.gz'
+        print 'DONE, removing local copy;', tarfile
+        subprocess.call(['rm', tarfile])
+
 if __name__ == '__main__':
     from optparse import OptionParser
     parser = OptionParser()
@@ -211,6 +256,11 @@ if __name__ == '__main__':
     parser.add_option('--stop', dest='stop', action="store_true", default=False)
     parser.add_option('--start', dest='start', action="store_true", default=False)
     parser.add_option('--restart', dest='restart', action="store_true", default=False)
+    parser.add_option('--get-shaders', dest='get_shaders', action="store_true", default=False)
+    parser.add_option('--push-shaders', dest='push_shaders', action="store_true", default=False)
+    parser.add_option('--update-shaders', dest='update_shaders', action="store_true", default=False)
+    parser.add_option('-f', '--folder', dest='folder', default=None)
+
     # parser.add_option('-c', '--client', dest='client', action="store_true", default=False)
     # parser.add_option('-f', '--file', dest='file', default=None)
     # parser.add_option('-l', '--loop', dest='loop', action="store_true", default=False)
