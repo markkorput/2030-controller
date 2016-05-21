@@ -104,6 +104,25 @@ class Tool:
         tarfile='py2030.tar.gz'
         ShellScript('data/scripts/py2030_tar_create.sh').execute({'tarfile': tarfile})
 
+    def push_py(self):
+        tarfile='py2030.tar.gz'
+        folder='py2030-'+time.strftime('%Y%m%d_%H%M%S')
+        installcmd = ShellScript('data/scripts/py2030_tar_install.sh').get_script({'tarfile': tarfile, 'folder': folder})
+
+        for remote in self.remotes:
+            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+            if not ssh.connect():
+                # could not connect to current remote, move to next one
+                continue
+
+            # push package
+            ssh.put(tarfile, tarfile)
+            # install package
+            ssh.cmd(installcmd)
+            # remove package
+            ssh.cmd('rm '+tarfile)
+            # done for this remote
+            ssh.disconnect()
 
 def main(opts, args):
     tool = Tool()
@@ -125,6 +144,9 @@ def main(opts, args):
     if opts.get_py:
         tool.create_py_tar()
 
+    if opts.push_py:
+        tool.push_py()
+
 if __name__ == '__main__':
     from optparse import OptionParser
     parser = OptionParser()
@@ -132,6 +154,8 @@ if __name__ == '__main__':
     parser.add_option('--push-of', dest='push_of', action="store_true", default=False)
     parser.add_option('--update-of', dest='update_of', action="store_true", default=False)
     parser.add_option('--get-py', dest='get_py', action="store_true", default=False)
+    parser.add_option('--push-py', dest='push_py', action="store_true", default=False)
+
     # parser.add_option('-c', '--client', dest='client', action="store_true", default=False)
     # parser.add_option('-f', '--file', dest='file', default=None)
     # parser.add_option('-l', '--loop', dest='loop', action="store_true", default=False)
