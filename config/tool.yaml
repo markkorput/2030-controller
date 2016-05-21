@@ -3,6 +3,7 @@ py2030:
   of2030:
     path: '/Users/mark/code/of_v0.9.3_osx_release/apps/of2030/of2030'
 
+
   remotes:
     # rpi1:
     #   hostname: 'rpi1'
@@ -28,3 +29,23 @@ py2030:
       # hostname: 'rpi9'
     rpi10:
       hostname: 'rpi10'
+    # rpi11:
+    #   hostname: 'rpi11'
+    # rpi12:
+    #   hostname: 'rpi12'
+    # rpi13:
+    #   hostname: 'rpi13'
+    # rpi14:
+    #   hostname: 'rpi14'
+    # rpi15:
+    #   hostname: 'rpi15'
+    # rpi16:
+    #   hostname: 'rpi16'
+    # rpi17:
+    #   hostname: 'rpi17'
+    # rpi18:
+    #   hostname: 'rpi18'
+    # rpi19:
+    #   hostname: 'rpi19'
+    # rpi20:
+    #   hostname: 'rpi20'
