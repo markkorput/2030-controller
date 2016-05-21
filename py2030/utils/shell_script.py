@@ -13,7 +13,7 @@ class ShellScript:
                 self.file = open(self.script_path)
             except IOError:
 
-                logging.getLogger().error('ShellScript could not open file:', self.script_path)
+                print 'ShellScript could not open file:', self.script_path
                 self.file=None
                 return None
 
@@ -56,7 +56,4 @@ if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option('-f', '--file', dest='file', default="data/scripts/py2030_tar_create.sh")
     options, args = parser.parse_args()
-    # logging.getLogger('ShellScript').setLevel(logging.INFO)
-    # logging.getLogger().warning('executing: ', options.file)
     ShellScript(options.file).execute()
-    # logging.getLogger().warning('done')

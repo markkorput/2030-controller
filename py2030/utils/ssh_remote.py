@@ -37,7 +37,7 @@ class SshRemote:
 
     def connect(self):
         if not self.ip:
-            print "no ip, can't connect"
+            print "no ip for hostname ({0}), can't connect".format(self.hostname)
             return False
 
         # if self.connected:
@@ -47,11 +47,11 @@ class SshRemote:
         try:
             self.client.connect(self.ip, username=self.username, password=self.password)
         except paramiko.ssh_exception.AuthenticationException as err:
-            ColorTerminal().fail('[SshRemote] ssh authentication failed on host {0}'.format(self.ip))
+            ColorTerminal().fail('[SshRemote] ssh authentication failed on host {0} ({1})'.format(self.ip, self.hostname))
             self.connected = False
             return False
 
-        print 'ssh connection established with', self.ip
+        print 'ssh connection established with', self.ip, self.hostname
         self.connected = True
         return True
 
@@ -65,13 +65,19 @@ class SshRemote:
         print "ssh-cmd:\n", command
         self.stdin, self.stdout, self.stderr = self.client.exec_command(command)
         if wait:
-            for line in self.stdout: pass
-            for line in self.stderr: ColorTerminal().fail(str(line.strip('\n')))
+            for line in self.stdout:
+                pass
+            for line in self.stderr:
+                try:
+                    print '[STDERR]',str(line.strip('\n'))
+                except UnicodeEncodeError as err:
+                    print '[STDERR] (unicode issue with printing error);'
+                    print err
 
     def put(self, local_file_path, remote_file_name):
         print "ssh-put:", local_file_path, remote_file_name
         with SCPClient(self.client.get_transport()) as scp:
-            scp.put(self.local_file_path, self.remote_file_name)
+            scp.put(local_file_path, remote_file_name)
 
     def get(self, remote_file_name):
         print "ssh-get:", remote_file_name

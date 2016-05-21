@@ -3,6 +3,7 @@ from py2030.config_file import ConfigFile
 from py2030.utils.ssh_remote import SshRemote
 from py2030.utils.shell_script import ShellScript
 from scp import SCPClient
+import time
 
 class Remote:
     def __init__(self, name, config_file):
@@ -14,8 +15,13 @@ class Remote:
         self.ssh_username = config_file.get_value(prefix+'.ssh.usr', 'pi')
         self.ssh_password = config_file.get_value(prefix+'.ssh.psw', 'raspberry')
         self.ofbuilder = config_file.get_value(prefix+'.ofbuilder', False)
-        self.ofpath = config_file.get_value(prefix+'.of2030.path', '/home/pi/of2030')
+        self.ofpath = config_file.get_value(prefix+'.of2030.path', '/home/pi/openFrameworks/apps/of2030/of2030')
 
+    def ofparentfolder(self):
+        return ','.join(self.ofpath.split('/')[0:-1])
+
+    def offoldername(self):
+        return self.ofpath.split('/')[-1]
 
 class Of2030:
     def __init__(self, config_file):
@@ -59,12 +65,38 @@ class Tool:
             return False
 
         tarfile = 'of2030-bin.tar.gz'
+
         # package bin folder into tar.gz file
         ssh.cmd(ShellScript('data/scripts/of2030_bin_tar_create.sh').get_script({'tarfile': tarfile, 'offolder': remote.ofpath}))
         # fetch package
         ssh.get(tarfile)
         # remove remotely
-        ssh.cmd(ShellScript('data/scripts/of2030_bin_tar_remove.sh').get_script({'tarfile': tarfile}))
+        ssh.cmd('rm '+tarfile)
+
+    def push_of_build(self, skip_builders=True):
+        for remote in self.remotes:
+            if remote.ofbuilder and skip_builders:
+                # we probably got the build form this raspi, skip it
+                continue
+
+            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+            if not ssh.connect():
+                # could not connect to current remote, move to next one
+                continue
+
+            tarfile='of2030-bin.tar.gz'
+            location=remote.ofparentfolder()
+            folder='of2030-'+time.strftime('%Y%m%d_%H%M%S')
+
+            # push package
+            ssh.put(tarfile, tarfile)
+            # install package
+            ssh.cmd(ShellScript('data/scripts/of2030_bin_tar_install.sh').get_script({'tarfile': tarfile, 'location': location, 'folder': folder}))
+            # remove package
+            ssh.cmd('rm '+tarfile)
+            # done for this remote
+            ssh.disconnect()
+
 
 def main(opts, args):
     tool = Tool()
@@ -72,11 +104,14 @@ def main(opts, args):
     if opts.get_of:
         tool.fetch_of_build()
 
+    if opts.push_of:
+        tool.push_of_build()
 
 if __name__ == '__main__':
     from optparse import OptionParser
     parser = OptionParser()
     parser.add_option('--get-of', dest='get_of', action="store_true", default=False)
+    parser.add_option('--push-of', dest='push_of', action="store_true", default=False)
 
     # parser.add_option('-c', '--client', dest='client', action="store_true", default=False)
     # parser.add_option('-f', '--file', dest='file', default=None)
