@@ -132,7 +132,6 @@ def main(opts, args):
         tool.push_of_build()
         tarfile='of2030-bin.tar.gz'
         print 'DONE, removing local copy;', tarfile
-
         subprocess.call(['rm', tarfile])
 
     if opts.get_of:
@@ -140,6 +139,14 @@ def main(opts, args):
 
     if opts.push_of:
         tool.push_of_build()
+
+    if opts.update_py:
+        tool.create_py_tar()
+        tool.push_py()
+        tarfile='py2030.tar.gz'
+        print 'DONE, removing local copy;', tarfile
+        subprocess.call(['rm', tarfile])
+
 
     if opts.get_py:
         tool.create_py_tar()
@@ -155,6 +162,7 @@ if __name__ == '__main__':
     parser.add_option('--update-of', dest='update_of', action="store_true", default=False)
     parser.add_option('--get-py', dest='get_py', action="store_true", default=False)
     parser.add_option('--push-py', dest='push_py', action="store_true", default=False)
+    parser.add_option('--update-py', dest='update_py', action="store_true", default=False)
 
     # parser.add_option('-c', '--client', dest='client', action="store_true", default=False)
     # parser.add_option('-f', '--file', dest='file', default=None)
