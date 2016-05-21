@@ -3,7 +3,7 @@ from py2030.config_file import ConfigFile
 from py2030.utils.ssh_remote import SshRemote
 from py2030.utils.shell_script import ShellScript
 from scp import SCPClient
-import time
+import time, subprocess
 
 class Remote:
     def __init__(self, name, config_file):
@@ -41,7 +41,10 @@ class Tool:
     def get_remotes(self):
         remotes = []
         remotes_config = self.config_file.get_value('py2030.remotes', {})
-        for remote_name in remotes_config:
+        remote_names = remotes_config.keys()
+        remote_names.sort()
+
+        for remote_name in remote_names:
             remotes.append(Remote(remote_name, self.config_file))
         return remotes
 
@@ -101,6 +104,14 @@ class Tool:
 def main(opts, args):
     tool = Tool()
 
+    if opts.update_of:
+        tool.fetch_of_build()
+        tool.push_of_build()
+        tarfile='of2030-bin.tar.gz'
+        print 'DONE, removing local copy;', tarfile 
+
+        subprocess.call(['rm', tarfile])
+
     if opts.get_of:
         tool.fetch_of_build()
 
@@ -112,6 +123,7 @@ if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option('--get-of', dest='get_of', action="store_true", default=False)
     parser.add_option('--push-of', dest='push_of', action="store_true", default=False)
+    parser.add_option('--update-of', dest='update_of', action="store_true", default=False)
 
     # parser.add_option('-c', '--client', dest='client', action="store_true", default=False)
     # parser.add_option('-f', '--file', dest='file', default=None)
