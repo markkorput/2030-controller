@@ -124,6 +124,44 @@ class Tool:
             # done for this remote
             ssh.disconnect()
 
+    def start(self):
+        cmd = ShellScript('data/scripts/rpi_start.sh').get_script()
+
+        for remote in self.remotes:
+            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+            if not ssh.connect():
+                # could not connect to current remote, move to next one
+                continue
+
+            # restart processes
+            ssh.cmd(cmd, wait=False)
+
+    def stop(self):
+        cmd = ShellScript('data/scripts/rpi_stop.sh').get_script()
+
+        for remote in self.remotes:
+            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+            if not ssh.connect():
+                # could not connect to current remote, move to next one
+                continue
+
+            # restart processes
+            ssh.cmd(cmd, wait=False)
+
+    def restart(self):
+        startcmd = ShellScript('data/scripts/rpi_start.sh').get_script()
+        stopcmd = ShellScript('data/scripts/rpi_stop.sh').get_script()
+
+        for remote in self.remotes:
+            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+            if not ssh.connect():
+                # could not connect to current remote, move to next one
+                continue
+
+            # restart processes
+            ssh.cmd(startcmd, wait=False)
+            ssh.cmd(stopcmd, wait=False)
+
 def main(opts, args):
     tool = Tool()
 
@@ -147,12 +185,19 @@ def main(opts, args):
         print 'DONE, removing local copy;', tarfile
         subprocess.call(['rm', tarfile])
 
-
     if opts.get_py:
         tool.create_py_tar()
 
     if opts.push_py:
         tool.push_py()
+
+    if opts.stop:
+        tool.stop()
+    if opts.start:
+        tool.start()
+
+    if opts.restart:
+        tool.restart()
 
 if __name__ == '__main__':
     from optparse import OptionParser
@@ -163,7 +208,9 @@ if __name__ == '__main__':
     parser.add_option('--get-py', dest='get_py', action="store_true", default=False)
     parser.add_option('--push-py', dest='push_py', action="store_true", default=False)
     parser.add_option('--update-py', dest='update_py', action="store_true", default=False)
-
+    parser.add_option('--stop', dest='stop', action="store_true", default=False)
+    parser.add_option('--start', dest='start', action="store_true", default=False)
+    parser.add_option('--restart', dest='restart', action="store_true", default=False)
     # parser.add_option('-c', '--client', dest='client', action="store_true", default=False)
     # parser.add_option('-f', '--file', dest='file', default=None)
     # parser.add_option('-l', '--loop', dest='loop', action="store_true", default=False)
