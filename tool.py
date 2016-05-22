@@ -16,6 +16,7 @@ class Remote:
         self.ssh_password = config_file.get_value(prefix+'.ssh.psw', 'raspberry')
         self.ofbuilder = config_file.get_value(prefix+'.ofbuilder', False)
         self.ofpath = config_file.get_value(prefix+'.of2030.path', '/home/pi/openFrameworks/apps/of2030/of2030')
+        self.of2030 = Of2030(path=self.ofpath)
 
     def ofparentfolder(self):
         return '/'.join(self.ofpath.split('/')[0:-1])
@@ -27,10 +28,18 @@ class Remote:
         return self.ofpath+'/bin/data/shadersES2'
 
 class Of2030:
-    def __init__(self, config_file):
+    def __init__(self, config_file=None, path=None):
         self.config_file = config_file
-        self.path = config_file.get_value('py2030.of2030.path', '/home/pi/of2030')
+        self.path = path
+
+        # grab path from config file?
+        if self.config_file and not self.path:
+            self.path = config_file.get_value('py2030.of2030.path', '/home/pi/of2030')
+
+        self.bin_path = self.path + '/bin'
+        self.data_path = self.path + '/bin/data'
         self.raspi_shaders_folder_path = self.path + '/bin/data/shadersES2'
+        self.osc_path = self.path + '/bin/data/osc'
 
 class Tool:
     def __init__(self):
@@ -59,6 +68,11 @@ class Tool:
                 return remote
         return None
 
+    def get_local_of_tar(self):
+        tarfile = 'of2030.tar.gz'
+        folder = Of2030(config_file=self.config_file).path
+        ShellScript('data/scripts/of2030_tar_create.sh').execute({'tarfile': tarfile, 'folder': folder})
+
     def fetch_of_build(self):
         remote = self.get_of_builder_remote()
 
@@ -71,19 +85,23 @@ class Tool:
             # abort
             return False
 
-        tarfile = 'of2030-bin.tar.gz'
+        tarfile = 'of2030.tar.gz'
 
         # package bin folder into tar.gz file
-        ssh.cmd(ShellScript('data/scripts/of2030_bin_tar_create.sh').get_script({'tarfile': tarfile, 'offolder': remote.ofpath}))
+        ssh.cmd(ShellScript('data/scripts/of2030_tar_create.sh').get_script({'tarfile': tarfile, 'folder': remote.ofpath}))
         # fetch package
         ssh.get(tarfile)
         # remove remotely
         ssh.cmd('rm '+tarfile)
 
-    def push_of_build(self, skip_builders=True):
+    def push_of_build(self, skip_builders=True, builders_only=False):
         for remote in self.remotes:
             if remote.ofbuilder and skip_builders:
-                # we probably got the build form this raspi, skip it
+                # skip builder
+                continue
+
+            if builders_only and not remote.ofbuilder:
+                # skip non-builder
                 continue
 
             ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
@@ -91,22 +109,24 @@ class Tool:
                 # could not connect to current remote, move to next one
                 continue
 
-            tarfile='of2030-bin.tar.gz'
+            tarfile='of2030.tar.gz'
             location=remote.ofparentfolder()
             # folder='of2030-'+time.strftime('%Y%m%d_%H%M%S')
+            ss = ShellScript('data/scripts/of2030_tar_install.sh')
+            installcmd = ss.get_script({'tarfile': tarfile, 'location': location, 'client_id': remote.name})
+            ss = ShellScript('data/scripts/of2030_tar_install_restore_build_files.sh')
+            restorecmd = ss.get_script({'location': location})
 
             # push package
             ssh.put(tarfile, tarfile)
             # install package
-            ssh.cmd(ShellScript('data/scripts/of2030_bin_tar_install.sh').get_script({'tarfile': tarfile, 'location': location}))
+            ssh.cmd(installcmd)
+            if builders_only:
+                ssh.cmd(restorecmd)
             # remove package
             ssh.cmd('rm '+tarfile)
             # done for this remote
             ssh.disconnect()
-
-    def create_py_tar(self):
-        tarfile='py2030.tar.gz'
-        ShellScript('data/scripts/py2030_tar_create.sh').execute({'tarfile': tarfile})
 
     def push_py(self):
         tarfile='py2030.tar.gz'
@@ -204,13 +224,49 @@ class Tool:
             ssh.cmd(cmd)
             ssh.disconnect()
 
+    def get_osc(self, folder=None):
+        # foler not specified by caller?
+        if not folder:
+            # try to get osc_folder setting from config file
+            folder = self.config_file.get_value('py2030.osc_folder', None)
+        # folder not specified in config file?
+        if not folder:
+            # use default osc folder of local of2030 folder
+            folder = Of2030(self.config_file).osc_path
+
+        tarfile = 'osc.tar.gz'
+        ShellScript('data/scripts/osc_tar_create.sh').execute({'tarfile': tarfile, 'folder': folder})
+
+    def push_osc(self):
+        for remote in self.remotes:
+            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+            if not ssh.connect():
+                # could not connect to current remote, move to next one
+                continue
+
+            tarfile='osc.tar.gz'
+            location=remote.of2030.osc_path
+
+            # push package
+            ssh.put(tarfile, tarfile)
+            # install package
+            ssh.cmd(ShellScript('data/scripts/osc_tar_install.sh').get_script({'tarfile': tarfile, 'location': location}))
+            # remove package
+            ssh.cmd('rm '+tarfile)
+            # done for this remote
+            ssh.disconnect()
+
+
+
 def main(opts, args):
     tool = Tool()
 
+    # of2030
+
     if opts.update_of:
         tool.fetch_of_build()
-        tool.push_of_build()
-        tarfile='of2030-bin.tar.gz'
+        tool.push_of_build(skip_builders=True, builders_only=False)
+        tarfile='of2030.tar.gz'
         print 'DONE, removing local copy;', tarfile
         subprocess.call(['rm', tarfile])
 
@@ -218,28 +274,37 @@ def main(opts, args):
         tool.fetch_of_build()
 
     if opts.push_of:
-        tool.push_of_build()
+        tool.push_of_build(skip_builders=True, builders_only=False)
 
-    if opts.update_py:
-        tool.create_py_tar()
-        tool.push_py()
-        tarfile='py2030.tar.gz'
+    if opts.get_local_of:
+        tool.get_local_of_tar()
+
+    if opts.push_local_of:
+        tool.push_of_build(skip_builders=False, builders_only=True)
+
+    if opts.update_local_of:
+        tool.get_local_of_tar()
+        tool.push_of_build(skip_builders=False, builders_only=True)
+        tarfile='of2030.tar.gz'
         print 'DONE, removing local copy;', tarfile
         subprocess.call(['rm', tarfile])
 
-    if opts.get_py:
-        tool.create_py_tar()
+    # of2030/bin/data/osc (presets)
 
-    if opts.push_py:
-        tool.push_py()
+    if opts.get_osc:
+        tool.get_osc(opts.folder)
 
-    if opts.stop:
-        tool.stop()
-    if opts.start:
-        tool.start()
+    if opts.push_osc:
+        tool.push_osc()
 
-    if opts.restart:
-        tool.restart()
+    if opts.update_osc:
+        tool.get_osc(opts.folder)
+        tool.push_osc()
+        tarfile = 'osc.tar.gz'
+        print 'DONE, removing local copy;', tarfile
+        subprocess.call(['rm', tarfile])
+
+    # of2030/bin/data/shadersES2
 
     if opts.get_shaders:
         tool.get_shaders(opts.folder)
@@ -254,6 +319,38 @@ def main(opts, args):
         print 'DONE, removing local copy;', tarfile
         subprocess.call(['rm', tarfile])
 
+    # py2030
+    if opts.get_py:
+        # create_py_tar
+        tarfile='py2030.tar.gz'
+        ShellScript('data/scripts/py2030_tar_create.sh').execute({'tarfile': tarfile})
+
+    if opts.push_py:
+        tool.push_py()
+
+    if opts.update_py:
+        # create_py_tar
+        tarfile='py2030.tar.gz'
+        ShellScript('data/scripts/py2030_tar_create.sh').execute({'tarfile': tarfile})
+
+        tool.push_py()
+
+        tarfile='py2030.tar.gz'
+        print 'DONE, removing local copy;', tarfile
+        subprocess.call(['rm', tarfile])
+
+    # rpi of2030 and py2030 control
+
+    if opts.stop:
+        tool.stop()
+    if opts.start:
+        tool.start()
+
+    if opts.restart:
+        tool.restart()
+
+    # rpi system
+
     if opts.reboot:
         tool.cmd_all_remotes('sudo reboot')
 
@@ -263,21 +360,36 @@ def main(opts, args):
 if __name__ == '__main__':
     from optparse import OptionParser
     parser = OptionParser()
+
+    # actions
     parser.add_option('--shutdown', dest='shutdown', action="store_true", default=False)
     parser.add_option('--reboot', dest='reboot', action="store_true", default=False)
+
+    parser.add_option('--stop', dest='stop', action="store_true", default=False)
+    parser.add_option('--start', dest='start', action="store_true", default=False)
+    parser.add_option('--restart', dest='restart', action="store_true", default=False)
 
     parser.add_option('--get-of', dest='get_of', action="store_true", default=False)
     parser.add_option('--push-of', dest='push_of', action="store_true", default=False)
     parser.add_option('--update-of', dest='update_of', action="store_true", default=False)
+
+    parser.add_option('--get-local-of', dest='get_local_of', action="store_true", default=False)
+    parser.add_option('--push-local-of', dest='push_local_of', action="store_true", default=False)
+    parser.add_option('--update-local-of', dest='update_local_of', action="store_true", default=False)
+
     parser.add_option('--get-py', dest='get_py', action="store_true", default=False)
     parser.add_option('--push-py', dest='push_py', action="store_true", default=False)
     parser.add_option('--update-py', dest='update_py', action="store_true", default=False)
-    parser.add_option('--stop', dest='stop', action="store_true", default=False)
-    parser.add_option('--start', dest='start', action="store_true", default=False)
-    parser.add_option('--restart', dest='restart', action="store_true", default=False)
+
     parser.add_option('--get-shaders', dest='get_shaders', action="store_true", default=False)
     parser.add_option('--push-shaders', dest='push_shaders', action="store_true", default=False)
     parser.add_option('--update-shaders', dest='update_shaders', action="store_true", default=False)
+
+    parser.add_option('--get-osc', dest='get_osc', action="store_true", default=False)
+    parser.add_option('--push-osc', dest='push_osc', action="store_true", default=False)
+    parser.add_option('--update-osc', dest='update_osc', action="store_true", default=False)
+
+    # params
     parser.add_option('-f', '--folder', dest='folder', default=None)
 
     # parser.add_option('-c', '--client', dest='client', action="store_true", default=False)

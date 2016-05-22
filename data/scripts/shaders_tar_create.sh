@@ -1,1 +1,1 @@
-tar -zvcf {{tarfile}} -C {{folder}} .
+tar -zvcf {{tarfile}} --exclude {{folder}}/.* -C {{folder}} .
