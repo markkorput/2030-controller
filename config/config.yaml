@@ -5,7 +5,7 @@ py2030:
     client:
       of2030:
         # path: '/home/pi/of2030' # default
-        log_monitor_interval: 15.0
+        log_monitor_interval: 20.0
         log_monitor_treshold: 20.0
       # alive_notifier:
       #   file: 'last-alive.txt'
@@ -162,33 +162,54 @@ py2030:
         path: 'auto' # 'data/osc/clock_spot.csv'
         # loop: true
         # sync: true
-        verbose: true
+        # verbose: true
       osc_outputs:
         playbacker:
           ip: '127.0.0.1'
-          port: 2025
-          verbose: true
-          outputs:
-            - event
-            - effect
-            - clip
-            - ping
-            - osc
-        playbackerRaspi:
-          #ip: '192.168.2.14'
-          hostname: 'rpi2.local'
           port: 2031
-          verbose: true
+          # verbose: true
           outputs:
-            - event
-            - effect
-            - clip
-            - ping
+            - osc
+        rpi3:
+          hostname: 'rpi3.local'
+          port: 2031
+          outputs:
+            - osc
+        rpi4:
+          hostname: 'rpi4.local'
+          port: 2031
+          outputs:
+            - osc
+        rpi5:
+          hostname: 'rpi5.local'
+          port: 2031
+          outputs:
+            - osc
+
+        playbackerRaspi7:
+          #ip: '192.168.2.14'
+          hostname: 'rpi7.local'
+          port: 2031
+          # verbose: true
+          outputs:
+            - osc
+        playbackerRaspi8:
+          #ip: '192.168.2.14'
+          hostname: 'rpi8.local'
+          port: 2031
+          # verbose: true
+          outputs:
+            - osc
+        playbackerRaspi10:
+          hostname: 'rpi10.local'
+          port: 2031
+          # verbose: true
+          outputs:
             - osc
         to_joiners:
           ip: 'joiner'
           port: 'joiner'
-          verbose: true
+          # verbose: true
           outputs:
             - event
             - effect
@@ -199,12 +220,7 @@ py2030:
     osccfg:
       osc_inputs:
         remote_receiver:
-          ip: 'self' #'127.0.0.1'
-          port: 2029
-          forwarder: true
-          # verbose: true
-        local_receiver:
-          ip: '127.0.0.1'
+          ip: '' #'127.0.0.1'
           port: 2029
           forwarder: true
           # verbose: true

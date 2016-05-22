@@ -14,12 +14,12 @@ py2030:
     rpi2:
       hostname: 'rpi2'
       ofbuilder: true
-    # rpi3:
-    #   hostname: 'rpi3'
-    # rpi4:
-    #   hostname: 'rpi4'
-    # rpi5:
-    #   hostname: 'rpi5'
+    rpi3:
+      hostname: 'rpi3'
+    rpi4:
+      hostname: 'rpi4'
+    rpi5:
+      hostname: 'rpi5'
     # rpi6:
     #   hostname: 'rpi6'
     rpi7:
