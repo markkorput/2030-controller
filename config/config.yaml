@@ -164,58 +164,69 @@ py2030:
         # sync: true
         # verbose: true
       osc_outputs:
-        playbacker:
+        localhost:
           ip: '127.0.0.1'
           port: 2031
           # verbose: true
           outputs:
             - osc
-        rpi3:
-          hostname: 'rpi3.local'
+        bcast:
+          ip: 192.168.2.255
+          # hostname: 'rpi4.local'
           port: 2031
           outputs:
             - osc
-        rpi4:
-          hostname: 'rpi4.local'
-          port: 2031
-          outputs:
-            - osc
-        rpi5:
-          hostname: 'rpi5.local'
-          port: 2031
-          outputs:
-            - osc
-
-        playbackerRaspi7:
-          #ip: '192.168.2.14'
-          hostname: 'rpi7.local'
-          port: 2031
-          # verbose: true
-          outputs:
-            - osc
-        playbackerRaspi8:
-          #ip: '192.168.2.14'
-          hostname: 'rpi8.local'
-          port: 2031
-          # verbose: true
-          outputs:
-            - osc
-        playbackerRaspi10:
-          hostname: 'rpi10.local'
-          port: 2031
-          # verbose: true
-          outputs:
-            - osc
-        to_joiners:
-          ip: 'joiner'
-          port: 'joiner'
-          # verbose: true
-          outputs:
-            - event
-            - effect
-            - clip
-            - ping
-            - osc
+        # rpi2:
+        #   hostname: 'rpi2.local'
+        #   port: 2031
+        #   outputs:
+        #     - osc
+        # rpi3:
+        #   hostname: 'rpi3.local'
+        #   port: 2031
+        #   outputs:
+        #     - osc
+        # rpi4:
+        #   hostname: 'rpi4.local'
+        #   port: 2031
+        #   outputs:
+        #     - osc
+        # rpi5:
+        #   hostname: 'rpi5.local'
+        #   port: 2031
+        #   outputs:
+        #     - osc
+        #
+        # playbackerRaspi7:
+        #   #ip: '192.168.2.14'
+        #   hostname: 'rpi7.local'
+        #   port: 2031
+        #   # verbose: true
+        #   outputs:
+        #     - osc
+        # playbackerRaspi8:
+        #   #ip: '192.168.2.14'
+        #   hostname: 'rpi8.local'
+        #   port: 2031
+        #   # verbose: true
+        #   outputs:
+        #     - osc
+        # playbackerRaspi10:
+        #   hostname: 'rpi10.local'
+        #   port: 2031
+        #   # verbose: true
+        #   outputs:
+        #     - osc
+        # to_joiners:
+        #   ip: 'joiner'
+        #   port: 'joiner'
+        #   # verbose: true
+        #   outputs:
+        #     - event
+        #     - effect
+        #     - clip
+        #     - ping
+        #     - osc
 
     osccfg:
       osc_inputs:
