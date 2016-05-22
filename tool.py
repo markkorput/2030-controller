@@ -112,13 +112,17 @@ class Tool:
             tarfile='of2030.tar.gz'
             location=remote.ofparentfolder()
             # folder='of2030-'+time.strftime('%Y%m%d_%H%M%S')
-            ss = ShellScript('data/scripts/of2030_tar_install_keep_build_files.sh')
-            cmd = ss.get_script({'tarfile': tarfile, 'location': location})
+            ss = ShellScript('data/scripts/of2030_tar_install.sh')
+            installcmd = ss.get_script({'tarfile': tarfile, 'location': location, 'client_id': remote.name})
+            ss = ShellScript('data/scripts/of2030_tar_install_restore_build_files.sh')
+            restorecmd = ss.get_script({'location': location})
 
             # push package
             ssh.put(tarfile, tarfile)
             # install package
-            ssh.cmd(cmd)
+            ssh.cmd(installcmd)
+            if builders_only:
+                ssh.cmd(restorecmd)
             # remove package
             ssh.cmd('rm '+tarfile)
             # done for this remote
