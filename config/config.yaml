@@ -3,21 +3,7 @@ py2030:
   version: '0.1.0'
   profiles:
     client:
-      of2030:
-        # path: '/home/pi/of2030' # default
-        log_monitor_interval: 20.0
-        log_monitor_treshold: 20.0
-      # alive_notifier:
-      #   file: 'last-alive.txt'
-      #   interval: 15.0
-      downloader:
-        enabled: true
-        reconfig: true
-        version: true
       join_interval: 5.0
-      syncer:
-        pong: true
-        ping: false
       osc_outputs:
         controller_joiner:
           # ip: '192.168.2.1'
@@ -39,8 +25,6 @@ py2030:
         self:
           ip: '' #'self'
           port: 2030
-          shared: false
-          verbose: true
           inputs:
             - ack
             - effect
@@ -48,17 +32,8 @@ py2030:
             - clip
             - ping
             - restart
+
     test:
-      # of2030:
-      #   path: '/Users/mark/code/of_v0.9.3_osx_release/apps/of2030/of2030'
-      #   bin_path: '/Users/mark/code/of_v0.9.3_osx_release/apps/of2030/of2030/bin/emptyExampleDebug.app/Contents/MacOS/emptyExampleDebug'
-      # alive_notifier:
-      #   file: 'last-alive.txt'
-      #   interval: 15.0
-      downloader:
-        enabled: true
-        reconfig: true
-        version: true
       join_interval: 5.0
       syncer:
         pong: true
@@ -81,10 +56,8 @@ py2030:
             - osc
       osc_inputs:
         self:
-          ip: '' # 'self'
+          ip: ''
           port: 2025
-          shared: false
-          # verbose: true
           inputs:
             - ack
             - effect
@@ -94,25 +67,14 @@ py2030:
             - restart
         of2030:
           ip: '' # '127.0.0.1'
-          port: 2033
-          shared: false
+          port: 2026
           verbose: true
           forwarder: true
 
     controller:
-      # monitor_config: true
-      # midi_input_port: 0
-      # http_server_port: 2040
-      # broadcast_interval: 3.0
-      broadcast_reconfig: true
-      # download_reconfig: true
-      syncer:
-        pong: false
-        ping: true
-
       osc_inputs:
         client_join_and_clip_receiver:
-          ip: '' #'self' #'127.0.0.1'
+          ip: ''
           port: 2030
           inputs:
             - join
@@ -120,7 +82,7 @@ py2030:
             - pong
           verbose: true
         forwarder_for_all_osc_messages:
-          ip: '' # '127.0.0.1'
+          ip: ''
           port: 2031
           forwarder: true
       osc_outputs:
@@ -145,6 +107,41 @@ py2030:
         enabled: true # dummy attribute
         source: 'py2030'
         destination: 'data/py2030-{version}.tar.gz'
+
+    everything:
+      # monitor_config: true
+      # midi_input_port: 0
+      # http_server_port: 2040
+      # broadcast_interval: 3.0
+      # broadcast_reconfig: true
+      # download_reconfig: true
+      of2030:
+        # path: '/home/pi/of2030' # default
+        log_monitor_interval: 20.0
+        log_monitor_treshold: 20.0
+      alive_notifier:
+        file: 'last-alive.txt'
+        interval: 15.0
+      downloader:
+        enabled: true
+        reconfig: true
+        version: true
+      syncer:
+        pong: true
+        ping: false
+      osc_inputs:
+        self:
+          ip: '' #'self'
+          port: 2030
+          shared: false
+          verbose: true
+          inputs:
+            - ack
+            - effect
+            - event
+            - clip
+            - ping
+            - restart
 
     oscrecorder:
       osc_inputs:
@@ -181,52 +178,6 @@ py2030:
         #   port: 2031
         #   outputs:
         #     - osc
-        # rpi3:
-        #   hostname: 'rpi3.local'
-        #   port: 2031
-        #   outputs:
-        #     - osc
-        # rpi4:
-        #   hostname: 'rpi4.local'
-        #   port: 2031
-        #   outputs:
-        #     - osc
-        # rpi5:
-        #   hostname: 'rpi5.local'
-        #   port: 2031
-        #   outputs:
-        #     - osc
-        #
-        # playbackerRaspi7:
-        #   #ip: '192.168.2.14'
-        #   hostname: 'rpi7.local'
-        #   port: 2031
-        #   # verbose: true
-        #   outputs:
-        #     - osc
-        # playbackerRaspi8:
-        #   #ip: '192.168.2.14'
-        #   hostname: 'rpi8.local'
-        #   port: 2031
-        #   # verbose: true
-        #   outputs:
-        #     - osc
-        # playbackerRaspi10:
-        #   hostname: 'rpi10.local'
-        #   port: 2031
-        #   # verbose: true
-        #   outputs:
-        #     - osc
-        # to_joiners:
-        #   ip: 'joiner'
-        #   port: 'joiner'
-        #   # verbose: true
-        #   outputs:
-        #     - event
-        #     - effect
-        #     - clip
-        #     - ping
-        #     - osc
 
     osccfg:
       osc_inputs:
@@ -236,16 +187,6 @@ py2030:
           forwarder: true
           # verbose: true
       osc_outputs:
-        forward_to_joiners:
-          ip: 'joiner'
-          port: 'joiner'
-          # verbose: true
-          outputs:
-            - event
-            - effect
-            - clip
-            - ping
-            - osc
         forward_local:
           ip: '127.0.0.1'
           port: 2031
@@ -265,7 +206,6 @@ py2030:
           configs_root_el: 'effects'
           config_el: 'effect'
           # verbose: true
-
   midi_triggers:
     48: # C2
       effect:
