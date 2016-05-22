@@ -108,6 +108,21 @@ py2030:
         source: 'py2030'
         destination: 'data/py2030-{version}.tar.gz'
 
+    bridge:
+      osc_inputs:
+        self:
+          ip: '' # '127.0.0.1'
+          port: 2031
+          verbose: true
+          forwarder: true
+      osc_outputs:
+        bcast:
+          ip: 192.168.2.255
+          # hostname: 'rpi4.local'
+          port: 2031
+          outputs:
+            - osc
+
     everything:
       # monitor_config: true
       # midi_input_port: 0
@@ -206,6 +221,7 @@ py2030:
           configs_root_el: 'effects'
           config_el: 'effect'
           # verbose: true
+
   midi_triggers:
     48: # C2
       effect:
