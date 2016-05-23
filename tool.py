@@ -349,6 +349,9 @@ def main(opts, args):
     if opts.restart:
         tool.restart()
 
+    if opts.start_of:
+        tool.cmd_all_remotes('make RunDebug -C of2030')
+
     # rpi system
 
     if opts.reboot:
@@ -368,6 +371,7 @@ if __name__ == '__main__':
     parser.add_option('--stop', dest='stop', action="store_true", default=False)
     parser.add_option('--start', dest='start', action="store_true", default=False)
     parser.add_option('--restart', dest='restart', action="store_true", default=False)
+    parser.add_option('--start-of', dest='start_of', action="store_true", default=False)
 
     parser.add_option('--get-of', dest='get_of', action="store_true", default=False)
     parser.add_option('--push-of', dest='push_of', action="store_true", default=False)
