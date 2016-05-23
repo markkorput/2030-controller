@@ -95,3 +95,5 @@ class OscAsciiInput:
     # and reset back to the start of the file
     def _onLoop(self, natnetFile):
         self.start_time = datetime.now()
+        if self.verbose:
+            print '[OscAscii-input] loop'

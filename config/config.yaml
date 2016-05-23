@@ -174,7 +174,7 @@ py2030:
         path: 'auto' # 'data/osc/clock_spot.csv'
         # loop: true
         # sync: true
-        # verbose: true
+        verbose: true
       osc_outputs:
         localhost:
           ip: '127.0.0.1'
