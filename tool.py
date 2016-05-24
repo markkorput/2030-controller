@@ -322,14 +322,19 @@ class Tool:
 
     # run generic command(s) on all remotes
 
-    def cmd_all_remotes(self, cmd, wait=True):
+    def cmd_all_remotes(self, cmd, wait=True, skip_builders=True, sleep=None):
         for remote in self.remotes:
+            if skip_builders and remote.ofbuilder:
+                continue
+
             ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
             if not ssh.connect():
                 # could not connect to current remote, move to next one
                 continue
 
             ssh.cmd(cmd, wait)
+            if sleep:
+                time.sleep(sleep)
             ssh.disconnect()
 
 
@@ -451,7 +456,8 @@ def main(opts, args):
         tool.restart()
 
     if opts.start_of:
-        tool.cmd_all_remotes('make RunDebug -C of2030', False)
+        # tool.cmd_all_remotes('./startof.sh\n\n', wait=False, skip_builders=True, sleep=1.0)
+        tool.cmd_all_remotes('make RunDebug -C of2030 &\n\n', wait=False, skip_builders=True, sleep=1.0)
 
     # rpi system
 
