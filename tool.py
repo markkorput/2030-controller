@@ -43,15 +43,17 @@ class Of2030:
 
 class Tool:
     def __init__(self):
-        self.config_file = self.get_config_file()
-        self.remotes = self.get_remotes()
+        self.config_file = self._get_config_file()
+        self.remotes = self._get_remotes()
 
-    def get_config_file(self):
+    # local methods
+
+    def _get_config_file(self):
         cf = ConfigFile({'path': 'config/tool.yaml'})
         cf.load()
         return cf
 
-    def get_remotes(self):
+    def _get_remotes(self):
         remotes = []
         remotes_config = self.config_file.get_value('py2030.remotes', {})
         remote_names = remotes_config.keys()
@@ -61,20 +63,106 @@ class Tool:
             remotes.append(Remote(remote_name, self.config_file))
         return remotes
 
-    def get_of_builder_remote(self):
+    def _get_of_builder_remote(self):
         for remote in self.remotes:
             # print 'trying', remote.name, ' - ', remote.ofbuilder
             if remote.ofbuilder:
                 return remote
         return None
 
+    # py2030
+
+    def push_py(self):
+        tarfile='py2030.tar.gz'
+        folder='py2030-'+time.strftime('%Y%m%d_%H%M%S')
+        installcmd = ShellScript('data/scripts/py2030_tar_install.sh').get_script({'tarfile': tarfile, 'folder': folder})
+
+        for remote in self.remotes:
+            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+            if not ssh.connect():
+                # could not connect to current remote, move to next one
+                continue
+
+            # push package
+            ssh.put(tarfile, tarfile)
+            # install package
+            ssh.cmd(installcmd)
+            # remove package
+            ssh.cmd('rm '+tarfile)
+            # done for this remote
+            ssh.disconnect()
+
+    # local of2030
+
     def get_local_of_tar(self):
         tarfile = 'of2030.tar.gz'
         folder = Of2030(config_file=self.config_file).path
         ShellScript('data/scripts/of2030_tar_create.sh').execute({'tarfile': tarfile, 'folder': folder})
 
+    # local of2030 src
+
+    def get_local_ofsrc_tar(self):
+        tarfile = 'of2030-src.tar.gz'
+        folder = Of2030(config_file=self.config_file).path
+        ShellScript('data/scripts/of2030src_tar_create.sh').execute({'tarfile': tarfile, 'folder': folder})
+
+    def push_ofsrc_tar(self, builders_only=True):
+        for remote in self.remotes:
+
+            if builders_only and not remote.ofbuilder:
+                # skip non-builder
+                continue
+
+            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+            if not ssh.connect():
+                # could not connect to current remote, move to next one
+                continue
+
+            tarfile='of2030-src.tar.gz'
+            offolder=remote.of2030.path
+            cmd = ShellScript('data/scripts/of2030src_tar_install.sh').get_script({'tarfile': tarfile, 'offolder': offolder})
+
+            # push package
+            ssh.put(tarfile, tarfile)
+            # install package
+            ssh.cmd(cmd)
+            # remove package
+            ssh.cmd('rm '+tarfile)
+            # done for this remote
+            ssh.disconnect()
+
+    # local of2030 xml
+
+    def get_local_ofxml_tar(self):
+        tarfile = 'of2030-xml.tar.gz'
+        folder = Of2030(config_file=self.config_file).path
+        ShellScript('data/scripts/of2030xml_tar_create.sh').execute({'tarfile': tarfile, 'folder': folder})
+
+    def push_ofxml_tar(self):
+        for remote in self.remotes:
+            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+            if not ssh.connect():
+                # could not connect to current remote, move to next one
+                continue
+
+            tarfile = 'of2030-xml.tar.gz'
+            offolder=remote.of2030.path
+            cmd = ShellScript('data/scripts/of2030xml_tar_install.sh').get_script({'tarfile': tarfile, 'offolder': offolder})
+
+            # push package
+            ssh.put(tarfile, tarfile)
+            # install package
+            ssh.cmd(cmd)
+            # remove package
+            ssh.cmd('rm '+tarfile)
+            # done for this remote
+            ssh.disconnect()
+
+
+    # raspi of2030 build
+
     def fetch_of_build(self):
-        remote = self.get_of_builder_remote()
+        remote = self._get_of_builder_remote()
 
         if not remote:
             print 'could not find ofbuilder-enabled remote'
@@ -128,25 +216,7 @@ class Tool:
             # done for this remote
             ssh.disconnect()
 
-    def push_py(self):
-        tarfile='py2030.tar.gz'
-        folder='py2030-'+time.strftime('%Y%m%d_%H%M%S')
-        installcmd = ShellScript('data/scripts/py2030_tar_install.sh').get_script({'tarfile': tarfile, 'folder': folder})
-
-        for remote in self.remotes:
-            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
-            if not ssh.connect():
-                # could not connect to current remote, move to next one
-                continue
-
-            # push package
-            ssh.put(tarfile, tarfile)
-            # install package
-            ssh.cmd(installcmd)
-            # remove package
-            ssh.cmd('rm '+tarfile)
-            # done for this remote
-            ssh.disconnect()
+    # control remote processes
 
     def start(self):
         cmd = ShellScript('data/scripts/rpi_start.sh').get_script()
@@ -186,6 +256,8 @@ class Tool:
             ssh.cmd(startcmd, wait=False)
             ssh.cmd(stopcmd, wait=False)
 
+    # shaders
+
     def get_shaders(self, folder=None):
         if not folder:
             folder = Of2030(self.config_file).raspi_shaders_folder_path
@@ -214,15 +286,7 @@ class Tool:
             # done for this remote
             ssh.disconnect()
 
-    def cmd_all_remotes(self, cmd):
-        for remote in self.remotes:
-            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
-            if not ssh.connect():
-                # could not connect to current remote, move to next one
-                continue
-
-            ssh.cmd(cmd)
-            ssh.disconnect()
+    # OSC
 
     def get_osc(self, folder=None):
         # foler not specified by caller?
@@ -256,6 +320,17 @@ class Tool:
             # done for this remote
             ssh.disconnect()
 
+    # run generic command(s) on all remotes
+
+    def cmd_all_remotes(self, cmd, wait=True):
+        for remote in self.remotes:
+            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+            if not ssh.connect():
+                # could not connect to current remote, move to next one
+                continue
+
+            ssh.cmd(cmd, wait)
+            ssh.disconnect()
 
 
 def main(opts, args):
@@ -286,6 +361,32 @@ def main(opts, args):
         tool.get_local_of_tar()
         tool.push_of_build(skip_builders=False, builders_only=True)
         tarfile='of2030.tar.gz'
+        print 'DONE, removing local copy;', tarfile
+        subprocess.call(['rm', tarfile])
+
+    if opts.get_ofsrc:
+        tool.get_local_ofsrc_tar()
+
+    if opts.push_ofsrc:
+        tool.push_ofsrc_tar()
+
+    if opts.update_ofsrc:
+        tool.get_local_ofsrc_tar()
+        tool.push_ofsrc_tar()
+        tarfile='of2030-src.tar.gz'
+        print 'DONE, removing local copy;', tarfile
+        subprocess.call(['rm', tarfile])
+
+    if opts.get_ofxml:
+        tool.get_local_ofxml_tar()
+
+    if opts.push_ofxml:
+        tool.push_ofxml_tar()
+
+    if opts.update_ofxml:
+        tool.get_local_ofxml_tar()
+        tool.push_ofxml_tar()
+        tarfile='of2030-xml.tar.gz'
         print 'DONE, removing local copy;', tarfile
         subprocess.call(['rm', tarfile])
 
@@ -350,7 +451,7 @@ def main(opts, args):
         tool.restart()
 
     if opts.start_of:
-        tool.cmd_all_remotes('make RunDebug -C of2030')
+        tool.cmd_all_remotes('make RunDebug -C of2030', False)
 
     # rpi system
 
@@ -380,6 +481,14 @@ if __name__ == '__main__':
     parser.add_option('--get-local-of', dest='get_local_of', action="store_true", default=False)
     parser.add_option('--push-local-of', dest='push_local_of', action="store_true", default=False)
     parser.add_option('--update-local-of', dest='update_local_of', action="store_true", default=False)
+
+    parser.add_option('--get-ofxml', dest='get_ofxml', action="store_true", default=False)
+    parser.add_option('--push-ofxml', dest='push_ofxml', action="store_true", default=False)
+    parser.add_option('--update-ofxml', dest='update_ofxml', action="store_true", default=False)
+
+    parser.add_option('--get-ofsrc', dest='get_ofsrc', action="store_true", default=False)
+    parser.add_option('--push-ofsrc', dest='push_ofsrc', action="store_true", default=False)
+    parser.add_option('--update-ofsrc', dest='update_ofsrc', action="store_true", default=False)
 
     parser.add_option('--get-py', dest='get_py', action="store_true", default=False)
     parser.add_option('--push-py', dest='push_py', action="store_true", default=False)
