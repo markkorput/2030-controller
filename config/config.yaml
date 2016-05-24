@@ -112,7 +112,7 @@ py2030:
       osc_inputs:
         self:
           ip: '' # '127.0.0.1'
-          port: 2031
+          port: 2029
           verbose: true
           forwarder: true
       osc_outputs:
@@ -122,6 +122,19 @@ py2030:
           port: 2031
           outputs:
             - osc
+        local:
+          ip: 127.0.0.1
+          # hostname: 'rpi4.local'
+          port: 2031
+          outputs:
+            - osc
+        # rpi4:
+        #   # ip: 192.168.2.255
+        #   hostname: 'rpi4.local'
+        #   port: 2031
+        #   outputs:
+        #     - osc
+
 
     everything:
       # monitor_config: true
