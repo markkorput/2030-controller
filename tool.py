@@ -458,6 +458,8 @@ def main(opts, args):
     if opts.start_of:
         # tool.cmd_all_remotes('./startof.sh\n\n', wait=False, skip_builders=True, sleep=1.0)
         tool.cmd_all_remotes('make RunDebug -C of2030 &\n\n', wait=False, skip_builders=True, sleep=1.0)
+    if opts.stop_of:
+        tool.cmd_all_remotes('sudo killall of2030_debug\n\n', wait=False, skip_builders=True, sleep=1.0)
 
     # rpi system
 
@@ -479,6 +481,7 @@ if __name__ == '__main__':
     parser.add_option('--start', dest='start', action="store_true", default=False)
     parser.add_option('--restart', dest='restart', action="store_true", default=False)
     parser.add_option('--start-of', dest='start_of', action="store_true", default=False)
+    parser.add_option('--stop-of', dest='stop_of', action="store_true", default=False)
 
     parser.add_option('--get-of', dest='get_of', action="store_true", default=False)
     parser.add_option('--push-of', dest='push_of', action="store_true", default=False)
