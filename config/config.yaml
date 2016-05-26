@@ -113,9 +113,50 @@ py2030:
         self:
           ip: '' # '127.0.0.1'
           port: 2029
-          verbose: true
+          # verbose: true
+          forwarder: true
+        maxmidi:
+          ip: '' # '127.0.0.1'
+          port: 2030
+          # verbose: true
           forwarder: true
       osc_outputs:
+        # rpi10:
+        #   # ip: 192.168.2.255
+        #   hostname: 'rpi10.local'
+        #   port: 2031
+        #   outputs:
+        #     - osc
+        # rpi3:
+        #   # ip: 192.168.2.255
+        #   hostname: 'rpi3.local'
+        #   port: 2031
+        #   outputs:
+        #     - osc
+        # rpi4:
+        #   # ip: 192.168.2.255
+        #   hostname: 'rpi4.local'
+        #   port: 2031
+        #   outputs:
+        #     - osc
+        # rpi5:
+        #   # ip: 192.168.2.255
+        #   hostname: 'rpi5.local'
+        #   port: 2031
+        #   outputs:
+        #     - osc
+        # rpi7:
+        #   # ip: 192.168.2.255
+        #   hostname: 'rpi7.local'
+        #   port: 2031
+        #   outputs:
+        #     - osc
+        # rpi8:
+        #   # ip: 192.168.2.255
+        #   hostname: 'rpi8.local'
+        #   port: 2031
+        #   outputs:
+        #     - osc
         bcast:
           ip: 192.168.2.255
           # hostname: 'rpi4.local'
@@ -187,7 +228,7 @@ py2030:
         path: 'auto' # 'data/osc/clock_spot.csv'
         # loop: true
         # sync: true
-        verbose: true
+        # verbose: true
       osc_outputs:
         localhost:
           ip: '127.0.0.1'
