@@ -115,7 +115,7 @@ py2030:
           port: 2029
           # verbose: true
           forwarder: true
-        maxmidi:
+        maxosc:
           ip: '' # '127.0.0.1'
           port: 2030
           # verbose: true
