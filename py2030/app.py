@@ -352,6 +352,7 @@ class App:
                 self.osc_ascii_input.configure({'path': self.options['file']})
             if 'loop' in self.options:
                 self.osc_ascii_input.configure({'loop': self.options['loop']})
+            self.osc_ascii_input.endEvent += self._onOscAsciiInputEnd
             self.osc_ascii_input.start()
             del OscAsciiInput
 
@@ -490,3 +491,6 @@ class App:
         self.joined = True
 
         # self.downloader will take care of the rest
+
+    def _onOscAsciiInputEnd(self, oscAsciiInput):
+        self.interface.restartEvent()
