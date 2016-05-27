@@ -230,12 +230,12 @@ py2030:
         # sync: true
         # verbose: true
       osc_outputs:
-        localhost:
-          ip: '127.0.0.1'
-          port: 2031
-          # verbose: true
-          outputs:
-            - osc
+        # localhost:
+        #   ip: '127.0.0.1'
+        #   port: 2031
+        #   verbose: true
+        #   outputs:
+        #     - osc
         bcast:
           ip: 192.168.2.255
           # hostname: 'rpi4.local'
