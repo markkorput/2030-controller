@@ -234,7 +234,11 @@ class Osc:
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
-        if self.osc_map and addr in self.osc_map:
+        if self.osc_map:
+            if not addr in self.osc_map:
+                # unknown value, ignore, don't forward
+                return
+
             data = []
             tags = []
             addr = self.osc_map[addr]
