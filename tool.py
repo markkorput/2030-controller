@@ -40,6 +40,7 @@ class Of2030:
         self.data_path = self.path + '/bin/data'
         self.raspi_shaders_folder_path = self.path + '/bin/data/shadersES2'
         self.osc_path = self.path + '/bin/data/osc'
+        self.vids_path = self.path + '/bin/data/vids'
 
 class Tool:
     def __init__(self):
@@ -320,6 +321,40 @@ class Tool:
             # done for this remote
             ssh.disconnect()
 
+    # vids
+
+    def get_vids(self, folder=None):
+        # foler not specified by caller?
+        if not folder:
+            # try to get osc_folder setting from config file
+            folder = self.config_file.get_value('py2030.vids_folder', None)
+        # folder not specified in config file?
+        if not folder:
+            # use default osc folder of local of2030 folder
+            folder = Of2030(self.config_file).vids_path
+
+        tarfile = 'osc.tar.gz'
+        ShellScript('data/scripts/vids_tar_create.sh').execute({'tarfile': tarfile, 'folder': folder})
+
+    def push_osc(self):
+        for remote in self.remotes:
+            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+            if not ssh.connect():
+                # could not connect to current remote, move to next one
+                continue
+
+            tarfile='osc.tar.gz'
+            location=remote.of2030.vids_path
+
+            # push package
+            ssh.put(tarfile, tarfile)
+            # install package
+            ssh.cmd(ShellScript('data/scripts/vids_tar_install.sh').get_script({'tarfile': tarfile, 'location': location}))
+            # remove package
+            ssh.cmd('rm '+tarfile)
+            # done for this remote
+            ssh.disconnect()
+
     # run generic command(s) on all remotes
 
     def cmd_all_remotes(self, cmd, wait=True, skip_builders=True, sleep=None):
@@ -407,6 +442,19 @@ def main(opts, args):
         tool.get_osc(opts.folder)
         tool.push_osc()
         tarfile = 'osc.tar.gz'
+        print 'DONE, removing local copy;', tarfile
+        subprocess.call(['rm', tarfile])
+
+    if opts.get_vids:
+        tool.get_vids(opts.folder)
+
+    if opts.push_vids:
+        tool.push_vids()
+
+    if opts.update_vids:
+        tool.get_vids(opts.folder)
+        tool.push_vids()
+        tarfile = 'vids.tar.gz'
         print 'DONE, removing local copy;', tarfile
         subprocess.call(['rm', tarfile])
 
@@ -510,6 +558,10 @@ if __name__ == '__main__':
     parser.add_option('--get-osc', dest='get_osc', action="store_true", default=False)
     parser.add_option('--push-osc', dest='push_osc', action="store_true", default=False)
     parser.add_option('--update-osc', dest='update_osc', action="store_true", default=False)
+
+    parser.add_option('--get-vids', dest='get_vids', action="store_true", default=False)
+    parser.add_option('--push-vids', dest='push_vids', action="store_true", default=False)
+    parser.add_option('--update-vids', dest='update_vids', action="store_true", default=False)
 
     # params
     parser.add_option('-f', '--folder', dest='folder', default=None)
