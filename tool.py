@@ -333,17 +333,17 @@ class Tool:
             # use default osc folder of local of2030 folder
             folder = Of2030(self.config_file).vids_path
 
-        tarfile = 'osc.tar.gz'
+        tarfile = 'vids.tar.gz'
         ShellScript('data/scripts/vids_tar_create.sh').execute({'tarfile': tarfile, 'folder': folder})
 
-    def push_osc(self):
+    def push_vids(self):
         for remote in self.remotes:
             ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
             if not ssh.connect():
                 # could not connect to current remote, move to next one
                 continue
 
-            tarfile='osc.tar.gz'
+            tarfile='vids.tar.gz'
             location=remote.of2030.vids_path
 
             # push package
