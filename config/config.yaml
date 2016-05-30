@@ -126,8 +126,7 @@ py2030:
           forwarder: true
           # osc_map format:
           # <osc addr>:
-          #   param: <first param value>
-          #   trigger: <osc message to be triggerd
+          #   <first param value>: <osc message to be triggered>
           osc_map:
             # '/live' [pitch]:
             '/lava':
@@ -137,6 +136,7 @@ py2030:
                 1: '/t/mud_machine_build'
             '/rain':
                 0: '/p/rain.thunder'
+                1: '/p/rain.noorderlicht'
 
             # '/lava2': '/t/lava_vid2'
             # '/lava3': '/t/lava_vid3'
