@@ -182,23 +182,29 @@ class App:
         #
         # midi input
         #
-        port = profile_data['midi_input_port'] if 'midi_input_port' in profile_data else None
-        if port >= 0:
-            if self.midi_effect_input:
-                if self.midi_effect_input.port != port:
-                    self.midi_effect_input.destroy()
-                    self.midi_effect_input.port = port
-                    # start receiving incoming midi message and map them to effect events
-                    self.midi_effect_input.setup()
-                else:
-                    if not self.midi_effect_input.connected:
-                        self.midi_effect_input.setup()
-            else:
-                from py2030.inputs.midi import MidiEffectInput
-                self.midi_effect_input = MidiEffectInput({'port': port, 'setup': True})
-        else:
-            if self.midi_effect_input:
-                self.midi_effect_input.destroy()
+        if 'midi_input' in profile_data:
+            from py2030.inputs.midi import MidiEffectInput
+            self.midi_effect_input = MidiEffectInput(profile_data['midi_input'])
+            self.midi_effect_input.setup()
+
+            del MidiEffectInput
+
+        #     if self.midi_effect_input:
+        #         if self.midi_effect_input.port != port:
+        #             self.midi_effect_input.destroy()
+        #             self.midi_effect_input.port = port
+        #             # start receiving incoming midi message and map them to effect events
+        #             self.midi_effect_input.setup()
+        #         else:
+        #             if not self.midi_effect_input.connected:
+        #                 self.midi_effect_input.setup()
+        #     else:
+        #         from py2030.inputs.midi import MidiEffectInput
+        #         self.midi_effect_input = MidiEffectInput(mid)
+        #         del MidiEffectInput
+        # else:
+        #     if self.midi_effect_input:
+        #         self.midi_effect_input.destroy()
 
         #
         # OSC outputs
