@@ -237,16 +237,12 @@ class Osc:
         if self.osc_map:
             if addr in self.osc_map:
                 mapper = self.osc_map[addr]
-                if 'param' in mapper and data[0] == mapper['param']:
-                    if 'trigger' in mapper:
-                        data = []
-                        tags = []
-                        addr = mapper['trigger']#self.osc_map[addr]
-
-                        if self.verbose:
-                            print '[osc-in] mapped to: ', addr
-                        self.interface.oscMessageEvent(addr, tags, data, client_address)
-                        return
+                if data[0] in mapper:
+                    addr = mapper[data[0]]
+                    if self.verbose:
+                        print '[osc-in] mapped to: ', addr
+                    self.interface.oscMessageEvent(addr, [], [], client_address)
+                    return
 
         self.interface.oscMessageEvent(addr, tags, data, client_address)
 

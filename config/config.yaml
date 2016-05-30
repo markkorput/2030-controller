@@ -119,7 +119,7 @@ py2030:
         #   port: 2029
         #   verbose: true
         #   forwarder: true
-        maxosc:
+        self_and_maxosc:
           ip: '' # '127.0.0.1'
           port: 2030
           verbose: true
@@ -131,14 +131,13 @@ py2030:
           osc_map:
             # '/live' [pitch]:
             '/lava':
-              param: 0
-              trigger: '/t/lava_vid1'
+                0: '/t/lava_vid1'
             '/mud':
-              param: 0
-              trigger: '/p/mud.wheel'
-            '/mud':
-              param: 1
-              trigger: '/t/mud_machine_build'
+                0: '/p/mud.wheel'
+                1: '/t/mud_machine_build'
+            '/rain':
+                0: '/p/rain.thunder'
+
             # '/lava2': '/t/lava_vid2'
             # '/lava3': '/t/lava_vid3'
             # '/lava4': '/t/lava_vid4'
