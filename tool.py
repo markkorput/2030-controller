@@ -148,7 +148,7 @@ class Tool:
 
             tarfile = 'of2030-xml.tar.gz'
             offolder=remote.of2030.path
-            cmd = ShellScript('data/scripts/of2030xml_tar_install.sh').get_script({'tarfile': tarfile, 'offolder': offolder})
+            cmd = ShellScript('data/scripts/of2030xml_tar_install.sh').get_script({'tarfile': tarfile, 'offolder': offolder, 'client_id': remote.name})
 
             # push package
             ssh.put(tarfile, tarfile)
@@ -508,6 +508,8 @@ def main(opts, args):
         tool.cmd_all_remotes('make RunDebug -C of2030 &\n\n', wait=False, skip_builders=True, sleep=1.0)
     if opts.stop_of:
         tool.cmd_all_remotes('sudo killall of2030_debug\n\n', wait=False, skip_builders=True, sleep=1.0)
+    if opts.restart_of:
+        tool.cmd_all_remotes('sudo killall of2030_debug\n\nmake RunDebug -C of2030 &\n\n', wait=False, skip_builders=True, sleep=1.0)
 
     # rpi system
 
@@ -528,8 +530,10 @@ if __name__ == '__main__':
     parser.add_option('--stop', dest='stop', action="store_true", default=False)
     parser.add_option('--start', dest='start', action="store_true", default=False)
     parser.add_option('--restart', dest='restart', action="store_true", default=False)
+
     parser.add_option('--start-of', dest='start_of', action="store_true", default=False)
     parser.add_option('--stop-of', dest='stop_of', action="store_true", default=False)
+    parser.add_option('--restart-of', dest='restart_of', action="store_true", default=False)
 
     parser.add_option('--get-of', dest='get_of', action="store_true", default=False)
     parser.add_option('--push-of', dest='push_of', action="store_true", default=False)
