@@ -19,5 +19,5 @@ py2030:
       hostname: 'rpi7'
     rpi8:
       hostname: 'rpi8'
-    rpi2:
-      hostname: 'rpi2'
+    # rpi2:
+    #   hostname: 'rpi2'
