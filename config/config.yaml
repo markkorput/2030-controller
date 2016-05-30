@@ -109,26 +109,43 @@ py2030:
         destination: 'data/py2030-{version}.tar.gz'
 
     bridge:
+      # midi_input:
+      #   verbose: true
+      #   port: 1
+      #   dummy: 'ok'
       osc_inputs:
-        self:
-          ip: '' # '127.0.0.1'
-          port: 2029
-          # verbose: true
-          forwarder: true
+        # self:
+        #   ip: '' # '127.0.0.1'
+        #   port: 2029
+        #   verbose: true
+        #   forwarder: true
         maxosc:
           ip: '' # '127.0.0.1'
           port: 2030
           verbose: true
           forwarder: true
+          # osc_map format:
+          # <osc addr>:
+          #   param: <first param value>
+          #   trigger: <osc message to be triggerd
           osc_map:
-            '/lava1': '/t/lava_vid1'
-            '/lava2': '/t/lava_vid2'
-            '/lava3': '/t/lava_vid3'
-            '/lava4': '/t/lava_vid4'
-            '/lava5': '/t/lava_vid5'
-            '/lava6': '/t/lava_vid6'
-            '/lava7': '/t/lava_vid7'
-            '/lava8': '/t/lava_vid8'
+            # '/live' [pitch]:
+            '/lava':
+              param: 0
+              trigger: '/t/lava_vid1'
+            '/mud':
+              param: 0
+              trigger: '/p/mud.wheel'
+            '/mud':
+              param: 1
+              trigger: '/t/mud_machine_build'
+            # '/lava2': '/t/lava_vid2'
+            # '/lava3': '/t/lava_vid3'
+            # '/lava4': '/t/lava_vid4'
+            # '/lava5': '/t/lava_vid5'
+            # '/lava6': '/t/lava_vid6'
+            # '/lava7': '/t/lava_vid7'
+            # '/lava8': '/t/lava_vid8'
       osc_outputs:
         bcast:
           ip: 192.168.2.255
