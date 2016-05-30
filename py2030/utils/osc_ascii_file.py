@@ -1,7 +1,7 @@
 from py2030.utils.color_terminal import ColorTerminal
 from py2030.utils.event import Event
 
-import struct, os
+import struct, os, re
 from datetime import datetime
 
 class OscAsciiFile:
@@ -100,6 +100,14 @@ class OscAsciiFile:
             self.loopEvent(self)
             # try again
             # TODO; do check to avoid endless recursion for empty files?
+            return self.next_line()
+
+        # empty line
+        if line.strip() == '':
+            return self.next_line()
+
+        # is this line a comment?
+        if re.compile("^\s*#").match(line):
             return self.next_line()
 
         self.last_line = line

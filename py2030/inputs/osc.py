@@ -18,6 +18,7 @@ class Osc:
         self.connected = False
         self.running = False
         self.verbose = False
+        self.osc_map = None
 
         self.connectEvent = Event()
         self.disconnectEvent = Event()
@@ -47,6 +48,9 @@ class Osc:
 
         if 'verbose' in options:
             self.verbose = options['verbose']
+
+        if 'osc_map' in options:
+            self.osc_map = options['osc_map']
 
     def start(self):
         if self._connect():
@@ -229,6 +233,17 @@ class Osc:
         # self.unknownMessageEvent(addr, tags, data, client_address, self)
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
+        if self.osc_map:
+            if not addr in self.osc_map:
+                # unknown value, ignore, don't forward
+                return
+
+            data = []
+            tags = []
+            addr = self.osc_map[addr]
+            if self.verbose:
+                print '[osc-in] mapped to: ', addr
 
         self.interface.oscMessageEvent(addr, tags, data, client_address)
 

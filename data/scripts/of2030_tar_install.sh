@@ -8,3 +8,5 @@ mkdir {{location}}/of2030
 tar -zxf {{tarfile}} -C {{location}}/of2030 --warning=no-timestamp
 # overwrite client id
 echo "<of2030><client_id>{{client_id}}</client_id></of2030>" > {{location}}/of2030/bin/data/client_id.xml
+# nice-to-have
+touch {{location}}/of2030/bin/data/log.txt

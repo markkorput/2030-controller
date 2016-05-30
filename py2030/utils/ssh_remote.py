@@ -51,7 +51,7 @@ class SshRemote:
             self.connected = False
             return False
 
-        print 'ssh connection established with', self.ip, self.hostname
+        ColorTerminal().green('ssh connection established with {0} (hostname: {1})'.format(self.ip, self.hostname))
         self.connected = True
         return True
 

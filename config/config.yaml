@@ -112,9 +112,23 @@ py2030:
       osc_inputs:
         self:
           ip: '' # '127.0.0.1'
-          port: 2031
+          port: 2029
+          # verbose: true
+          forwarder: true
+        maxosc:
+          ip: '' # '127.0.0.1'
+          port: 2030
           verbose: true
           forwarder: true
+          osc_map:
+            '/lava1': '/t/lava_vid1'
+            '/lava2': '/t/lava_vid2'
+            '/lava3': '/t/lava_vid3'
+            '/lava4': '/t/lava_vid4'
+            '/lava5': '/t/lava_vid5'
+            '/lava6': '/t/lava_vid6'
+            '/lava7': '/t/lava_vid7'
+            '/lava8': '/t/lava_vid8'
       osc_outputs:
         bcast:
           ip: 192.168.2.255
@@ -122,6 +136,56 @@ py2030:
           port: 2031
           outputs:
             - osc
+        # local:
+        #   ip: 127.0.0.1
+        #   # hostname: 'rpi4.local'
+        #   port: 2031
+        #   outputs:
+        #     - osc
+
+        # rpi10:
+        #   # ip: 192.168.2.255
+        #   hostname: 'rpi10.local'
+        #   port: 2031
+        #   outputs:
+        #     - osc
+        # rpi3:
+        #   # ip: 192.168.2.255
+        #   hostname: 'rpi3.local'
+        #   port: 2031
+        #   outputs:
+        #     - osc
+        # rpi4:
+        #   # ip: 192.168.2.255
+        #   hostname: 'rpi4.local'
+        #   port: 2031
+        #   outputs:
+        #     - osc
+        # rpi5:
+        #   # ip: 192.168.2.255
+        #   hostname: 'rpi5.local'
+        #   port: 2031
+        #   outputs:
+        #     - osc
+        # rpi7:
+        #   # ip: 192.168.2.255
+        #   hostname: 'rpi7.local'
+        #   port: 2031
+        #   outputs:
+        #     - osc
+        # rpi8:
+        #   # ip: 192.168.2.255
+        #   hostname: 'rpi8.local'
+        #   port: 2031
+        #   outputs:
+        #     - osc
+        # rpi4:
+        #   # ip: 192.168.2.255
+        #   hostname: 'rpi4.local'
+        #   port: 2031
+        #   outputs:
+        #     - osc
+
 
     everything:
       # monitor_config: true
@@ -176,12 +240,12 @@ py2030:
         # sync: true
         # verbose: true
       osc_outputs:
-        localhost:
-          ip: '127.0.0.1'
-          port: 2031
-          # verbose: true
-          outputs:
-            - osc
+        # localhost:
+        #   ip: '127.0.0.1'
+        #   port: 2031
+        #   verbose: true
+        #   outputs:
+        #     - osc
         bcast:
           ip: 192.168.2.255
           # hostname: 'rpi4.local'

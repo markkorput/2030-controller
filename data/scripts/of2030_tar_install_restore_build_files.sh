@@ -11,3 +11,5 @@ cp -r {{location}}/of2030.bak/obj {{location}}/of2030/
 cp {{location}}/of2030.bak/bin/of2030 {{location}}/of2030/bin/
 cp {{location}}/of2030.bak/bin/of2030_debug {{location}}/of2030/bin/
 cp -r {{location}}/of2030.bak/bin/libs {{location}}/of2030/bin/
+# nice-to-have
+touch {{location}}/of2030/bin/data/log.txt

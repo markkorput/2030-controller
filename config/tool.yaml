@@ -1,17 +1,13 @@
 py2030:
   # local of2030 data
-  osc_folder: '/Users/mark/Dropbox/2030-mark/19-timelines/4-OSC-EXPORTS'
+  #osc_folder: '/Users/mark/Dropbox/2030-mark/19-timelines/4-OSC-EXPORTS'
+
   of2030:
     path: '/Users/mark/code/of_v0.9.3_osx_release/apps/of2030/of2030'
 
   remotes:
-    # rpi1:
-    #   hostname: 'rpi1'
-    #   ssh:
-    #     usr: 'pi'
-    #     psw: 'raspberry'
-    rpi2:
-      hostname: 'rpi2'
+    rpi10:
+      hostname: 'rpi10'
       ofbuilder: true
     rpi3:
       hostname: 'rpi3'
@@ -19,33 +15,9 @@ py2030:
       hostname: 'rpi4'
     rpi5:
       hostname: 'rpi5'
-    # rpi6:
-    #   hostname: 'rpi6'
     rpi7:
       hostname: 'rpi7'
     rpi8:
       hostname: 'rpi8'
-    # rpi9:
-      # hostname: 'rpi9'
-    rpi10:
-      hostname: 'rpi10'
-    # rpi11:
-    #   hostname: 'rpi11'
-    # rpi12:
-    #   hostname: 'rpi12'
-    # rpi13:
-    #   hostname: 'rpi13'
-    # rpi14:
-    #   hostname: 'rpi14'
-    # rpi15:
-    #   hostname: 'rpi15'
-    # rpi16:
-    #   hostname: 'rpi16'
-    # rpi17:
-    #   hostname: 'rpi17'
-    # rpi18:
-    #   hostname: 'rpi18'
-    # rpi19:
-    #   hostname: 'rpi19'
-    # rpi20:
-    #   hostname: 'rpi20'
+    rpi2:
+      hostname: 'rpi2'
