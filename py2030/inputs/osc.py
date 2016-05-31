@@ -235,6 +235,10 @@ class Osc:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
         if self.osc_map:
+            if addr == '-none-':
+                print ('fitlered -none- message')
+                return
+
             if addr in self.osc_map:
                 mapper = self.osc_map[addr]
                 if data[0] in mapper:
