@@ -146,6 +146,8 @@ py2030:
             '/rain':
                 0: '/p/rain.thunder'
                 1: '/p/rain.noorderlicht'
+                2: '/p/rain.tear'
+                3: '/p/rain.cubes'
 
             # '/lava2': '/t/lava_vid2'
             # '/lava3': '/t/lava_vid3'
