@@ -130,13 +130,19 @@ py2030:
           osc_map:
             # '/live' [pitch]:
             '/lava':
-                0: '/t/lava_vid1'
+                0: '/p/lava.beat'
+                1: '/p/lava.start'
+                2: '/p/lava.grow'
+                3: '/p/lava.flatline'
+                4: '/p/lava.nightmare'
+                5: '/p/lava.blink'
             '/mud':
                 0: '/p/mud.wheel'
                 1: '/p/mud.machinebuild'
                 2: '/p/mud.machineloop'
                 3: '/p/mud.roof1'
                 4: '/p/mud.roof2'
+                5: '/p/mud.destruct'
             '/rain':
                 0: '/p/rain.thunder'
                 1: '/p/rain.noorderlicht'
