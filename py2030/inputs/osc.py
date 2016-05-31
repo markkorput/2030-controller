@@ -235,15 +235,18 @@ class Osc:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
         if self.osc_map:
-            if not addr in self.osc_map:
-                # unknown value, ignore, don't forward
+            if addr == '-none-':
+                print ('fitlered -none- message')
                 return
 
-            data = []
-            tags = []
-            addr = self.osc_map[addr]
-            if self.verbose:
-                print '[osc-in] mapped to: ', addr
+            if addr in self.osc_map:
+                mapper = self.osc_map[addr]
+                if data[0] in mapper:
+                    addr = mapper[data[0]]
+                    if self.verbose:
+                        print '[osc-in] mapped to: ', addr
+                    self.interface.oscMessageEvent(addr, [], [], client_address)
+                    return
 
         self.interface.oscMessageEvent(addr, tags, data, client_address)
 

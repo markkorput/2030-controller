@@ -148,7 +148,7 @@ class Tool:
 
             tarfile = 'of2030-xml.tar.gz'
             offolder=remote.of2030.path
-            cmd = ShellScript('data/scripts/of2030xml_tar_install.sh').get_script({'tarfile': tarfile, 'offolder': offolder})
+            cmd = ShellScript('data/scripts/of2030xml_tar_install.sh').get_script({'tarfile': tarfile, 'offolder': offolder, 'client_id': remote.name})
 
             # push package
             ssh.put(tarfile, tarfile)
@@ -212,6 +212,56 @@ class Tool:
             ssh.cmd(installcmd)
             if builders_only:
                 ssh.cmd(restorecmd)
+            # remove package
+            ssh.cmd('rm '+tarfile)
+            # done for this remote
+            ssh.disconnect()
+
+    def get_ofbin_tar(self):
+        tarfile = 'of2030-bin.tar.gz'
+
+        remote = self._get_of_builder_remote()
+
+        if not remote:
+            print 'could not find ofbuilder-enabled remote'
+            return False
+
+        ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+        if not ssh.connect():
+            # abort
+            return False
+
+        # package bin folder into tar.gz file
+        ssh.cmd(ShellScript('data/scripts/of2030bin_tar_create.sh').get_script({'tarfile': tarfile, 'offolder': remote.ofpath}))
+        # fetch package
+        ssh.get(tarfile)
+        # remove remotely
+        ssh.cmd('rm '+tarfile)
+
+    def push_ofbin_tar(self, skipBuilders=True):
+        tarfile = 'of2030-bin.tar.gz'
+
+        for remote in self.remotes:
+            if remote.ofbuilder and skipBuilders:
+                # skip builder
+                continue
+
+            # if builders_only and not remote.ofbuilder:
+            #     # skip non-builder
+            #     continue
+
+            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+            if not ssh.connect():
+                # could not connect to current remote, move to next one
+                continue
+
+            ss = ShellScript('data/scripts/of2030bin_tar_install.sh')
+            installcmd = ss.get_script({'tarfile': tarfile, 'offolder': remote.ofpath})
+
+            # push package
+            ssh.put(tarfile, tarfile)
+            # install package
+            ssh.cmd(installcmd)
             # remove package
             ssh.cmd('rm '+tarfile)
             # done for this remote
@@ -417,6 +467,20 @@ def main(opts, args):
         print 'DONE, removing local copy;', tarfile
         subprocess.call(['rm', tarfile])
 
+    if opts.get_ofbin:
+        tool.get_ofbin_tar()
+
+    if opts.push_ofbin:
+        tool.push_ofbin_tar()
+
+    if opts.update_ofbin:
+        tool.get_ofbin_tar()
+        tool.push_ofbin_tar()        
+        tarfile = 'of2030-bin.tar.gz'
+        print 'DONE, removing local copy;', tarfile
+        subprocess.call(['rm', tarfile])
+
+
     if opts.get_ofxml:
         tool.get_local_ofxml_tar()
 
@@ -508,6 +572,8 @@ def main(opts, args):
         tool.cmd_all_remotes('make RunDebug -C of2030 &\n\n', wait=False, skip_builders=True, sleep=1.0)
     if opts.stop_of:
         tool.cmd_all_remotes('sudo killall of2030_debug\n\n', wait=False, skip_builders=True, sleep=1.0)
+    if opts.restart_of:
+        tool.cmd_all_remotes('sudo killall of2030_debug\n\nmake RunDebug -C of2030 &\n\n', wait=False, skip_builders=True, sleep=1.0)
 
     # rpi system
 
@@ -528,8 +594,10 @@ if __name__ == '__main__':
     parser.add_option('--stop', dest='stop', action="store_true", default=False)
     parser.add_option('--start', dest='start', action="store_true", default=False)
     parser.add_option('--restart', dest='restart', action="store_true", default=False)
+
     parser.add_option('--start-of', dest='start_of', action="store_true", default=False)
     parser.add_option('--stop-of', dest='stop_of', action="store_true", default=False)
+    parser.add_option('--restart-of', dest='restart_of', action="store_true", default=False)
 
     parser.add_option('--get-of', dest='get_of', action="store_true", default=False)
     parser.add_option('--push-of', dest='push_of', action="store_true", default=False)
@@ -546,6 +614,10 @@ if __name__ == '__main__':
     parser.add_option('--get-ofsrc', dest='get_ofsrc', action="store_true", default=False)
     parser.add_option('--push-ofsrc', dest='push_ofsrc', action="store_true", default=False)
     parser.add_option('--update-ofsrc', dest='update_ofsrc', action="store_true", default=False)
+
+    parser.add_option('--get-ofbin', dest='get_ofbin', action="store_true", default=False)
+    parser.add_option('--push-ofbin', dest='push_ofbin', action="store_true", default=False)
+    parser.add_option('--update-ofbin', dest='update_ofbin', action="store_true", default=False)
 
     parser.add_option('--get-py', dest='get_py', action="store_true", default=False)
     parser.add_option('--push-py', dest='push_py', action="store_true", default=False)
