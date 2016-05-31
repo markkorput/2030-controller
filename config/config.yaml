@@ -130,24 +130,50 @@ py2030:
           osc_map:
             # '/live' [pitch]:
             '/lava':
-                0: '/p/lava.beat'
-                1: '/p/lava.start'
-                2: '/p/lava.grow'
-                3: '/p/lava.flatline'
-                4: '/p/lava.nightmare'
-                5: '/p/lava.blink'
+              0: '/p/lava.beat'
+              1: '/p/lava.start'
+              2: '/p/lava.grow'
+              3: '/p/lava.flatline'
+              4: '/p/lava.nightmare'
+              5: '/p/lava.blink'
             '/mud':
-                0: '/p/mud.wheel'
-                1: '/p/mud.machinebuild'
-                2: '/p/mud.machineloop'
-                3: '/p/mud.roof1'
-                4: '/p/mud.roof2'
-                5: '/p/mud.destruct'
+              0: '/p/mud.wheel'
+              1: '/p/mud.machinebuild'
+              2: '/p/mud.machineloop'
+              3: '/p/mud.roof1'
+              4: '/p/mud.roof2'
+              5: '/p/mud.destruct'
             '/rain':
-                0: '/p/rain.thunder'
-                1: '/p/rain.noorderlicht'
-                2: '/p/rain.tear'
-                3: '/p/rain.cubes'
+              0: '/p/rain.thunder'
+              1: '/p/rain.noorderlicht'
+              2: '/p/rain.tear'
+              3: '/p/rain.cubes'
+            '/inloop':
+              0: '/p/inloop.start'
+            '/impro':
+              0: '/p/impro.start'
+              1: '/p/impro.finalize'
+            '/stellar':
+              0: '/p/stellar.worms'
+              1: '/p/stellar.spot_grow'
+              2: '/p/stellar.clock1'
+              3: '/p/stellar.clock2'
+              4: '/p/stellar.clock3'
+              5: '/p/stellar.clock4'
+              6: '/p/stellar.clock5'
+              7: '/p/stellar.clock6'
+              8: '/p/stellar.clock7'
+              9: '/p/stellar.map'
+              10: '/p/stellar.voice1'
+              11: '/p/stellar.chorus' # two spots and smoke
+              12: '/p/stellar.ping'
+              13: '/p/stellar.voice2' # also turns on steady (non-blinking) spot
+              
+              
+              
+
+
+
 
             # '/lava2': '/t/lava_vid2'
             # '/lava3': '/t/lava_vid3'
