@@ -134,6 +134,7 @@ py2030:
             '/mud':
                 0: '/p/mud.wheel'
                 1: '/t/mud_machine_build'
+                2: '/p/mud.machineloop'
             '/rain':
                 0: '/p/rain.thunder'
                 1: '/p/rain.noorderlicht'
