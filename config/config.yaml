@@ -169,20 +169,7 @@ py2030:
               11: '/p/stellar.chorus' # two spots and smoke
               12: '/p/stellar.ping'
               13: '/p/stellar.voice2' # also turns on steady (non-blinking) spot
-              
-              
-              
 
-
-
-
-            # '/lava2': '/t/lava_vid2'
-            # '/lava3': '/t/lava_vid3'
-            # '/lava4': '/t/lava_vid4'
-            # '/lava5': '/t/lava_vid5'
-            # '/lava6': '/t/lava_vid6'
-            # '/lava7': '/t/lava_vid7'
-            # '/lava8': '/t/lava_vid8'
       osc_outputs:
         bcast:
           ip: 192.168.2.255
