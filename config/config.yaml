@@ -114,11 +114,11 @@ py2030:
       #   port: 1
       #   dummy: 'ok'
       osc_inputs:
-        # self:
-        #   ip: '' # '127.0.0.1'
-        #   port: 2029
-        #   verbose: true
-        #   forwarder: true
+      #   self:
+      #     ip: '' # '127.0.0.1'
+      #     port: 2029
+      #     # verbose: true
+      #     forwarder: true
         self_and_maxosc:
           ip: '' # '127.0.0.1'
           port: 2030
@@ -136,6 +136,7 @@ py2030:
               3: '/p/lava.flatline'
               4: '/p/lava.nightmare'
               5: '/p/lava.blink'
+              6: '/p/lava.end'
             '/mud':
               0: '/p/mud.wheel'
               1: '/p/mud.machinebuild'
