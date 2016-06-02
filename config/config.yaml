@@ -165,10 +165,13 @@ py2030:
               7: '/p/stellar.clock6'
               8: '/p/stellar.clock7'
               9: '/p/stellar.map'
-              10: '/p/stellar.voice1'
+              #10: '/p/stellar.voice1'
               11: '/p/stellar.chorus' # two spots and smoke
               12: '/p/stellar.ping'
-              13: '/p/stellar.voice2' # also turns on steady (non-blinking) spot
+              #13: '/p/stellar.voice2' # also turns on steady (non-blinking) spot
+            '/live':
+              0: '/p/stellar.voice1'
+              1: '/p/stellar.voice2'
 
       osc_outputs:
         bcast:
