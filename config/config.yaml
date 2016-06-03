@@ -172,6 +172,18 @@ py2030:
             '/live':
               0: '/p/stellar.voice1'
               1: '/p/stellar.voice2'
+            '/scav':
+              0: '/p/scav.start'
+              1: '/p/scav.fans'
+              2: '/p/scav.fanbeat'
+              3: '/p/scav.heli'
+              4: '/p/scav.turbo'
+              5: '/p/scav.roof'
+              6: '/p/scav.fallingline'
+
+
+
+
 
       osc_outputs:
         bcast:
