@@ -176,10 +176,18 @@ py2030:
               0: '/p/scav.start'
               1: '/p/scav.fans'
               2: '/p/scav.fanbeat'
-              3: '/p/scav.heli'
+              3: '/p/scav.pano'
               4: '/p/scav.turbo'
               5: '/p/scav.roof'
               6: '/p/scav.fallingline'
+            '/divide':
+              0: '/p/divide.start'
+              1: '/p/divide.chords'
+              2: '/p/divide.particles1'
+              3: '/p/divide.particles2'
+              4: '/p/divide.particles3'
+              5: '/p/divide.blinks'
+
 
 
 
