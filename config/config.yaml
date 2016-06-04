@@ -173,6 +173,7 @@ py2030:
               0: '/p/stellar.voice1'
               1: '/p/stellar.voice2'
             '/scav':
+              126: '/p/scav.end'
               0: '/p/scav.start'
               1: '/p/scav.fans'
               2: '/p/scav.fanbeat'
@@ -181,12 +182,41 @@ py2030:
               5: '/p/scav.roof'
               6: '/p/scav.fallingline'
             '/divide':
-              0: '/p/divide.start'
-              1: '/p/divide.chords'
-              2: '/p/divide.particles1'
+              127: '/p/divide.start'
+              126: '/p/divide.end'
+              0: '/p/divide.chords'
+              1: '/p/divide.particles1'
+              # 2: '/p/divide.particles1move'
               3: '/p/divide.particles2'
               4: '/p/divide.particles3'
               5: '/p/divide.blinks'
+            '/rings':
+              127: '/p/rings.start'
+              0: '/p/rings.fade'
+              1: '/p/rings.march1'
+              2: '/p/rings.hey1'
+              3: '/p/rings.circles'
+              4: '/p/rings.squares'
+              5: '/p/rings.chorus.beat'
+              6: '/p/rings.hey2'
+              7: '/p/rings.hey3' # also start verse
+              8: '/p/rings.verse2.2'
+              9: '/p/rings.verse2.2.2'
+              10: '/p/rings.blackblocks'
+              11: '/p/rings.chorus2'
+              12: '/p/rings.hey4' # also start onregelmatigheid
+              13: '/p/rings.hey5' # also start bridge
+              13: '/p/rings.snare'
+              14: '/p/rings.roll'
+              15: '/p/rings.chorus3'
+              
+
+
+
+
+              # 126:  '/p/rings.end'
+
+
 
 
 
@@ -314,6 +344,12 @@ py2030:
           ip: 192.168.2.255
           # hostname: 'rpi4.local'
           port: 2031
+          outputs:
+            - osc
+        max_dev:
+          ip: 192.168.2.100
+          # hostname: 'rpi4.local'
+          port: 2030
           outputs:
             - osc
         # rpi2:
