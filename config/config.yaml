@@ -114,11 +114,11 @@ py2030:
       #   port: 1
       #   dummy: 'ok'
       osc_inputs:
-        # self:
-        #   ip: '' # '127.0.0.1'
-        #   port: 2029
-        #   verbose: true
-        #   forwarder: true
+      #   self:
+      #     ip: '' # '127.0.0.1'
+      #     port: 2029
+      #     # verbose: true
+      #     forwarder: true
         self_and_maxosc:
           ip: '' # '127.0.0.1'
           port: 2030
@@ -136,6 +136,7 @@ py2030:
               3: '/p/lava.flatline'
               4: '/p/lava.nightmare'
               5: '/p/lava.blink'
+              6: '/p/lava.end'
             '/mud':
               0: '/p/mud.wheel'
               1: '/p/mud.machinebuild'
@@ -164,24 +165,64 @@ py2030:
               7: '/p/stellar.clock6'
               8: '/p/stellar.clock7'
               9: '/p/stellar.map'
-              10: '/p/stellar.voice1'
+              #10: '/p/stellar.voice1'
               11: '/p/stellar.chorus' # two spots and smoke
               12: '/p/stellar.ping'
-              13: '/p/stellar.voice2' # also turns on steady (non-blinking) spot
+              #13: '/p/stellar.voice2' # also turns on steady (non-blinking) spot
+            '/live':
+              0: '/p/stellar.voice1'
+              1: '/p/stellar.voice2'
+            '/scav':
+              126: '/p/scav.end'
+              0: '/p/scav.start'
+              1: '/p/scav.fans'
+              2: '/p/scav.fanbeat'
+              3: '/p/scav.pano'
+              4: '/p/scav.turbo'
+              5: '/p/scav.roof'
+              6: '/p/scav.fallingline'
+            '/divide':
+              127: '/p/divide.start'
+              126: '/p/divide.end'
+              0: '/p/divide.chords'
+              1: '/p/divide.particles1'
+              # 2: '/p/divide.particles1move'
+              3: '/p/divide.particles2'
+              4: '/p/divide.particles3'
+              5: '/p/divide.blinks'
+            '/rings':
+              127: '/p/rings.start'
+              0: '/p/rings.fade'
+              1: '/p/rings.march1'
+              2: '/p/rings.hey1'
+              3: '/p/rings.circles'
+              4: '/p/rings.squares'
+              5: '/p/rings.chorus.beat'
+              6: '/p/rings.hey2'
+              7: '/p/rings.hey3' # also start verse
+              8: '/p/rings.verse2.2'
+              9: '/p/rings.verse2.2.2'
+              10: '/p/rings.blackblocks'
+              11: '/p/rings.chorus2'
+              12: '/p/rings.hey4' # also start onregelmatigheid
+              13: '/p/rings.hey5' # also start bridge
+              13: '/p/rings.snare'
+              14: '/p/rings.roll'
+              15: '/p/rings.chorus3'
               
-              
-              
 
 
 
 
-            # '/lava2': '/t/lava_vid2'
-            # '/lava3': '/t/lava_vid3'
-            # '/lava4': '/t/lava_vid4'
-            # '/lava5': '/t/lava_vid5'
-            # '/lava6': '/t/lava_vid6'
-            # '/lava7': '/t/lava_vid7'
-            # '/lava8': '/t/lava_vid8'
+              # 126:  '/p/rings.end'
+
+
+
+
+
+
+
+
       osc_outputs:
         bcast:
           ip: 192.168.2.255
@@ -303,6 +344,12 @@ py2030:
           ip: 192.168.2.255
           # hostname: 'rpi4.local'
           port: 2031
+          outputs:
+            - osc
+        max_dev:
+          ip: 192.168.2.100
+          # hostname: 'rpi4.local'
+          port: 2030
           outputs:
             - osc
         # rpi2:
