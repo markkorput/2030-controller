@@ -386,7 +386,7 @@ class Tool:
         tarfile = 'vids.tar.gz'
         ShellScript('data/scripts/vids_tar_create.sh').execute({'tarfile': tarfile, 'folder': folder})
 
-    def push_vids(self):
+    def push_vids(self, push=True, install=True):
         for remote in self.remotes:
             ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
             if not ssh.connect():
@@ -396,12 +396,15 @@ class Tool:
             tarfile='vids.tar.gz'
             location=remote.of2030.vids_path
 
-            # push package
-            ssh.put(tarfile, tarfile)
-            # install package
-            ssh.cmd(ShellScript('data/scripts/vids_tar_install.sh').get_script({'tarfile': tarfile, 'location': location}))
-            # remove package
-            ssh.cmd('rm '+tarfile)
+            if push:
+                # push package
+                ssh.put(tarfile, tarfile)
+
+            if install:
+                # install package
+                ssh.cmd(ShellScript('data/scripts/vids_tar_install.sh').get_script({'tarfile': tarfile, 'location': location}))
+                # remove package
+                ssh.cmd('rm '+tarfile)
             # done for this remote
             ssh.disconnect()
 
@@ -513,11 +516,14 @@ def main(opts, args):
         tool.get_vids(opts.folder)
 
     if opts.push_vids:
-        tool.push_vids()
+        tool.push_vids(push=True, install=False)
+
+    if opts.install_vids:
+        tool.push_vids(push=False, install=True)
 
     if opts.update_vids:
         tool.get_vids(opts.folder)
-        tool.push_vids()
+        tool.push_vids(push=True, install=True)
         tarfile = 'vids.tar.gz'
         print 'DONE, removing local copy;', tarfile
         subprocess.call(['rm', tarfile])
@@ -633,6 +639,7 @@ if __name__ == '__main__':
 
     parser.add_option('--get-vids', dest='get_vids', action="store_true", default=False)
     parser.add_option('--push-vids', dest='push_vids', action="store_true", default=False)
+    parser.add_option('--install-vids', dest='install_vids', action="store_true", default=False)
     parser.add_option('--update-vids', dest='update_vids', action="store_true", default=False)
 
     # params
