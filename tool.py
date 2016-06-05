@@ -3,7 +3,7 @@ from py2030.config_file import ConfigFile
 from py2030.utils.ssh_remote import SshRemote
 from py2030.utils.shell_script import ShellScript
 from scp import SCPClient
-import time, subprocess
+import sys, time, subprocess
 
 class Remote:
     def __init__(self, name, config_file):
@@ -46,6 +46,7 @@ class Tool:
     def __init__(self):
         self.config_file = self._get_config_file()
         self.remotes = self._get_remotes()
+        self.connections = {}
 
     # local methods
 
@@ -73,25 +74,31 @@ class Tool:
 
     # py2030
 
-    def push_py(self):
+    def connect(self):
+        for remote in self.remotes:
+            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+            if ssh.connect():
+                self.connections[remote] = ssh
+
+    def disconnect(self):
+        for ssh in self.connections.values():
+            ssh.disconnect()
+        self.connections = {}
+
+    def execute_argv(self, argv):
+        print 'implement execute_argv, got: ', argv
+
+    def push_py(self, remote, ssh):
         tarfile='py2030.tar.gz'
         folder='py2030-'+time.strftime('%Y%m%d_%H%M%S')
         installcmd = ShellScript('data/scripts/py2030_tar_install.sh').get_script({'tarfile': tarfile, 'folder': folder})
 
-        for remote in self.remotes:
-            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
-            if not ssh.connect():
-                # could not connect to current remote, move to next one
-                continue
-
-            # push package
-            ssh.put(tarfile, tarfile)
-            # install package
-            ssh.cmd(installcmd)
-            # remove package
-            ssh.cmd('rm '+tarfile)
-            # done for this remote
-            ssh.disconnect()
+        # push package
+        ssh.put(tarfile, tarfile)
+        # install package
+        ssh.cmd(installcmd)
+        # remove package
+        ssh.cmd('rm '+tarfile)
 
     # local of2030
 
@@ -107,30 +114,17 @@ class Tool:
         folder = Of2030(config_file=self.config_file).path
         ShellScript('data/scripts/of2030src_tar_create.sh').execute({'tarfile': tarfile, 'folder': folder})
 
-    def push_ofsrc_tar(self, builders_only=True):
-        for remote in self.remotes:
+    def push_ofsrc_tar(self, remote, ssh):
+        tarfile='of2030-src.tar.gz'
+        offolder=remote.of2030.path
+        cmd = ShellScript('data/scripts/of2030src_tar_install.sh').get_script({'tarfile': tarfile, 'offolder': offolder})
 
-            if builders_only and not remote.ofbuilder:
-                # skip non-builder
-                continue
-
-            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
-            if not ssh.connect():
-                # could not connect to current remote, move to next one
-                continue
-
-            tarfile='of2030-src.tar.gz'
-            offolder=remote.of2030.path
-            cmd = ShellScript('data/scripts/of2030src_tar_install.sh').get_script({'tarfile': tarfile, 'offolder': offolder})
-
-            # push package
-            ssh.put(tarfile, tarfile)
-            # install package
-            ssh.cmd(cmd)
-            # remove package
-            ssh.cmd('rm '+tarfile)
-            # done for this remote
-            ssh.disconnect()
+        # push package
+        ssh.put(tarfile, tarfile)
+        # install package
+        ssh.cmd(cmd)
+        # remove package
+        ssh.cmd('rm '+tarfile)
 
     # local of2030 xml
 
@@ -139,43 +133,33 @@ class Tool:
         folder = Of2030(config_file=self.config_file).path
         ShellScript('data/scripts/of2030xml_tar_create.sh').execute({'tarfile': tarfile, 'folder': folder})
 
-    def push_ofxml_tar(self):
-        for remote in self.remotes:
-            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
-            if not ssh.connect():
-                # could not connect to current remote, move to next one
-                continue
+    def push_ofxml_tar(self, remote, ssh):
+        tarfile = 'of2030-xml.tar.gz'
+        offolder=remote.of2030.path
+        cmd = ShellScript('data/scripts/of2030xml_tar_install.sh').get_script({'tarfile': tarfile, 'offolder': offolder, 'client_id': remote.name})
 
-            tarfile = 'of2030-xml.tar.gz'
-            offolder=remote.of2030.path
-            cmd = ShellScript('data/scripts/of2030xml_tar_install.sh').get_script({'tarfile': tarfile, 'offolder': offolder, 'client_id': remote.name})
-
-            # push package
-            ssh.put(tarfile, tarfile)
-            # install package
-            ssh.cmd(cmd)
-            # remove package
-            ssh.cmd('rm '+tarfile)
-            # done for this remote
-            ssh.disconnect()
-
+        # push package
+        ssh.put(tarfile, tarfile)
+        # install package
+        ssh.cmd(cmd)
+        # remove package
+        ssh.cmd('rm '+tarfile)
 
     # raspi of2030 build
 
-    def fetch_of_build(self):
-        remote = self._get_of_builder_remote()
+    def fetch_of_build(self, remote, ssh):
+        # remote = self._get_of_builder_remote()
 
-        if not remote:
-            print 'could not find ofbuilder-enabled remote'
-            return False
+        # if not remote:
+        #     print 'could not find ofbuilder-enabled remote'
+        #     return False
 
-        ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
-        if not ssh.connect():
-            # abort
-            return False
+        # ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+        # if not ssh.connect():
+        #     # abort
+        #     return False
 
         tarfile = 'of2030.tar.gz'
-
         # package bin folder into tar.gz file
         ssh.cmd(ShellScript('data/scripts/of2030_tar_create.sh').get_script({'tarfile': tarfile, 'folder': remote.ofpath}))
         # fetch package
@@ -183,53 +167,51 @@ class Tool:
         # remove remotely
         ssh.cmd('rm '+tarfile)
 
-    def push_of_build(self, skip_builders=True, builders_only=False):
-        for remote in self.remotes:
-            if remote.ofbuilder and skip_builders:
-                # skip builder
-                continue
+    def push_of_build(self, remote, ssh): #skip_builders=True, builders_only=False):
+        # for remote in self.remotes:
+        #     if remote.ofbuilder and skip_builders:
+        #         # skip builder
+        #         continue
 
-            if builders_only and not remote.ofbuilder:
-                # skip non-builder
-                continue
+        #     if builders_only and not remote.ofbuilder:
+        #         # skip non-builder
+        #         continue
 
-            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
-            if not ssh.connect():
-                # could not connect to current remote, move to next one
-                continue
+        #     ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+        #     if not ssh.connect():
+        #         # could not connect to current remote, move to next one
+        #         continue
 
-            tarfile='of2030.tar.gz'
-            location=remote.ofparentfolder()
-            # folder='of2030-'+time.strftime('%Y%m%d_%H%M%S')
-            ss = ShellScript('data/scripts/of2030_tar_install.sh')
-            installcmd = ss.get_script({'tarfile': tarfile, 'location': location, 'client_id': remote.name})
-            ss = ShellScript('data/scripts/of2030_tar_install_restore_build_files.sh')
-            restorecmd = ss.get_script({'location': location})
+        tarfile='of2030.tar.gz'
+        location=remote.ofparentfolder()
+        # folder='of2030-'+time.strftime('%Y%m%d_%H%M%S')
+        ss = ShellScript('data/scripts/of2030_tar_install.sh')
+        installcmd = ss.get_script({'tarfile': tarfile, 'location': location, 'client_id': remote.name})
+        ss = ShellScript('data/scripts/of2030_tar_install_restore_build_files.sh')
+        restorecmd = ss.get_script({'location': location})
 
-            # push package
-            ssh.put(tarfile, tarfile)
-            # install package
-            ssh.cmd(installcmd)
-            if builders_only:
-                ssh.cmd(restorecmd)
-            # remove package
-            ssh.cmd('rm '+tarfile)
-            # done for this remote
-            ssh.disconnect()
+        # push package
+        ssh.put(tarfile, tarfile)
+        # install package
+        ssh.cmd(installcmd)
+        if builders_only:
+            ssh.cmd(restorecmd)
+        # remove package
+        ssh.cmd('rm '+tarfile)
 
-    def get_ofbin_tar(self):
+    def get_ofbin_tar(self, remote, ssh):
         tarfile = 'of2030-bin.tar.gz'
 
-        remote = self._get_of_builder_remote()
+        # remote = self._get_of_builder_remote()
 
-        if not remote:
-            print 'could not find ofbuilder-enabled remote'
-            return False
+        # if not remote:
+        #     print 'could not find ofbuilder-enabled remote'
+        #     return False
 
-        ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
-        if not ssh.connect():
-            # abort
-            return False
+        # ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+        # if not ssh.connect():
+        #     # abort
+        #     return False
 
         # package bin folder into tar.gz file
         ssh.cmd(ShellScript('data/scripts/of2030bin_tar_create.sh').get_script({'tarfile': tarfile, 'offolder': remote.ofpath}))
@@ -238,74 +220,65 @@ class Tool:
         # remove remotely
         ssh.cmd('rm '+tarfile)
 
-    def push_ofbin_tar(self, skipBuilders=True):
+    def push_ofbin_tar(self, remote, ssh): #skipBuilders=True):
+        # for remote in self.remotes:
+        #     if remote.ofbuilder and skipBuilders:
+        #         # skip builder
+        #         continue
+
+        #     # if builders_only and not remote.ofbuilder:
+        #     #     # skip non-builder
+        #     #     continue
+
+        #     ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+        #     if not ssh.connect():
+        #         # could not connect to current remote, move to next one
+        #         continue
+
         tarfile = 'of2030-bin.tar.gz'
+        ss = ShellScript('data/scripts/of2030bin_tar_install.sh')
+        installcmd = ss.get_script({'tarfile': tarfile, 'offolder': remote.ofpath})
 
-        for remote in self.remotes:
-            if remote.ofbuilder and skipBuilders:
-                # skip builder
-                continue
-
-            # if builders_only and not remote.ofbuilder:
-            #     # skip non-builder
-            #     continue
-
-            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
-            if not ssh.connect():
-                # could not connect to current remote, move to next one
-                continue
-
-            ss = ShellScript('data/scripts/of2030bin_tar_install.sh')
-            installcmd = ss.get_script({'tarfile': tarfile, 'offolder': remote.ofpath})
-
-            # push package
-            ssh.put(tarfile, tarfile)
-            # install package
-            ssh.cmd(installcmd)
-            # remove package
-            ssh.cmd('rm '+tarfile)
-            # done for this remote
-            ssh.disconnect()
+        # push package
+        ssh.put(tarfile, tarfile)
+        # install package
+        ssh.cmd(installcmd)
+        # remove package
+        ssh.cmd('rm '+tarfile)
 
     # control remote processes
+    def start(self, remote, ssh):
+        # for remote in self.remotes:
+        #     ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+        #     if not ssh.connect():
+        #         # could not connect to current remote, move to next one
+        #         continue
 
-    def start(self):
         cmd = ShellScript('data/scripts/rpi_start.sh').get_script()
+        # restart processes
+        ssh.cmd(cmd, wait=False)
 
-        for remote in self.remotes:
-            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
-            if not ssh.connect():
-                # could not connect to current remote, move to next one
-                continue
-
-            # restart processes
-            ssh.cmd(cmd, wait=False)
-
-    def stop(self):
+    def stop(self, remote, ssh):
+        # for remote in self.remotes:
+        #     ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+        #     if not ssh.connect():
+        #         # could not connect to current remote, move to next one
+        #         continue
         cmd = ShellScript('data/scripts/rpi_stop.sh').get_script()
+        # restart processes
+        ssh.cmd(cmd, wait=False)
 
-        for remote in self.remotes:
-            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
-            if not ssh.connect():
-                # could not connect to current remote, move to next one
-                continue
-
-            # restart processes
-            ssh.cmd(cmd, wait=False)
-
-    def restart(self):
+    def restart(self, remote, ssh):
+        # for remote in self.remotes:
+        #     ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+        #     if not ssh.connect():
+        #         # could not connect to current remote, move to next one
+        #         continue
         startcmd = ShellScript('data/scripts/rpi_start.sh').get_script()
         stopcmd = ShellScript('data/scripts/rpi_stop.sh').get_script()
-
-        for remote in self.remotes:
-            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
-            if not ssh.connect():
-                # could not connect to current remote, move to next one
-                continue
-
-            # restart processes
-            ssh.cmd(startcmd, wait=False)
-            ssh.cmd(stopcmd, wait=False)
+        # restart processes
+        ssh.cmd(startcmd, wait=False)
+        ssh.cmd(stopcmd, wait=False)
 
     # shaders
 
@@ -316,26 +289,24 @@ class Tool:
         tarfile = 'shadersES2.tar.gz'
         ShellScript('data/scripts/shaders_tar_create.sh').execute({'tarfile': tarfile, 'folder': folder})
 
-    def push_shaders(self, skip_builders=False):
-        for remote in self.remotes:
-            if remote.ofbuilder and skip_builders:
-                continue
+    def push_shaders(self, remote, ssh):
+        # for remote in self.remotes:
+        #     if remote.ofbuilder and skip_builders:
+        #         continue
 
-            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
-            if not ssh.connect():
-                # could not connect to current remote, move to next one
-                continue
+        #     ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+        #     if not ssh.connect():
+        #         # could not connect to current remote, move to next one
+        #         continue
 
-            tarfile='shadersES2.tar.gz'
-            location=remote.ofshadersfolder()
-            # push package
-            ssh.put(tarfile, tarfile)
-            # install package
-            ssh.cmd(ShellScript('data/scripts/shaders_tar_install.sh').get_script({'tarfile': tarfile, 'location': location}))
-            # remove package
-            ssh.cmd('rm '+tarfile)
-            # done for this remote
-            ssh.disconnect()
+        tarfile='shadersES2.tar.gz'
+        location=remote.ofshadersfolder()
+        # push package
+        ssh.put(tarfile, tarfile)
+        # install package
+        ssh.cmd(ShellScript('data/scripts/shaders_tar_install.sh').get_script({'tarfile': tarfile, 'location': location}))
+        # remove package
+        ssh.cmd('rm '+tarfile)
 
     # OSC
 
@@ -352,24 +323,22 @@ class Tool:
         tarfile = 'osc.tar.gz'
         ShellScript('data/scripts/osc_tar_create.sh').execute({'tarfile': tarfile, 'folder': folder})
 
-    def push_osc(self):
-        for remote in self.remotes:
-            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
-            if not ssh.connect():
-                # could not connect to current remote, move to next one
-                continue
+    def push_osc(self, remote, ssh):
+        # for remote in self.remotes:
+        #     ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+        #     if not ssh.connect():
+        #         # could not connect to current remote, move to next one
+        #         continue
 
-            tarfile='osc.tar.gz'
-            location=remote.of2030.osc_path
+        tarfile='osc.tar.gz'
+        location=remote.of2030.osc_path
 
-            # push package
-            ssh.put(tarfile, tarfile)
-            # install package
-            ssh.cmd(ShellScript('data/scripts/osc_tar_install.sh').get_script({'tarfile': tarfile, 'location': location}))
-            # remove package
-            ssh.cmd('rm '+tarfile)
-            # done for this remote
-            ssh.disconnect()
+        # push package
+        ssh.put(tarfile, tarfile)
+        # install package
+        ssh.cmd(ShellScript('data/scripts/osc_tar_install.sh').get_script({'tarfile': tarfile, 'location': location}))
+        # remove package
+        ssh.cmd('rm '+tarfile)
 
     # vids
 
@@ -386,48 +355,292 @@ class Tool:
         tarfile = 'vids.tar.gz'
         ShellScript('data/scripts/vids_tar_create.sh').execute({'tarfile': tarfile, 'folder': folder})
 
-    def push_vids(self, push=True, install=True):
-        for remote in self.remotes:
-            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
-            if not ssh.connect():
-                # could not connect to current remote, move to next one
-                continue
+    def push_vids(self, remote, ssh):
+        # for remote in self.remotes:
+        #     ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+        #     if not ssh.connect():
+        #         # could not connect to current remote, move to next one
+        #         continue
 
-            tarfile='vids.tar.gz'
-            location=remote.of2030.vids_path
+        tarfile='vids.tar.gz'
+        location=remote.of2030.vids_path
 
-            if push:
-                # push package
-                ssh.put(tarfile, tarfile)
+        if push:
+            # push package
+            ssh.put(tarfile, tarfile)
 
-            if install:
-                # install package
-                ssh.cmd(ShellScript('data/scripts/vids_tar_install.sh').get_script({'tarfile': tarfile, 'location': location}))
-                # remove package
-                ssh.cmd('rm '+tarfile)
-            # done for this remote
-            ssh.disconnect()
+        if install:
+            # install package
+            ssh.cmd(ShellScript('data/scripts/vids_tar_install.sh').get_script({'tarfile': tarfile, 'location': location}))
+            # remove package
+            ssh.cmd('rm '+tarfile)
+
 
     # run generic command(s) on all remotes
 
-    def cmd_all_remotes(self, cmd, wait=True, skip_builders=True, sleep=None):
-        for remote in self.remotes:
-            if skip_builders and remote.ofbuilder:
-                continue
+    def cmd_all_remotes(self, remote, ssh, cmd, wait=True, skip_builders=True, sleep=None):
+        # for remote in self.remotes:
+        #     if skip_builders and remote.ofbuilder:
+        #         continue
 
-            ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
-            if not ssh.connect():
-                # could not connect to current remote, move to next one
-                continue
+        #     ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+        #     if not ssh.connect():
+        #         # could not connect to current remote, move to next one
+        #         continue
+        ssh.cmd(cmd, wait)
+        # if sleep:
+        #     time.sleep(sleep)
+        # ssh.disconnect()
 
-            ssh.cmd(cmd, wait)
-            if sleep:
-                time.sleep(sleep)
-            ssh.disconnect()
 
+try:
+    import OSC
+except ImportError:
+    print "importing embedded version of pyOSC library for py2030.outputs.osc"
+    import py2030.dependencies.OSC as OSC
+
+
+class Client:
+    def __init__(self, osc_port=2130, osc_host='127.0.0.1', verbose=True):
+        self.osc_port = osc_port
+        self.osc_host = osc_host
+        self.verbose = verbose
+
+        # attributes
+        self.client = None
+        self.connected = False
+        self.running = False
+
+    def __del__(self):
+        self.stop()
+
+    def start(self):
+        if self._connect():
+            self.running = True
+
+    def stop(self):
+        if self.connected:
+            self._disconnect()
+        self.running = False
+
+    def _connect(self):
+        try:
+            self.client = OSC.OSCClient()
+            self.client.connect((self.osc_host, self.osc_port))
+        except OSC.OSCClientError as err:
+            ColorTerminal().fail("OSC connection failure: {0}".format(err))
+            return False
+
+        self.connected = True
+        print "OSC client connected to {0}:{1}".format(self.osc_host, str(self.osc_port))
+        return True
+
+    def _disconnect(self):
+        if not hasattr(self, 'client') or not self.client:
+            return False
+        self.client.close()
+        self.client = None
+        self.connected = False
+        print "OSC client closed"
+        return True
+
+    def send(self, addr, data=[]):
+        if not self.connected:
+            print 'client not connect, not sending message ', addr, data
+            return
+
+        msg = OSC.OSCMessage()
+        msg.setAddress(addr) # set OSC address
+
+        for item in data:
+            msg.append(item)
+
+        try:
+            self.client.send(msg)
+        except OSC.OSCClientError as err:
+            pass
+        except AttributeError as err:
+            print '[Tool.Client {0}:{1}] error:'.format(self.osc_host, self.osc_port)
+            print err
+            self.stop()
+
+        if self.verbose:
+            print '[Tool.Client {0}:{1}]:'.format(self.osc_host, self.osc_port), addr, data
+
+class Service:
+    def __init__(self, osc_port=2130, verbose=True):
+        self.osc_port = osc_port
+        self.verbose = verbose
+
+        self.running=False
+        self.connected=False
+        self.osc_server=None
+        self.got_pong = False
+        self.tool = None
+
+    def __del__(self):
+        self.stop()
+
+    def start(self):
+        if self._connect():
+            self.running = True
+
+    def stop(self):
+        if self.connected:
+            self._disconnect()
+        if self.tool:
+            self.tool.disconnect()
+            self.tool = None
+        self.running = False
+
+    def update(self):
+        if not self.connected:
+            return
+
+        # we'll enforce a limit to the number of osc requests
+        # we'll handle in a single iteration, otherwise we might
+        # get stuck in processing an endless stream of data
+        limit = 50
+        count = 0
+
+        # clear timed_out flag
+        self.osc_server.timed_out = False
+
+        # handle all pending requests then return
+        while not self.osc_server.timed_out and count < limit:
+            try:
+                self.osc_server.handle_request()
+                count += 1
+            except Exception as exc:
+                print 'Something went wrong while handling incoming OSC messages:'
+                print exc
+
+    def _connect(self):
+        if self.connected:
+            print 'Tool.Service - Already connected'
+            return False
+
+        try:
+            self.osc_server = OSC.OSCServer(('', self.osc_port))
+        except Exception as err:
+            # something went wrong, cleanup
+            self.connected = False
+            self.osc_server = None
+            print "{0}\nOSC Server could not start @ {1}".format(err, str(self.osc_port))
+            # abort
+            return False
+
+        # register time out callback
+        self.osc_server.handle_timeout = self._onTimeout
+        self.osc_server.addMsgHandler('default', self._onMessage)
+        self.connected = True
+        print "OSC Server running @ {0}".format(str(self.osc_port))
+        return True
+
+    def _disconnect(self):
+        if hasattr(self, 'osc_server') and self.osc_server:
+            self.osc_server.close()
+            self.connected = False
+            self.osc_server = None
+            print 'OSC Server stopped'
+
+    def _onTimeout(self):
+        self.osc_server.timed_out = True
+
+    def _onMessage(self, addr, tags, data, client_address):
+        if self.verbose:
+            print 'Tool.Service got OSC Message {0}'.format((addr, tags, data, client_address))
+
+        # respond to pings with pong
+        if addr == '/ping':
+            cport = data[0] if len(data) > 0 else 2132
+            c = Client(osc_host=client_address[0], osc_port=cport)
+            c.start()
+            c.send('/pong')
+            return
+
+        # set got pong when receiving a /pong message
+        if addr == '/pong':
+            self.got_pong = True
+            return
+
+        if addr == '/argv':
+            if not self.tool:
+                self.tool = Tool()
+                self.tool.connect()
+            self.tool.execute_argv(data)
 
 def main(opts, args):
-    tool = Tool()
+    if opts.service:
+        # the service does the actual execution
+        service = Service()
+        service.start()
+
+        try:
+            while True:
+                service.update()
+        except KeyboardInterrupt:
+            print ' KeyboardInterrupt; quitting'
+        service.stop()
+        return
+
+
+    # the service receives '/pong' messages
+    service = Service(osc_port=2132)
+    service.start()
+
+    # the client sends operation command to the service via OSC
+    # the service can run in a separate process (keeping SSH connections alive)
+    # or simply be part of this process
+    client = Client()
+    client.start()
+
+    # check if there's a service running
+    remote_service_running = False
+
+    client.send('/ping', [service.osc_port])
+    t = time.time()
+    while time.time() - t < 3.0:
+        service.update()
+        if service.got_pong:
+            remote_service_running = True
+            # break out of the while loop
+            break
+
+    # stop local service (only used to receive /pong from remote service)
+    service.stop()
+    service=None
+
+    if remote_service_running:
+        # our client is already connected to the remote service
+        print 'using remote service at {0}'.format(client.osc_port)
+        client.send('/argv', sys.argv)
+        client.stop()
+        client = None
+    else:
+        # no remote service detected, keep our local service and create new client
+        # that connects to the local service instead
+        client.stop()
+        client = None
+        #client = Client(osc_port=2032)
+        #print 'using local service at {0}'.format(client.osc_port)
+        Tool().execute_argv(sys.argv)
+
+    return
+
+
+
+
+
+
+
+
+
+    # for opt, value in opts.iteritems():
+    #     if value:
+    #         client.send('/'+opt)
+
+    return
 
     # of2030
 
@@ -594,6 +807,7 @@ if __name__ == '__main__':
     parser = OptionParser()
 
     # actions
+    parser.add_option('-s', '--service', dest='service', action="store_true", default=False)
     parser.add_option('--shutdown', dest='shutdown', action="store_true", default=False)
     parser.add_option('--reboot', dest='reboot', action="store_true", default=False)
 
