@@ -58,7 +58,7 @@ class SshRemote:
     def disconnect(self):
         if self.client:
             self.client.close()
-            print 'ssh connection closed'
+            ColorTerminal().yellow('ssh connection closed with {0} (hostname: {1})'.format(self.ip, self.hostname))
             self.client = None
 
     def cmd(self, command, wait=True):

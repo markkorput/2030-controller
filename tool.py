@@ -78,7 +78,7 @@ class Tool:
 
     def connect(self):
         for remote in self.remotes:
-            ssh = get_ssh_for_remote(remote)
+            ssh = self.get_ssh_for_remote(remote)
             if ssh:
                 self.sshs[remote] = ssh
 
@@ -114,7 +114,7 @@ class Tool:
             if non_builders_only and remote.ofbuilder:
                 continue
 
-            ssh = get_connection_for_remote(connect)
+            ssh = self.get_ssh_for_remote(remote, connect)
             if ssh:
                 connects.append({'remote': remote, 'ssh': ssh})
 
@@ -446,6 +446,8 @@ class Tool:
             if remote.ofbuilder:
                 if '--push-src' in argv or '--update-src' in argv:
                     self.push_src(remote, ssh)
+                if '--build' in argv or '--build-of' in argv:
+                    ssh.cmd('make Debug -C of2030 > buildlog.txt &')
 
             if '--push-bin' in argv or '--update-bin' in argv:
                 self.push_bin(remote, ssh)
@@ -914,64 +916,64 @@ if __name__ == '__main__':
 
     # actions
     parser.add_option('-s', '--service', dest='service', action="store_true", default=False)
-    # parser.add_option('--shutdown', dest='shutdown', action="store_true", default=False)
-    # parser.add_option('--reboot', dest='reboot', action="store_true", default=False)
-    #
-    # parser.add_option('--stop', dest='stop', action="store_true", default=False)
-    # parser.add_option('--start', dest='start', action="store_true", default=False)
-    # parser.add_option('--restart', dest='restart', action="store_true", default=False)
-    #
-    # parser.add_option('--start-of', dest='start_of', action="store_true", default=False)
-    # parser.add_option('--stop-of', dest='stop_of', action="store_true", default=False)
-    # parser.add_option('--restart-of', dest='restart_of', action="store_true", default=False)
-    #
+    parser.add_option('--shutdown', dest='shutdown', action="store_true", default=False)
+    parser.add_option('--reboot', dest='reboot', action="store_true", default=False)
+    
+    parser.add_option('--stop', dest='stop', action="store_true", default=False)
+    parser.add_option('--start', dest='start', action="store_true", default=False)
+    parser.add_option('--restart', dest='restart', action="store_true", default=False)
+    parser.add_option('--start-of', dest='start_of', action="store_true", default=False)
+    parser.add_option('--stop-of', dest='stop_of', action="store_true", default=False)
+    parser.add_option('--restart-of', dest='restart_of', action="store_true", default=False)
+    parser.add_option('--build', dest='build_of', action="store_true", default=False)
     # parser.add_option('--get-of', dest='get_of', action="store_true", default=False)
     # parser.add_option('--push-of', dest='push_of', action="store_true", default=False)
     # parser.add_option('--update-of', dest='update_of', action="store_true", default=False)
-    #
+
     # parser.add_option('--get-local-of', dest='get_local_of', action="store_true", default=False)
     # parser.add_option('--push-local-of', dest='push_local_of', action="store_true", default=False)
     # parser.add_option('--update-local-of', dest='update_local_of', action="store_true", default=False)
-    #
-    # parser.add_option('--get-xml', dest='get_ofxml', action="store_true", default=False)
-    # parser.add_option('--push-xml', dest='push_ofxml', action="store_true", default=False)
-    # parser.add_option('--update-xml', dest='update_ofxml', action="store_true", default=False)
-    #
-    # parser.add_option('--get-src', dest='get_ofsrc', action="store_true", default=False)
-    # parser.add_option('--push-src', dest='push_ofsrc', action="store_true", default=False)
-    # parser.add_option('--update-src', dest='update_ofsrc', action="store_true", default=False)
-    #
-    # parser.add_option('--get-bin', dest='get_ofbin', action="store_true", default=False)
-    # parser.add_option('--push-bin', dest='push_ofbin', action="store_true", default=False)
-    # parser.add_option('--update-bin', dest='update_ofbin', action="store_true", default=False)
-    #
-    # parser.add_option('--get-shaders', dest='get_shaders', action="store_true", default=False)
-    # parser.add_option('--push-shaders', dest='push_shaders', action="store_true", default=False)
-    # parser.add_option('--update-shaders', dest='update_shaders', action="store_true", default=False)
-    #
-    # parser.add_option('--get-osc', dest='get_osc', action="store_true", default=False)
-    # parser.add_option('--push-osc', dest='push_osc', action="store_true", default=False)
-    # parser.add_option('--update-osc', dest='update_osc', action="store_true", default=False)
-    #
-    # parser.add_option('--get-vids', dest='get_vids', action="store_true", default=False)
-    # parser.add_option('--push-vids', dest='push_vids', action="store_true", default=False)
-    # parser.add_option('--install-vids', dest='install_vids', action="store_true", default=False)
-    # parser.add_option('--update-vids', dest='update_vids', action="store_true", default=False)
-    #
-    # parser.add_option('--get-py', dest='get_py', action="store_true", default=False)
-    # parser.add_option('--push-py', dest='push_py', action="store_true", default=False)
-    # parser.add_option('--update-py', dest='update_py', action="store_true", default=False)
+    
+    parser.add_option('--get-xml', dest='get_ofxml', action="store_true", default=False)
+    parser.add_option('--push-xml', dest='push_ofxml', action="store_true", default=False)
+    parser.add_option('--update-xml', dest='update_ofxml', action="store_true", default=False)
+    
+    parser.add_option('--get-src', dest='get_ofsrc', action="store_true", default=False)
+    parser.add_option('--push-src', dest='push_ofsrc', action="store_true", default=False)
+    parser.add_option('--update-src', dest='update_ofsrc', action="store_true", default=False)
+
+    parser.add_option('--get-bin', dest='get_ofbin', action="store_true", default=False)
+    parser.add_option('--push-bin', dest='push_ofbin', action="store_true", default=False)
+    parser.add_option('--update-bin', dest='update_ofbin', action="store_true", default=False)
+
+    parser.add_option('--get-shaders', dest='get_shaders', action="store_true", default=False)
+    parser.add_option('--push-shaders', dest='push_shaders', action="store_true", default=False)
+    parser.add_option('--update-shaders', dest='update_shaders', action="store_true", default=False)
+
+    parser.add_option('--get-osc', dest='get_osc', action="store_true", default=False)
+    parser.add_option('--push-osc', dest='push_osc', action="store_true", default=False)
+    parser.add_option('--update-osc', dest='update_osc', action="store_true", default=False)
+
+    parser.add_option('--get-vids', dest='get_vids', action="store_true", default=False)
+    parser.add_option('--push-vids', dest='push_vids', action="store_true", default=False)
+    parser.add_option('--put-vids', dest='push_vids', action="store_true", default=False)
+    parser.add_option('--install-vids', dest='install_vids', action="store_true", default=False)
+    parser.add_option('--update-vids', dest='update_vids', action="store_true", default=False)
+
+    parser.add_option('--get-py', dest='get_py', action="store_true", default=False)
+    parser.add_option('--push-py', dest='push_py', action="store_true", default=False)
+    parser.add_option('--update-py', dest='update_py', action="store_true", default=False)
 
     # params
-    # parser.add_option('-f', '--folder', dest='folder', default=None)
-
-    # parser.add_option('-c', '--client', dest='client', action="store_true", default=False)
+    
+    parser.add_option('-c', '--client', dest='client', action="store_true", default=False)
+    parser.add_option('-f', '--folder', dest='folder', default=None)
     # parser.add_option('-f', '--file', dest='file', default=None)
-    # parser.add_option('-l', '--loop', dest='loop', action="store_true", default=False)
-    # parser.add_option('-t', '--threaded', dest='threaded', action="store_true", default=False)
-    # parser.add_option('--install', dest='install', action="store_true", default=False)
-    # parser.add_option('--bootstrap', dest='bootstrap', action="store_true", default=False)
-    # parser.add_option('--route-ip', dest="route_ip", action="store_true", help="Route IP address (default: the controller profile's osc_out_ip value from the config file) to specific interface (default: en0)", default=None)
+    parser.add_option('-l', '--loop', dest='loop', action="store_true", default=False)
+    parser.add_option('-t', '--threaded', dest='threaded', action="store_true", default=False)
+    parser.add_option('--install', dest='install', action="store_true", default=False)
+    parser.add_option('--bootstrap', dest='bootstrap', action="store_true", default=False)
+    parser.add_option('--route-ip', dest="route_ip", action="store_true", help="Route IP address (default: the controller profile's osc_out_ip value from the config file) to specific interface (default: en0)", default=None)
     options, args = parser.parse_args()
     del OptionParser
     main(options, args)
