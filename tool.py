@@ -39,7 +39,7 @@ class Of2030:
         self.raspi_shaders_folder_path = self.path + '/bin/data/shadersES2'
         self.osc_path = self.path + '/bin/data/osc'
         self.vids_path = self.path + '/bin/data/vids'
-
+        self.images_path = self.path + '/bin/data/images'
 
 from scp import SCPClient
 import sys, time, subprocess
@@ -374,6 +374,39 @@ class Tool:
         # remove package
         ssh.cmd('rm '+tarfile)
 
+    def get_img(self, folder=None):
+        # foler not specified by caller?
+        if not folder:
+            # try to get osc_folder setting from config file
+            folder = self.config_file.get_value('py2030.images_folder', None)
+        # folder not specified in config file?
+        if not folder:
+            # use default osc folder of local of2030 folder
+            folder = Of2030(self.config_file).images_path
+
+        tarfile = 'imgs.tar.gz'
+        ShellScript('data/scripts/images_tar_create.sh').execute({'tarfile': tarfile, 'folder': folder})
+
+    def push_img(self, remote, ssh, put=True, install=True):
+        # for remote in self.remotes:
+        #     ssh = SshRemote(ip=remote.ip, hostname=remote.hostname, username=remote.ssh_username, password=remote.ssh_password)
+        #     if not ssh.connect():
+        #         # could not connect to current remote, move to next one
+        #         continue
+
+        tarfile='imgs.tar.gz'
+        location=remote.of2030.images_path
+
+        if put:
+            # push package
+            ssh.put(tarfile, tarfile)
+
+        if install:
+            # install package
+            ssh.cmd(ShellScript('data/scripts/images_tar_install.sh').get_script({'tarfile': tarfile, 'location': location}))
+            # remove package
+            ssh.cmd('rm '+tarfile)
+
 
     def get_vids(self, folder=None):
         # foler not specified by caller?
@@ -425,13 +458,15 @@ class Tool:
             else:
                 print 'could not get ofbuilder connection to do --get-bin'
 
-        if '--get-osc' in argv:
+        if '--get-osc' in argv or '--update-osc' in argv:
             self.get_osc()
 
-        if '--get-vids' in argv:
+        if '--get-vids' in argv or '--update-vids' in argv:
             self.get_vids()
+        if '--get-img' in argv or '--update-img' in argv:
+            self.get_img()
 
-        if '--get-shaders' in argv:
+        if '--get-shaders' in argv or '--update-shaders' in argv:
             self.get_shaders()
 
         # each connection
@@ -463,6 +498,15 @@ class Tool:
 
             if '--install-vids' in argv:
                 self.push_vids(remote, ssh, put=False, install=True)
+
+            if '--push-img' in argv or '--update-img' in argv:
+                self.push_img(remote, ssh)
+
+            if '--put-img' in argv:
+                self.push_img(remote, ssh, put=True, install=False)
+
+            if '--install-img' in argv:
+                self.push_img(remote, ssh, put=False, install=True)
 
             if '--push-shaders' in argv or '--update-shaders' in argv:
                 self.push_shaders(remote, ssh)
@@ -503,6 +547,9 @@ class Tool:
 
         if '--update-vids' in argv:
             local_files_to_remove.append('vids.tar.gz')
+
+        if '--update-img' in argv:
+            local_files_to_remove.append('imgs.tar.gz')
 
         if '--update-shaders' in argv:
             local_files_to_remove.append('shadersES2.tar.gz')
@@ -959,6 +1006,12 @@ if __name__ == '__main__':
     parser.add_option('--put-vids', dest='push_vids', action="store_true", default=False)
     parser.add_option('--install-vids', dest='install_vids', action="store_true", default=False)
     parser.add_option('--update-vids', dest='update_vids', action="store_true", default=False)
+
+    parser.add_option('--get-img', dest='get_img', action="store_true", default=False)
+    parser.add_option('--push-img', dest='push_img', action="store_true", default=False)
+    parser.add_option('--put-img', dest='push_img', action="store_true", default=False)
+    parser.add_option('--install-img', dest='install_img', action="store_true", default=False)
+    parser.add_option('--update-img', dest='update_img', action="store_true", default=False)
 
     parser.add_option('--get-py', dest='get_py', action="store_true", default=False)
     parser.add_option('--push-py', dest='push_py', action="store_true", default=False)
