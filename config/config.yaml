@@ -129,14 +129,6 @@ py2030:
           #   <first param value>: <osc message to be triggered>
           osc_map:
             # '/live' [pitch]:
-            '/lava':
-              0: '/p/lava.beat'
-              1: '/p/lava.start'
-              2: '/p/lava.grow'
-              3: '/p/lava.flatline'
-              4: '/p/lava.nightmare'
-              5: '/p/lava.blink'
-              6: '/p/lava.end'
             '/mud':
               0: '/p/mud.wheel'
               1: '/p/mud.machinebuild'
@@ -145,16 +137,20 @@ py2030:
               4: '/p/mud.roof2'
               5: '/p/mud.destruct'
             '/rain':
+              126: '/p/rain.end'
               0: '/p/rain.thunder'
               1: '/p/rain.noorderlicht'
               2: '/p/rain.tear'
               3: '/p/rain.cubes'
             '/inloop':
+              127: '/p/inloop.start'
               0: '/p/inloop.start'
             '/impro':
-              0: '/p/impro.start'
+              127: '/p/impro.start'
               1: '/p/impro.finalize'
             '/stellar':
+              127: '/p/stellar.start'
+              126: '/p/stellar.end'
               0: '/p/stellar.worms'
               1: '/p/stellar.spot_grow'
               2: '/p/stellar.clock1'
@@ -165,16 +161,17 @@ py2030:
               7: '/p/stellar.clock6'
               8: '/p/stellar.clock7'
               9: '/p/stellar.map'
-              #10: '/p/stellar.voice1'
+              # 10: '/p/stellar.voice1' # now live
               11: '/p/stellar.chorus' # two spots and smoke
               12: '/p/stellar.ping'
-              #13: '/p/stellar.voice2' # also turns on steady (non-blinking) spot
+              # 13: '/p/stellar.voice2' # also turns on steady (non-blinking) spot
             '/live':
               0: '/p/stellar.voice1'
               1: '/p/stellar.voice2'
             '/scav':
+              127: '/p/scav.start'
               126: '/p/scav.end'
-              0: '/p/scav.start'
+              # 0: '/p/scav.fans'
               1: '/p/scav.fans'
               2: '/p/scav.fanbeat'
               3: '/p/scav.pano'
@@ -192,6 +189,7 @@ py2030:
               5: '/p/divide.blinks'
             '/rings':
               127: '/p/rings.start'
+              126:  '/p/rings.end'
               0: '/p/rings.fade'
               1: '/p/rings.march1'
               2: '/p/rings.hey1'
@@ -206,22 +204,27 @@ py2030:
               11: '/p/rings.chorus2'
               12: '/p/rings.hey4' # also start onregelmatigheid
               13: '/p/rings.hey5' # also start bridge
-              13: '/p/rings.snare'
-              14: '/p/rings.roll'
-              15: '/p/rings.chorus3'
-              
-
-
-
-
-              # 126:  '/p/rings.end'
-
-
-
-
-
-
-
+              14: '/p/rings.snare'
+              15: '/p/rings.roll'
+              16: '/p/rings.chorus3'
+              17: '/p/rings.chorus1.start'
+              18: '/p/rings.chorus1.end'
+              19: '/p/rings.chorus2.end'
+              20: '/p/rings.chorus4.start'
+            '/leap':
+              'forward': '/cfg/rings_pattern_white_intro/current_alpha'
+            '/lava':
+              127: '/p/lava.start'
+              # 126: '/p/lava.end' # <-- geruik lava.flatline voor end
+              0: '/p/lava.beat'
+              1: '/p/lava.bed1'
+              2: '/p/lava.grow'
+              3: '/p/lava.flatline'
+              4: '/p/lava.nightmare'
+              5: '/p/lava.blink'
+              6: '/p/lava.chorus1.end'
+            '/dead':
+              127: '/p/dead.start'
 
       osc_outputs:
         bcast:
@@ -236,7 +239,6 @@ py2030:
         #   port: 2031
         #   outputs:
         #     - osc
-
         # rpi10:
         #   # ip: 192.168.2.255
         #   hostname: 'rpi10.local'
