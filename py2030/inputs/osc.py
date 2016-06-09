@@ -241,6 +241,10 @@ class Osc:
 
             if addr in self.osc_map:
                 mapper = self.osc_map[addr]
+                if 'forward' in mapper:
+                    print '[osc-in] mapped to: ', mapper['forward']
+                    self.interface.oscMessageEvent(mapper['forward'], tags, data, client_address)
+
                 if data[0] in mapper:
                     addr = mapper[data[0]]
                     if self.verbose:

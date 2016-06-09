@@ -484,20 +484,12 @@ class Tool:
                 if '--build' in argv or '--build-of' in argv:
                     ssh.cmd('make Debug -C of2030 > buildlog.txt &')
 
-            if '--push-bin' in argv or '--update-bin' in argv:
-                self.push_bin(remote, ssh)
+            if not remote.ofbuilder:
+                if '--push-bin' in argv or '--update-bin' in argv:
+                    self.push_bin(remote, ssh)
 
             if '--push-osc' in argv or '--update-osc' in argv:
                 self.push_osc(remote, ssh)
-
-            if '--push-vids' in argv or '--update-vids' in argv:
-                self.push_vids(remote, ssh)
-
-            if '--put-vids' in argv:
-                self.push_vids(remote, ssh, put=True, install=False)
-
-            if '--install-vids' in argv:
-                self.push_vids(remote, ssh, put=False, install=True)
 
             if '--push-img' in argv or '--update-img' in argv:
                 self.push_img(remote, ssh)
@@ -510,6 +502,15 @@ class Tool:
 
             if '--push-shaders' in argv or '--update-shaders' in argv:
                 self.push_shaders(remote, ssh)
+
+            if '--push-vids' in argv or '--update-vids' in argv:
+                self.push_vids(remote, ssh)
+
+            if '--put-vids' in argv:
+                self.push_vids(remote, ssh, put=True, install=False)
+
+            if '--install-vids' in argv:
+                self.push_vids(remote, ssh, put=False, install=True)
 
             if not remote.ofbuilder:
                 if '--stop' in argv or '--stop-of' in argv or '--restart' in argv or '--restart-of' in argv:
