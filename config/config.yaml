@@ -129,14 +129,6 @@ py2030:
           #   <first param value>: <osc message to be triggered>
           osc_map:
             # '/live' [pitch]:
-            '/lava':
-              0: '/p/lava.beat'
-              1: '/p/lava.start'
-              2: '/p/lava.grow'
-              3: '/p/lava.flatline'
-              4: '/p/lava.nightmare'
-              5: '/p/lava.blink'
-              6: '/p/lava.end'
             '/mud':
               0: '/p/mud.wheel'
               1: '/p/mud.machinebuild'
@@ -145,6 +137,7 @@ py2030:
               4: '/p/mud.roof2'
               5: '/p/mud.destruct'
             '/rain':
+              126: '/p/rain.end'
               0: '/p/rain.thunder'
               1: '/p/rain.noorderlicht'
               2: '/p/rain.tear'
@@ -196,7 +189,7 @@ py2030:
               5: '/p/divide.blinks'
             '/rings':
               127: '/p/rings.start'
-              # 126:  '/p/rings.end'
+              126:  '/p/rings.end'
               0: '/p/rings.fade'
               1: '/p/rings.march1'
               2: '/p/rings.hey1'
@@ -216,8 +209,22 @@ py2030:
               16: '/p/rings.chorus3'
               17: '/p/rings.chorus1.start'
               18: '/p/rings.chorus1.end'
+              19: '/p/rings.chorus2.end'
+              20: '/p/rings.chorus4.start'
             '/leap':
               'forward': '/cfg/rings_pattern_white_intro/current_alpha'
+            '/lava':
+              127: '/p/lava.start'
+              # 126: '/p/lava.end' # <-- geruik lava.flatline voor end
+              0: '/p/lava.beat'
+              1: '/p/lava.bed1'
+              2: '/p/lava.grow'
+              3: '/p/lava.flatline'
+              4: '/p/lava.nightmare'
+              5: '/p/lava.blink'
+              6: '/p/lava.chorus1.end'
+            '/dead':
+              127: '/p/dead.start'
 
       osc_outputs:
         bcast:
