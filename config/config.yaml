@@ -128,20 +128,6 @@ py2030:
           # <osc addr>:
           #   <first param value>: <osc message to be triggered>
           osc_map:
-            # '/live' [pitch]:
-            '/mud':
-              0: '/p/mud.wheel'
-              1: '/p/mud.machinebuild'
-              2: '/p/mud.machineloop'
-              3: '/p/mud.roof1'
-              4: '/p/mud.roof2'
-              5: '/p/mud.destruct'
-            '/rain':
-              126: '/p/rain.end'
-              0: '/p/rain.thunder'
-              1: '/p/rain.noorderlicht'
-              2: '/p/rain.tear'
-              3: '/p/rain.cubes'
             '/inloop':
               127: '/p/inloop.start'
               0: '/p/inloop.start'
@@ -178,15 +164,8 @@ py2030:
               4: '/p/scav.turbo'
               5: '/p/scav.roof'
               6: '/p/scav.fallingline'
-            '/divide':
-              127: '/p/divide.start'
-              126: '/p/divide.end'
-              0: '/p/divide.chords'
-              1: '/p/divide.particles1'
-              # 2: '/p/divide.particles1move'
-              3: '/p/divide.particles2'
-              4: '/p/divide.particles3'
-              5: '/p/divide.blinks'
+            '/leap':
+              'forward': '/cfg/rings_pattern_white_intro/current_alpha'
             '/rings':
               127: '/p/rings.start'
               126:  '/p/rings.end'
@@ -211,8 +190,14 @@ py2030:
               18: '/p/rings.chorus1.end'
               19: '/p/rings.chorus2.end'
               20: '/p/rings.chorus4.start'
-            '/leap':
-              'forward': '/cfg/rings_pattern_white_intro/current_alpha'
+            # '/live' [pitch]:
+            '/mud':
+              0: '/p/mud.wheel'
+              1: '/p/mud.machinebuild'
+              2: '/p/mud.machineloop'
+              3: '/p/mud.roof1'
+              4: '/p/mud.roof2'
+              5: '/p/mud.destruct'
             '/lava':
               127: '/p/lava.start'
               # 126: '/p/lava.end' # <-- geruik lava.flatline voor end
@@ -225,6 +210,21 @@ py2030:
               6: '/p/lava.chorus1.end'
             '/dead':
               127: '/p/dead.start'
+            '/rain':
+              126: '/p/rain.end'
+              0: '/p/rain.thunder'
+              1: '/p/rain.noorderlicht'
+              2: '/p/rain.tear'
+              3: '/p/rain.cubes'
+            '/divide':
+              127: '/p/divide.start'
+              126: '/p/divide.end'
+              0: '/p/divide.chords'
+              1: '/p/divide.particles1'
+              # 2: '/p/divide.particles1move'
+              3: '/p/divide.particles2'
+              4: '/p/divide.particles3'
+              5: '/p/divide.blinks'
 
       osc_outputs:
         bcast:
