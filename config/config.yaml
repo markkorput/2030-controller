@@ -128,20 +128,6 @@ py2030:
           # <osc addr>:
           #   <first param value>: <osc message to be triggered>
           osc_map:
-            # '/live' [pitch]:
-            '/mud':
-              0: '/p/mud.wheel'
-              1: '/p/mud.machinebuild'
-              2: '/p/mud.machineloop'
-              3: '/p/mud.roof1'
-              4: '/p/mud.roof2'
-              5: '/p/mud.destruct'
-            '/rain':
-              126: '/p/rain.end'
-              0: '/p/rain.thunder'
-              1: '/p/rain.noorderlicht'
-              2: '/p/rain.tear'
-              3: '/p/rain.cubes'
             '/inloop':
               127: '/p/inloop.start'
               0: '/p/inloop.start'
@@ -178,15 +164,8 @@ py2030:
               4: '/p/scav.turbo'
               5: '/p/scav.roof'
               6: '/p/scav.fallingline'
-            '/divide':
-              127: '/p/divide.start'
-              126: '/p/divide.end'
-              0: '/p/divide.chords'
-              1: '/p/divide.particles1'
-              # 2: '/p/divide.particles1move'
-              3: '/p/divide.particles2'
-              4: '/p/divide.particles3'
-              5: '/p/divide.blinks'
+            '/leap':
+              'forward': '/cfg/rings_pattern_white_intro/current_alpha'
             '/rings':
               127: '/p/rings.start'
               126:  '/p/rings.end'
@@ -211,8 +190,14 @@ py2030:
               18: '/p/rings.chorus1.end'
               19: '/p/rings.chorus2.end'
               20: '/p/rings.chorus4.start'
-            '/leap':
-              'forward': '/cfg/rings_pattern_white_intro/current_alpha'
+            # '/live' [pitch]:
+            '/mud':
+              0: '/p/mud.wheel'
+              1: '/p/mud.machinebuild'
+              2: '/p/mud.machineloop'
+              3: '/p/mud.roof1'
+              4: '/p/mud.roof2'
+              5: '/p/mud.destruct'
             '/lava':
               127: '/p/lava.start'
               # 126: '/p/lava.end' # <-- geruik lava.flatline voor end
@@ -225,6 +210,42 @@ py2030:
               6: '/p/lava.chorus1.end'
             '/dead':
               127: '/p/dead.start'
+            '/rain':
+              126: '/p/rain.end'
+              0: '/p/rain.thunder'
+              1: '/p/rain.noorderlicht'
+              2: '/p/rain.tear'
+              3: '/p/rain.cubes'
+            '/wan':
+              127: '/p/now.01.start' # niet alles pre-loaden; sommmgie dingen laden tijdens voice1
+              126: '/p/now.99.end'
+              0: '/p/now.02.alarm1' # 0.46
+              1: '/p/now.03.noisefade' # 0.51 
+              1: '/p/now.04.drumlines' # 0.54 (streepjes), 7x, 1x niet, 15x
+              2: '/p/now.05.dots' # 0.54, 3.5x
+              3: '/p/now.06.alarm2' # 1.10 --> triggers break1 (1.12)
+              4: '/p/now.07.roof1' # 1.15s, 5+x
+              5: '/p/now.08.triangles1' # 1.56 (3x)
+              6: '/p/now.09.voice1' # also unloads triangles
+              7: '/p/now.05.dots' # 2.55 (8x)
+              8: '/p/now.10.magnet.short' # (1x), immediately unloads after that first play
+              9: '/p/now.11.magnet.long1'
+              10: '/p/now.12.magnet.long2'
+              11: '/p/now.13.magnet.long3'
+              12: '/p/now.14.magnet.long4'
+              13: '/p/now.15.voice2'
+            '/fusion':
+              127: '/p/fusion.01.start'
+              126: '/p/fusion.99.end'
+            '/divide':
+              127: '/p/divide.start'
+              126: '/p/divide.end'
+              0: '/p/divide.chords'
+              1: '/p/divide.particles1'
+              # 2: '/p/divide.particles1move'
+              3: '/p/divide.particles2'
+              4: '/p/divide.particles3'
+              5: '/p/divide.blinks'
 
       osc_outputs:
         bcast:
