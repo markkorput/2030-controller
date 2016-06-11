@@ -133,27 +133,27 @@ py2030:
               0: '/p/inloop.start'
             '/impro':
               127: '/p/impro.start'
-              1: '/p/impro.finalize'
+              # 1: '/p/impro.finalize' # still necessary?
             '/stellar':
-              127: '/p/stellar.start'
-              126: '/p/stellar.end'
-              0: '/p/stellar.worms'
-              1: '/p/stellar.spot_grow'
-              2: '/p/stellar.clock1'
-              3: '/p/stellar.clock2'
-              4: '/p/stellar.clock3'
-              5: '/p/stellar.clock4'
-              6: '/p/stellar.clock5'
-              7: '/p/stellar.clock6'
-              8: '/p/stellar.clock7'
-              9: '/p/stellar.map'
+              127: '/p/stellar.00.start'
+              126: '/p/stellar.99.end'
+              # 0: '/p/stellar.worms'
+              1: '/p/stellar.01.spot_grow'
+              2: '/p/stellar.02.clock1'
+              3: '/p/stellar.03.clock2'
+              4: '/p/stellar.04.clock3'
+              5: '/p/stellar.05.clock4'
+              6: '/p/stellar.06.clock5'
+              7: '/p/stellar.07.clock6'
+              8: '/p/stellar.08.clock7'
+              9: '/p/stellar.09.map'
               # 10: '/p/stellar.voice1' # now live
-              11: '/p/stellar.chorus' # two spots and smoke
-              12: '/p/stellar.ping'
+              11: '/p/stellar.11.chorus' # two spots and smoke
+              12: '/p/stellar.12.ping'
               # 13: '/p/stellar.voice2' # also turns on steady (non-blinking) spot
             '/live':
-              0: '/p/stellar.voice1'
-              1: '/p/stellar.voice2'
+              0: '/p/stellar.10.voice1'
+              1: '/p/stellar.13.voice2'
             '/scav':
               127: '/p/scav.start'
               126: '/p/scav.end'
