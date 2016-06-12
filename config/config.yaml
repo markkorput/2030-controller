@@ -137,7 +137,7 @@ py2030:
             '/stellar':
               127: '/p/stellar.00.start'
               126: '/p/stellar.99.end'
-              # 0: '/p/stellar.worms'
+              0: '/p/stellar.01.worms'
               1: '/p/stellar.01.spot_grow'
               2: '/p/stellar.02.clock1'
               3: '/p/stellar.03.clock2'
@@ -237,6 +237,33 @@ py2030:
             '/fusion':
               127: '/p/fusion.01.start'
               126: '/p/fusion.99.end'
+              0: '/p/fusion.02.startline' # 0.2
+              1: '/p/fusion.03.lines1' # 0.12
+              2: '/p/fusion.03.lines2'
+              3: '/p/fusion.03.lines3' # vacals
+              4: '/p/fusion.03.lines4'
+              5: '/p/fusion.04.chorus1' # 0.43
+              6: '/p/fusion.05.lines5' # 0.58
+              7: '/p/fusion.06.lines6' # 1.07
+              8: '/p/fusion.07.fade1' # 1.14
+              9: '/p/fusion.08.accent' # 1.17
+              10: '/p/fusion.09.beat' # 1.18
+              11: '/p/fusion.10.spring' # 1.26
+              12: '/p/fusion.11.lines' # 1.49
+              13: '/p/fusion.12.lines' # 1.57
+              14: '/p/fusion.13.buildup' # 2.03
+              15: '/p/fusion.13.beat' # 2.06
+              16: '/p/fusion.14.fadegydo' # 2.37
+              17: '/p/fusion.15.accent' # 2.40; 8x fades gydo spot
+              18: '/p/fusion.16.spring' # 2.55, also starts gydo spot again and unloads spring
+              19: '/p/fusion.17.lines' # 3.11 also stops max and gydo spots
+              20: '/p/fusion.18.lines' # 3.19 and unloads lines vid
+              21: '/p/fusion.13.beat' # 3.28
+              22: '/p/fusion.19.fade' # 3.58 fades all three spots, fades in koen after 5sec
+              23: '/p/fusion.20.fade' # 3.25
+              24: '/p/fusion.21.space' # 3.30
+              25: '/p/fusion.22.space' # 5.29
+
             '/divide':
               127: '/p/divide.01.start'
               126: '/p/divide.99.end'
