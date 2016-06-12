@@ -162,8 +162,10 @@ py2030:
               2: '/p/scav.03.fanbeat'
               3: '/p/scav.04.pano'
               4: '/p/scav.05.turbo'
-              5: '/p/scav.06.roof'
+              5: '/p/scav.06.roof' # TOMAX ; every beat?
               6: '/p/scav.07.fallingline'
+              7: '/p/scav.08.spotkoen' # TOMAX, 4.00
+              8: '/p/scav.09.fade' # TOMAX 4.06
             '/leap':
               'forward': '/cfg/rings_pattern_white_intro/current_alpha'
             '/rings':
@@ -216,7 +218,7 @@ py2030:
               3: '/p/rain.02.cubes'
               2: '/p/rain.03.tear'
               0: '/p/rain.04.thunder'
-            '/wan':
+            '/wan': # TOMAX
               127: '/p/now.01.start' # niet alles pre-loaden; sommmgie dingen laden tijdens voice1
               126: '/p/now.99.end'
               0: '/p/now.02.alarm1' # 0.46
@@ -234,7 +236,7 @@ py2030:
               11: '/p/now.13.magnet.long3'
               12: '/p/now.14.magnet.long4'
               13: '/p/now.15.voice2'
-            '/fusion':
+            '/fusion': # TOMAX
               127: '/p/fusion.01.start'
               126: '/p/fusion.99.end'
               0: '/p/fusion.02.startline' # 0.2
@@ -263,7 +265,6 @@ py2030:
               23: '/p/fusion.20.fade' # 3.25
               24: '/p/fusion.21.space' # 3.30
               25: '/p/fusion.22.space' # 5.29
-
             '/divide':
               127: '/p/divide.01.start'
               126: '/p/divide.99.end'
