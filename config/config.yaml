@@ -214,7 +214,7 @@ py2030:
             '/dead':
               127: '/p/dead.start'
             '/rain':
-              127: '/prain.start'
+              127: '/p/rain.00.start'
               126: '/p/rain.99.end'
               1: '/p/rain.01.noorderlicht'
               3: '/p/rain.02.cubes'
