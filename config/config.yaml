@@ -2,6 +2,25 @@ py2030:
   # version must have single quotes marks!
   version: '0.1.0'
   profiles:
+    midi:
+      midi_input:
+        verbose: true
+        #   port: 1
+        #   dummy: 'ok'
+        map:
+          176:
+            4:
+              op: 'led'
+
+      # led:
+      #   verbose: true
+      #   device: '/dev/cu.usbserial-EN187350'
+      #   channel_map:
+      #     1: 2
+      #     2: 3
+      #     3: 4
+      #     4: 5
+
     client:
       join_interval: 5.0
       osc_outputs:
@@ -109,16 +128,25 @@ py2030:
         destination: 'data/py2030-{version}.tar.gz'
 
     bridge:
-      # midi_input:
-      #   verbose: true
-      #   port: 1
-      #   dummy: 'ok'
+      osc_outputs:
+        bcast:
+          ip: 192.168.2.255
+          # hostname: 'rpi4.local'
+          port: 2031
+          outputs:
+            - osc
+        # local:
+        #   ip: 127.0.0.1
+        #   # hostname: 'rpi4.local'
+        #   port: 2031
+        #   outputs:
+        #     - osc
       osc_inputs:
-      #   self:
-      #     ip: '' # '127.0.0.1'
-      #     port: 2029
-      #     # verbose: true
-      #     forwarder: true
+        #   self:
+        #     ip: '' # '127.0.0.1'
+        #     port: 2029
+        #     # verbose: true
+        #     forwarder: true
         self_and_maxosc:
           ip: '' # '127.0.0.1'
           port: 2030
@@ -198,7 +226,7 @@ py2030:
               1: '/p/mud.01.machinebuild'
               2: '/p/mud.02.machineloop'
               3: '/p/mud.03.roof1'
-              0: '/p/mud.04.wheel'              
+              0: '/p/mud.04.wheel'
               4: '/p/mud.05.roof2'
               5: '/p/mud.06.destruct'
             '/lava':
@@ -238,7 +266,7 @@ py2030:
               12: '/p/now.13.magnet.long3'
               13: '/p/now.14.magnet.long4'
               14: '/p/now.15.voice2'
-              15: '/p/now.03.noisefade' # 0.51 
+              15: '/p/now.03.noisefade' # 0.51
             '/fusion':
               127: '/p/fusion.01.start'
               126: '/p/fusion.99.end'
@@ -277,63 +305,6 @@ py2030:
               3: '/p/divide.04.particles2'
               4: '/p/divide.05.particles3'
               5: '/p/divide.06.blinks'
-
-      osc_outputs:
-        bcast:
-          ip: 192.168.2.255
-          # hostname: 'rpi4.local'
-          port: 2031
-          outputs:
-            - osc
-        # local:
-        #   ip: 127.0.0.1
-        #   # hostname: 'rpi4.local'
-        #   port: 2031
-        #   outputs:
-        #     - osc
-        # rpi10:
-        #   # ip: 192.168.2.255
-        #   hostname: 'rpi10.local'
-        #   port: 2031
-        #   outputs:
-        #     - osc
-        # rpi3:
-        #   # ip: 192.168.2.255
-        #   hostname: 'rpi3.local'
-        #   port: 2031
-        #   outputs:
-        #     - osc
-        # rpi4:
-        #   # ip: 192.168.2.255
-        #   hostname: 'rpi4.local'
-        #   port: 2031
-        #   outputs:
-        #     - osc
-        # rpi5:
-        #   # ip: 192.168.2.255
-        #   hostname: 'rpi5.local'
-        #   port: 2031
-        #   outputs:
-        #     - osc
-        # rpi7:
-        #   # ip: 192.168.2.255
-        #   hostname: 'rpi7.local'
-        #   port: 2031
-        #   outputs:
-        #     - osc
-        # rpi8:
-        #   # ip: 192.168.2.255
-        #   hostname: 'rpi8.local'
-        #   port: 2031
-        #   outputs:
-        #     - osc
-        # rpi4:
-        #   # ip: 192.168.2.255
-        #   hostname: 'rpi4.local'
-        #   port: 2031
-        #   outputs:
-        #     - osc
-
 
     everything:
       # monitor_config: true

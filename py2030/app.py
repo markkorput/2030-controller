@@ -384,7 +384,12 @@ class App:
             del ConfigRecorder
 
 
-
+        if 'led' in profile_data:
+            led_opts = profile_data['led']
+            led_opts['interface'] = self.interface
+            from py2030.outputs.led import Led
+            self.led_out = Led(led_opts)
+            self.led_out.setup()
 
 
 

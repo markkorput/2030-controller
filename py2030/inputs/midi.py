@@ -34,6 +34,7 @@ class MidiEffectInput:
         self._connect()
         # reset timer
         self.time = 0
+        self.op_map = self.options['map'] if 'map' in self.options else {}
 
     def destroy(self):
         if self.midiin:
@@ -101,6 +102,9 @@ class MidiEffectInput:
 
             self.time += msg[1]
 
+            if midi_message[0] in self.op_map:
+                map = self.op_map[midi_message[0]]
+                if midi_message[1] in self.op_map[]
             # process message
             effect_data = self.midi_message_to_effect(msg[0])
             # if effect_data:

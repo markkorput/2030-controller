@@ -53,6 +53,8 @@ class Interface:
         # triggered when an Osc message came in that simply has to be forwarded to all connected clients
         self.oscMessageEvent = Event()
 
+        self.ledValueEvent = Event()
+
         # configuration
         self.options = {}
         self.configure(options)
