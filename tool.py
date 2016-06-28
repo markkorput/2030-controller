@@ -514,13 +514,13 @@ class Tool:
 
             if not remote.ofbuilder:
                 if '--stop' in argv or '--stop-of' in argv or '--restart' in argv or '--restart-of' in argv:
-                    ssh.cmd("sudo killall of2030_debug\n\n", wait=False)
+                    ssh.cmd("sudo killall of2030\n\n", wait=False)
                     time.sleep(0.5)
-                    ssh.cmd("sudo killall of2030_debug\n\n", wait=False)
+                    ssh.cmd("sudo killall of2030\n\n", wait=False)
                     time.sleep(1.0)
 
                 if '--start' in argv or '--start-of' in argv or '--restart' in argv or '--restart-of' in argv:
-                    ssh.cmd('make RunDebug -C of2030 &\n\n', wait=False)
+                    ssh.cmd('make RunRelease -C of2030 &\n\n', wait=False)
                     time.sleep(1.0)
 
             if '--reboot' in argv:
