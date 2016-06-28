@@ -19,9 +19,9 @@ class MidiEffectInput:
         self.limit = 10
         self.connected = False
 
-        # setup
-        if 'setup' in options and options['setup']:
-            self.setup()
+        # # setup
+        # if 'setup' in options and options['setup']:
+        #     self.setup()
 
     def __del__(self):
         self.destroy()
@@ -34,10 +34,14 @@ class MidiEffectInput:
         self._connect()
         # reset timer
         self.time = 0
+        self.op_map = self.options['map'] if 'map' in self.options else {}
 
     def destroy(self):
         if self.midiin:
             self._disconnect()
+
+    def verbose(self):
+        return 'verbose' in self.options and self.options['verbose']
 
     def _get_midi_effect_map(self):
         # get the part of the config file data we need
@@ -93,13 +97,20 @@ class MidiEffectInput:
             if not msg:
                 return
 
+            if self.verbose():
+                print msg
+
             self.time += msg[1]
 
+            if midi_message[0] in self.op_map:
+                map = self.op_map[midi_message[0]]
+                if midi_message[1] in self.op_map[]
             # process message
             effect_data = self.midi_message_to_effect(msg[0])
-            if effect_data:
-                self.interface.effectEvent(effect_data)
-                print('[MidiEffectInput] triggered interface effectEvent with: ', effect_data)
+            # if effect_data:
+                # self.interface.effectEvent(effect_data)
+                # print('[MidiEffectInput] triggered interface effectEvent with: ', effect_data)
+
 
             # debugging
             # print("[%s] @%0.6f %r" % (self.port_name, self.time, message))

@@ -72,6 +72,9 @@ class Osc(Output):
         # default is 2030
         return int(self.options['port']) if 'port' in self.options else 2030
 
+    def hostname(self):
+        return self.options['hostname'] if 'hostname' in self.options else None
+
     def host(self):
         if self.host_cache:
             return self.host_cache
@@ -81,17 +84,21 @@ class Osc(Output):
                 self.host_cache = socket.gethostbyname(self.options['hostname'])
                 return self.host_cache
             except socket.gaierror as err:
-                ColorTerminal().red("Could not get controller IP from hostname: "+self.options['hostname'])
+                ColorTerminal().red("Could not get IP from hostname: "+self.options['hostname'])
                 print err
 
         # default is localhost
-        self.host_cache = self.options['ip'] if 'ip' in self.options else '127.0.0.1'
+        self.host_cache = self.options['ip'] if 'ip' in self.options else None #'127.0.0.1'
         return self.host_cache
 
     def client_id(self):
         return self.options['client_id'] if 'client_id' in self.options else None
 
     def _connect(self):
+        if not self.host():
+            ColorTerminal().warn("Osc output: no host, can't connect")
+            return
+
         try:
             self.client = OSC.OSCClient()
 
@@ -106,7 +113,7 @@ class Osc(Output):
 
         self.connected = True
         self.connectEvent(self)
-        ColorTerminal().success("OSC client connected to " + self.host() + ':' + str(self.port()))
+        ColorTerminal().success("OSC client connected to {0}:{1} (hostname: {2})".format(self.host(), str(self.port()), self.hostname()))
         return True
 
     def _disconnect(self):

@@ -182,23 +182,29 @@ class App:
         #
         # midi input
         #
-        port = profile_data['midi_input_port'] if 'midi_input_port' in profile_data else None
-        if port >= 0:
-            if self.midi_effect_input:
-                if self.midi_effect_input.port != port:
-                    self.midi_effect_input.destroy()
-                    self.midi_effect_input.port = port
-                    # start receiving incoming midi message and map them to effect events
-                    self.midi_effect_input.setup()
-                else:
-                    if not self.midi_effect_input.connected:
-                        self.midi_effect_input.setup()
-            else:
-                from py2030.inputs.midi import MidiEffectInput
-                self.midi_effect_input = MidiEffectInput({'port': port, 'setup': True})
-        else:
-            if self.midi_effect_input:
-                self.midi_effect_input.destroy()
+        if 'midi_input' in profile_data:
+            from py2030.inputs.midi import MidiEffectInput
+            self.midi_effect_input = MidiEffectInput(profile_data['midi_input'])
+            self.midi_effect_input.setup()
+
+            del MidiEffectInput
+
+        #     if self.midi_effect_input:
+        #         if self.midi_effect_input.port != port:
+        #             self.midi_effect_input.destroy()
+        #             self.midi_effect_input.port = port
+        #             # start receiving incoming midi message and map them to effect events
+        #             self.midi_effect_input.setup()
+        #         else:
+        #             if not self.midi_effect_input.connected:
+        #                 self.midi_effect_input.setup()
+        #     else:
+        #         from py2030.inputs.midi import MidiEffectInput
+        #         self.midi_effect_input = MidiEffectInput(mid)
+        #         del MidiEffectInput
+        # else:
+        #     if self.midi_effect_input:
+        #         self.midi_effect_input.destroy()
 
         #
         # OSC outputs
@@ -352,6 +358,7 @@ class App:
                 self.osc_ascii_input.configure({'path': self.options['file']})
             if 'loop' in self.options:
                 self.osc_ascii_input.configure({'loop': self.options['loop']})
+            self.osc_ascii_input.endEvent += self._onOscAsciiInputEnd
             self.osc_ascii_input.start()
             del OscAsciiInput
 
@@ -377,7 +384,12 @@ class App:
             del ConfigRecorder
 
 
-
+        if 'led' in profile_data:
+            led_opts = profile_data['led']
+            led_opts['interface'] = self.interface
+            from py2030.outputs.led import Led
+            self.led_out = Led(led_opts)
+            self.led_out.setup()
 
 
 
@@ -490,3 +502,6 @@ class App:
         self.joined = True
 
         # self.downloader will take care of the rest
+
+    def _onOscAsciiInputEnd(self, oscAsciiInput):
+        self.interface.restartEvent()

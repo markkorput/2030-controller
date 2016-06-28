@@ -71,3 +71,4 @@ data/osc/*.csv
 data/*.tar.gz
 *.bak
 last-alive.txt
+*.gz

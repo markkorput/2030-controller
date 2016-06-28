@@ -1,6 +1,6 @@
 from py2030.interface import Interface
 from py2030.utils.osc_ascii_file import OscAsciiFile
-
+from py2030.utils.event import Event
 from datetime import datetime
 
 class OscAsciiInput:
@@ -11,6 +11,9 @@ class OscAsciiInput:
         self.file = OscAsciiFile()
         self.interface = Interface.instance()
         self.verbose = False
+
+        # events
+        self.endEvent = Event()
 
         # config
         self.options = {}
@@ -32,6 +35,7 @@ class OscAsciiInput:
                 if self.verbose:
                     print '[OscAsciiInput] done'
                 self.stop()
+                self.endEvent(self)
                 return
 
         # frame-syncing enabled?
@@ -95,3 +99,5 @@ class OscAsciiInput:
     # and reset back to the start of the file
     def _onLoop(self, natnetFile):
         self.start_time = datetime.now()
+        if self.verbose:
+            print '[OscAscii-input] loop'
