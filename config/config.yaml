@@ -12,6 +12,7 @@ py2030:
           outputs:
             - osc
       midi_input:
+        port: 1
         verbose: true
         #   port: 1
         #   dummy: 'ok'
@@ -19,9 +20,26 @@ py2030:
           176:
             4:
               op: 'led'
+          # yamaha 4x tom
+          153:
+            48: # tom1 (side A)
+              osc: '/p/scav.07.fallingline'
+            47: # tom2 (side A)
+              osc: '/p/scav.07.fallingline'
+            45: # tom3 (side B)
+              osc: '/p/scav.07.fallingline'
+            43: # tom4 (side B)
+              osc: '/p/scav.07.fallingline'
+          # akai pads (prog1)
           144:
             36:
-              osc: '/p/cursor1'
+              osc-seq:
+                - '/p/dum1'
+                - '/p/dum2'
+                - '/p/dum3'
+                - '/p/dumLAST'
+            # 36:
+            #   osc: '/p/cursor1'
             37:
               osc: '/p/cursor2'
             38:
@@ -153,18 +171,18 @@ py2030:
 
     bridge:
       osc_outputs:
-        # bcast:
-        #   ip: 192.168.2.255
-        #   # hostname: 'rpi4.local'
-        #   port: 2031
-        #   outputs:
-        #     - osc
-        local:
-          ip: 127.0.0.1
+        bcast:
+          ip: 192.168.2.255
           # hostname: 'rpi4.local'
           port: 2031
           outputs:
             - osc
+        # local:
+        #   ip: 127.0.0.1
+        #   # hostname: 'rpi4.local'
+        #   port: 2031
+        #   outputs:
+        #     - osc
       osc_inputs:
         #   self:
         #     ip: '' # '127.0.0.1'

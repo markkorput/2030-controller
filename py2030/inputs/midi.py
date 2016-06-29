@@ -18,6 +18,7 @@ class MidiEffectInput:
         self.port_name = None
         self.limit = 10
         self.connected = False
+        self.osc_seq_counters = {}
 
         # # setup
         # if 'setup' in options and options['setup']:
@@ -97,6 +98,9 @@ class MidiEffectInput:
             if not msg:
                 return
 
+            if msg[0][2] == 0 or msg[0][0] == 128:
+                continue
+
             if self.verbose():
                 print 'midi message: ', msg # ie. ([176, 12, 7], 0.0)
                 # print self.op_map # ie. {'176': {'4': {'op': 'led'}}}
@@ -104,13 +108,23 @@ class MidiEffectInput:
             self.time += msg[1]
 
             if msg[0][0] in self.op_map:
-                opmap = self.op_map[msg[0][0]]
-                if msg[0][1] in opmap:
-                    opmap=opmap[msg[0][1]]
-                    if 'osc' in opmap:
-                        self.interface.oscMessageEvent(opmap['osc'], [], [], None)
+                cur = self.op_map[msg[0][0]]
+                if msg[0][1] in cur:
+                    cur=cur[msg[0][1]]
+                    if 'osc' in cur:
+                        self.interface.oscMessageEvent(cur['osc'], [], [], None)
                         if self.verbose():
-                            print 'mapped to', opmap['osc']
+                            print 'mapped to', cur['osc']
+                    elif 'osc-seq' in cur:
+                        id = (msg[0][0], msg[0][1])
+                        if not id in self.osc_seq_counters:
+                            self.osc_seq_counters[id] = 0
+                        osc_msg = cur['osc-seq'][self.osc_seq_counters[id] % len(cur['osc-seq'])]
+                        self.interface.oscMessageEvent(osc_msg, [], [], None)
+                        if self.verbose():
+                            print 'mapped to', osc_msg
+                        self.osc_seq_counters[id] = self.osc_seq_counters[id] + 1
+
 
             # else:
             # # process message
