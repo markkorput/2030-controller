@@ -28,7 +28,14 @@ py2030:
               osc: '/p/cursor3'
             39:
               osc: '/p/cursor4'
-
+            40:
+              osc: '/t/riser1'
+            41:
+              osc: '/t/riser2'
+            42:
+              osc: '/t/riser3'
+            43:
+              osc: '/t/riser4'
       # led:
       #   verbose: true
       #   device: '/dev/cu.usbserial-EN187350'

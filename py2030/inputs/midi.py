@@ -97,8 +97,8 @@ class MidiEffectInput:
             if not msg:
                 return
 
-            # if self.verbose():
-            #     print 'midi message: ', msg # ie. ([176, 12, 7], 0.0)
+            if self.verbose():
+                print 'midi message: ', msg # ie. ([176, 12, 7], 0.0)
                 # print self.op_map # ie. {'176': {'4': {'op': 'led'}}}
 
             self.time += msg[1]
