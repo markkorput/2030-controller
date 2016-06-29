@@ -3,6 +3,14 @@ py2030:
   version: '0.1.0'
   profiles:
     midi:
+      osc_outputs:
+        local:
+          verbose: true
+          ip: 127.0.0.1
+          # hostname: 'rpi4.local'
+          port: 2030
+          outputs:
+            - osc
       midi_input:
         verbose: true
         #   port: 1
@@ -11,6 +19,15 @@ py2030:
           176:
             4:
               op: 'led'
+          144:
+            36:
+              osc: '/p/cursor1'
+            37:
+              osc: '/p/cursor2'
+            38:
+              osc: '/p/cursor3'
+            39:
+              osc: '/p/cursor4'
 
       # led:
       #   verbose: true

@@ -97,19 +97,27 @@ class MidiEffectInput:
             if not msg:
                 return
 
-            if self.verbose():
-                print msg
+            # if self.verbose():
+            #     print 'midi message: ', msg # ie. ([176, 12, 7], 0.0)
+                # print self.op_map # ie. {'176': {'4': {'op': 'led'}}}
 
             self.time += msg[1]
 
-            if midi_message[0] in self.op_map:
-                map = self.op_map[midi_message[0]]
-                if midi_message[1] in self.op_map[]
-            # process message
-            effect_data = self.midi_message_to_effect(msg[0])
-            # if effect_data:
-                # self.interface.effectEvent(effect_data)
-                # print('[MidiEffectInput] triggered interface effectEvent with: ', effect_data)
+            if msg[0][0] in self.op_map:
+                opmap = self.op_map[msg[0][0]]
+                if msg[0][1] in opmap:
+                    opmap=opmap[msg[0][1]]
+                    if 'osc' in opmap:
+                        self.interface.oscMessageEvent(opmap['osc'], [], [], None)
+                        if self.verbose():
+                            print 'mapped to', opmap['osc']
+
+            # else:
+            # # process message
+            # effect_data = self.midi_message_to_effect(msg[0])
+            # # if effect_data:
+            #     # self.interface.effectEvent(effect_data)
+            #     # print('[MidiEffectInput] triggered interface effectEvent with: ', effect_data)
 
 
             # debugging
