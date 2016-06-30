@@ -34,10 +34,12 @@ py2030:
           144:
             36:
               osc-seq:
-                - '/p/dum1'
-                - '/p/dum2'
-                - '/p/dum3'
-                - '/p/dumLAST'
+                - '/p/expo_bars1'
+                - '/p/expo_bars2'
+                - '/p/expo_bars3'
+                - '/p/expo_bars4'
+                - '/p/expo_bars5'
+                - '/p/expo_bars6'
             # 36:
             #   osc: '/p/cursor1'
             37:
