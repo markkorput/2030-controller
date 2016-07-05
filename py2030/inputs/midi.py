@@ -98,7 +98,7 @@ class MidiEffectInput:
             if not msg:
                 return
 
-            if msg[0][2] == 0 or msg[0][0] == 128:
+            if len(msg) > 0 and len(msg[0]) > 2 and msg[0][2] == 0 or msg[0][0] == 128:
                 continue
 
             if self.verbose():
@@ -116,15 +116,19 @@ class MidiEffectInput:
                         if self.verbose():
                             print 'mapped to', cur['osc']
                     elif 'osc-seq' in cur:
+                        # counter identifier
                         id = (msg[0][0], msg[0][1])
-                        if not id in self.osc_seq_counters:
-                            self.osc_seq_counters[id] = 0
-                        osc_msg = cur['osc-seq'][self.osc_seq_counters[id] % len(cur['osc-seq'])]
+                        # get count from counter, default to zero if counter doesn't exist yet
+                        count = self.osc_seq_counters[id] if id in self.osc_seq_counters else 0
+                        # get osc message for current count
+                        osc_msg = cur['osc-seq'][count]
+                        # send message
                         self.interface.oscMessageEvent(osc_msg, [], [], None)
+                        # log
                         if self.verbose():
                             print 'mapped to', osc_msg
-                        self.osc_seq_counters[id] = self.osc_seq_counters[id] + 1
-
+                        # update counter
+                        self.osc_seq_counters[id] = (count+1) % len(cur['osc-seq'])
 
             # else:
             # # process message

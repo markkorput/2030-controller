@@ -9,15 +9,27 @@ py2030:
     # rpi10:
     #   hostname: 'rpi10'
     #   ofbuilder: true
-    # rpi3:
-    #   hostname: 'rpi3'
-    # rpi4:
-    #   hostname: 'rpi4'
-    # rpi5:
-    #   hostname: 'rpi5'
+    # rpi2:
+    #   hostname: 'rpi2'
+    rpi3:
+      hostname: 'rpi3'
+    # # rpi4:
+    # #   hostname: 'rpi4'
+    # # rpi5:
+    # #   hostname: 'rpi5'
     rpi7:
       hostname: 'rpi7'
     rpi8:
       hostname: 'rpi8'
-    # rpi2:
-    #   hostname: 'rpi2'
+    rpi9:
+      hostname: 'rpi9'
+    rpi10:
+      hostname: 'rpi10'
+    rpi11:
+      hostname: 'rpi11'
+    rpi12:
+      hostname: 'rpi12'
+    rpi13:
+      hostname: 'rpi13'
+    # # rpi2:
+    # #   hostname: 'rpi2'

@@ -5,7 +5,7 @@ py2030:
     midi:
       osc_outputs:
         local:
-          verbose: true
+          # verbose: true
           ip: 127.0.0.1
           # hostname: 'rpi4.local'
           port: 2030
@@ -13,7 +13,7 @@ py2030:
             - osc
       midi_input:
         port: 1
-        verbose: true
+        # verbose: true
         #   port: 1
         #   dummy: 'ok'
         map:
@@ -23,13 +23,37 @@ py2030:
           # yamaha 4x tom
           153:
             48: # tom1 (side A)
-              osc: '/p/scav.07.fallingline'
+              osc-seq:
+                - '/p/expo_bars1'
+                - '/p/expo_bars2'
+                - '/p/expo_bars3'
+                - '/p/expo_bars4'
+                - '/p/expo_bars5'
+                - '/p/expo_bars6'
             47: # tom2 (side A)
-              osc: '/p/scav.07.fallingline'
+              osc-seq:
+                - '/p/expo2_1'
+                - '/p/expo2_2'
+                - '/p/expo2_3'
+                - '/p/expo2_4'
+                - '/p/expo2_5'
+                - '/p/expo2_6'
             45: # tom3 (side B)
-              osc: '/p/scav.07.fallingline'
-            43: # tom4 (side B)
-              osc: '/p/scav.07.fallingline'
+              osc-seq:
+                - '/p/expo3_1'
+                - '/p/expo3_2'
+                - '/p/expo3_3'
+                - '/p/expo3_4'
+                - '/p/expo3_5'
+                - '/p/expo3_6'
+            43:
+              osc-seq:
+                - '/p/expo4_1'
+                - '/p/expo4_2'
+                - '/p/expo4_3'
+                - '/p/expo4_4'
+                - '/p/expo4_5'
+                - '/p/expo4_6'
           # akai pads (prog1)
           144:
             36:
