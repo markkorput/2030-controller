@@ -131,6 +131,12 @@ class Osc:
             self.osc_server.addMsgHandler('/clip', self._onClip)
             self.osc_server.addMsgHandler('/effect', self._onEffect)
             self.osc_server.addMsgHandler('/restart', self._onRestart)
+            self.osc_server.addMsgHandler('/hoh/start', self._onHohStart)
+            self.osc_server.addMsgHandler('/hoh/stop', self._onHohStop)
+            self.osc_server.addMsgHandler('/hoh/win1', self._onHohWin1)
+            self.osc_server.addMsgHandler('/hoh/win2', self._onHohWin2)
+            self.osc_server.addMsgHandler('/hoh/win3', self._onHohWin3)
+
             # self.osc_server.addMsgHandler('default', self._onUnknownMessage)
         self.osc_server.addMsgHandler('default', self._forwardOscMessage)
 
@@ -262,3 +268,63 @@ class Osc:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
         self.interface.restartEvent()
+
+    def _onHohStart(self, addr, tags, data, client_address):
+        if not self.receivesType(addr[1:]):
+            return
+
+        if len(data) == 1 and data[0] == 0.0:
+            return
+
+        self.interface.hohStartEvent()
+
+        if self.verbose:
+            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
+    def _onHohStop(self, addr, tags, data, client_address):
+        if not self.receivesType(addr[1:]):
+            return
+
+        if len(data) == 1 and data[0] == 0.0:
+            return
+
+        self.interface.hohStopEvent()
+
+        if self.verbose:
+            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
+    def _onHohWin1(self, addr, tags, data, client_address):
+        if not self.receivesType(addr[1:]):
+            return
+
+        if len(data) == 1 and data[0] == 0.0:
+            return
+
+        self.interface.hohWinnerEvent(1)
+
+        if self.verbose:
+            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
+    def _onHohWin2(self, addr, tags, data, client_address):
+        if not self.receivesType(addr[1:]):
+            return
+
+        if len(data) == 1 and data[0] == 0.0:
+            return
+
+        self.interface.hohWinnerEvent(2)
+
+        if self.verbose:
+            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
+    def _onHohWin3(self, addr, tags, data, client_address):
+        if not self.receivesType(addr[1:]):
+            return
+
+        if len(data) == 1 and data[0] == 0.0:
+            return
+
+        self.interface.hohWinnerEvent(3)
+
+        if self.verbose:
+            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address

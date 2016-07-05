@@ -53,6 +53,10 @@ class Interface:
         # triggered when an Osc message came in that simply has to be forwarded to all connected clients
         self.oscMessageEvent = Event()
 
+        self.hohStartEvent = Event()
+        self.hohStopEvent = Event()
+        self.hohWinnerEvent = Event()
+
         self.ledValueEvent = Event()
 
         # configuration

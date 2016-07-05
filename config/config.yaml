@@ -2,6 +2,13 @@ py2030:
   # version must have single quotes marks!
   version: '0.1.0'
   profiles:
+    hoh:
+      osc_inputs:
+        self:
+          ip: '' # self
+          port: 2030
+          verbose: true
+
     midi:
       osc_outputs:
         local:
