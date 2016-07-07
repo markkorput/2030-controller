@@ -6,9 +6,15 @@ py2030:
       osc_inputs:
         self:
           ip: '' # self
-          port: 2030
+          port: 2031
           verbose: true
-
+      hoh_vid_starter:
+        verbose: true
+        vids:
+          start: '/home/pi/hoh/vidname.mov'
+          win1: ''
+          win2: ''
+          win3: ''
     midi:
       osc_outputs:
         local:
