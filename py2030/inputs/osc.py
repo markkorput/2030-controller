@@ -236,6 +236,13 @@ class Osc:
         if self.verbose:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
+        if addr.startswith('/hoh/start/'):
+            try:
+                no = int(addr.replace('/hoh/start/', ''))
+                self.interface.hohStartEvent(addr.replace('/hoh/start/', ''))
+            except ValueError as err:
+                print '[osc-in] invalid hoh start addr:', addr
+
         if addr.startswith('/hoh/load/'):
             try:
                 no = int(addr.replace('/hoh/load/', ''))
@@ -243,12 +250,6 @@ class Osc:
             except ValueError as err:
                 print '[osc-in] invalid hoh load addr:', addr
 
-        if addr.startswith('/hoh/start/'):
-            try:
-                no = int(addr.replace('/hoh/start/', ''))
-                self.interface.hohStartEvent(addr.replace('/hoh/start/', ''))
-            except ValueError as err:
-                print '[osc-in] invalid hoh start addr:', addr
 
         # if addr.startswith('/hoh/play/')
         #     try:
@@ -261,6 +262,9 @@ class Osc:
 
         if addr == '/hoh/stop':
             self.interface.hohStopEvent()
+
+        if addr == '/hoh/pause':
+            self.interface.hohPauseEvent()
 
         # print 'py2030.inputs.Osc._forwardOscMessage with', addr, tags, data, client_address
         # ColorTerminal().warn('Got unknown OSC Message {0}'.format((addr, tags, data, client_address)))
