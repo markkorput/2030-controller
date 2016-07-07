@@ -1,5 +1,9 @@
 from py2030.interface import Interface
-import os
+try:
+    from omxplayer import OMXPlayer
+except:
+    print '[HohVidStarter] no omxplayer'
+    OMXPlayer = None
 
 class HohVidStarter:
   def __init__(self, options = {}):
@@ -8,43 +12,113 @@ class HohVidStarter:
     # config
     self.interface = self.options['interface'] if 'interface' in self.options else Interface.instance()
     self.verbose = 'verbose' in self.options and self.options['verbose']
+    self.player = None
+
+  def __del__(self):
+      if self.player:
+          self.unload()
 
   def setup(self):
     # get video paths
-    data = self.options['vids'] if 'vids' in self.options else {}
-    self.startVidPath = data['start'] if 'start' in data else ''
-    self.winPaths = []
-    p = data['win1'] if 'win1' in data else ''
-    self.winPaths.append(p)
-    p = data['win2'] if 'win2' in data else ''
-    self.winPaths.append(p)
-    p = data['win3'] if 'win3' in data else ''
-    self.winPaths.append(p)
-
+    self.vidPaths = []
+    self.vidPaths = self.options['vids'] if 'vids' in self.options else []
+    print '[HohVidStarter] video paths:', self.vidPaths
     # register callbacks
     print 'registering hoh video starter callbacks'
     self.interface.hohStartEvent += self._onStart
+    self.interface.hohLoadEvent += self._onLoad
+    self.interface.hohPlayEvent += self._onPlay
     self.interface.hohStopEvent += self._onStop
-    self.interface.hohWinnerEvent += self._onWinner
 
-  def _onStart(self):
-    cmd = 'omxplayer ' + self.startVidPath + ' &'
+  def unload(self):
+    if self.player:
+      self.player.quit()
+      self.player = None
+
+  def load(self, videoPath):
     if self.verbose:
-        print 'starting video with command:', cmd
-    os.system(cmd)
+      print '[HohVidStarter#start] loading player with:', videoPath
+
+    # close existing video
+    if self.player:
+      self.unload()
+
+    # this will be paused by default
+    if OMXPlayer:
+        self.player = OMXPlayer(videoPath)
+
+  def start(self):
+    if not self.player:
+      print '[HohVidStarter#start] No video loaded'
+      return
+    if self.verbose:
+      print '[HohVidStarter#start] self.player.play()'
+    self.player.play()
+
+  def pause(self):
+    if not self.player:
+      print '[HohVidStarter#pause] No video loaded'
+      return
+    if self.verbose:
+      print '[HohVidStarter#start] self.player.pause()'
+
+    self.player.pause()
+
+  def stop(self):
+    if not self.player:
+      print '[HohVidStarter#pause] No video loaded'
+      return
+    if self.verbose:
+      print '[HohVidStarter#start] self.player.stop()'
+
+    self.player.stop()
+
+  #
+  # Callback methods
+  #
+
+  def _onStart(self, no):
+    try:
+      no = int(no)
+    except:
+      no = 0
+
+    if no < 0 or no >= len(self.vidPaths):
+      print '[HohVidStarter] invalid start value:', no
+      return
+
+    # cmd = 'omxplayer ' + self.vidPaths[0] + ' &'
+    # if self.verbose:
+    #     print 'starting video with command:', cmd
+    # os.system(cmd)
+    self.load(self.vidPaths[no])
+    self.start()
 
   def _onStop(self):
-    cmd = 'pkill omxplayer'
-    if self.verbose:
-        print 'killing video with command:', cmd
-    os.system(cmd)
+    # cmd = 'pkill omxplayer'
+    # if self.verbose:
+    #     print 'killing video with command:', cmd
+    # os.system(cmd)
+    self.stop()
 
-  def _onWinner(self, winner):
-    if winner < 1 or winner > len(self.winPaths):
-        print 'invalid winner value:', winner
+  def _onLoad(self, no):
+    try:
+      no = int(no)
+    except:
+      no = 0
+
+    if no < 0 or no >= len(self.vidPaths):
+        print '[HohVidStarter] invalid load value:', no
         return
+    self.load(self.vidPaths[no])
 
-    cmd = 'omxplayer ' + self.winPaths[winner-1] + ' &'
-    if self.verbose:
-        print 'starting video with command:', cmd
-    os.system(cmd)
+  def _onPlay(self):
+    # if no < 0 or no >= len(self.vidPaths):
+    #     print '[HohVidStarter] invalid play value:', no
+    #     return
+
+    # cmd = 'omxplayer ' + self.vidPaths[winner] + ' &'
+    # if self.verbose:
+    #     print 'starting video with command:', cmd
+    # os.system(cmd)
+    self.start()

@@ -131,14 +131,9 @@ class Osc:
             self.osc_server.addMsgHandler('/clip', self._onClip)
             self.osc_server.addMsgHandler('/effect', self._onEffect)
             self.osc_server.addMsgHandler('/restart', self._onRestart)
-            self.osc_server.addMsgHandler('/hoh/start', self._onHohStart)
-            self.osc_server.addMsgHandler('/hoh/stop', self._onHohStop)
-            self.osc_server.addMsgHandler('/hoh/win1', self._onHohWin1)
-            self.osc_server.addMsgHandler('/hoh/win2', self._onHohWin2)
-            self.osc_server.addMsgHandler('/hoh/win3', self._onHohWin3)
 
             # self.osc_server.addMsgHandler('default', self._onUnknownMessage)
-        self.osc_server.addMsgHandler('default', self._forwardOscMessage)
+        self.osc_server.addMsgHandler('default', self._onDefault)
 
 
         # set internal connected flag
@@ -233,12 +228,43 @@ class Osc:
     def isForwarder(self):
         return 'forwarder' in self.options and self.options['forwarder']
 
-    def _forwardOscMessage(self, addr, tags, data, client_address):
+    def _onDefault(self, addr, tags, data, client_address):
+        # skip touch osc touch-up events
+        if len(data) == 1 and data[0] == 0.0:
+            return
+
+        if self.verbose:
+            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
+        if addr.startswith('/hoh/load/'):
+            try:
+                no = int(addr.replace('/hoh/load/', ''))
+                self.interface.hohLoadEvent(addr.replace('/hoh/load/', ''))
+            except ValueError as err:
+                print '[osc-in] invalid hoh load addr:', addr
+
+        if addr.startswith('/hoh/start/'):
+            try:
+                no = int(addr.replace('/hoh/start/', ''))
+                self.interface.hohStartEvent(addr.replace('/hoh/start/', ''))
+            except ValueError as err:
+                print '[osc-in] invalid hoh start addr:', addr
+
+        # if addr.startswith('/hoh/play/')
+        #     try:
+        #         no = int(addr.replace('/hoh/play/', ''))
+        #         self.interface.hohPlayEvent(addr.replace('/hoh/play/', ''))
+        #     except ValueError as err:
+        #         print '[osc-in] invalid hoh play addr:', addr
+        if addr == '/hoh/play':
+            self.interface.hohPlayEvent()
+
+        if addr == '/hoh/stop':
+            self.interface.hohStopEvent()
+
         # print 'py2030.inputs.Osc._forwardOscMessage with', addr, tags, data, client_address
         # ColorTerminal().warn('Got unknown OSC Message {0}'.format((addr, tags, data, client_address)))
         # self.unknownMessageEvent(addr, tags, data, client_address, self)
-        if self.verbose:
-            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
         if self.osc_map:
             if addr == '-none-':
@@ -268,63 +294,3 @@ class Osc:
             print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
         self.interface.restartEvent()
-
-    def _onHohStart(self, addr, tags, data, client_address):
-        if not self.receivesType(addr[1:]):
-            return
-
-        if len(data) == 1 and data[0] == 0.0:
-            return
-
-        self.interface.hohStartEvent()
-
-        if self.verbose:
-            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
-
-    def _onHohStop(self, addr, tags, data, client_address):
-        if not self.receivesType(addr[1:]):
-            return
-
-        if len(data) == 1 and data[0] == 0.0:
-            return
-
-        self.interface.hohStopEvent()
-
-        if self.verbose:
-            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
-
-    def _onHohWin1(self, addr, tags, data, client_address):
-        if not self.receivesType(addr[1:]):
-            return
-
-        if len(data) == 1 and data[0] == 0.0:
-            return
-
-        self.interface.hohWinnerEvent(1)
-
-        if self.verbose:
-            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
-
-    def _onHohWin2(self, addr, tags, data, client_address):
-        if not self.receivesType(addr[1:]):
-            return
-
-        if len(data) == 1 and data[0] == 0.0:
-            return
-
-        self.interface.hohWinnerEvent(2)
-
-        if self.verbose:
-            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
-
-    def _onHohWin3(self, addr, tags, data, client_address):
-        if not self.receivesType(addr[1:]):
-            return
-
-        if len(data) == 1 and data[0] == 0.0:
-            return
-
-        self.interface.hohWinnerEvent(3)
-
-        if self.verbose:
-            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address

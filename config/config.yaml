@@ -11,10 +11,11 @@ py2030:
       hoh_vid_starter:
         verbose: true
         vids:
-          start: '/home/pi/hoh/vidname.mov'
-          win1: ''
-          win2: ''
-          win3: ''
+          - '/home/pi/hoh/video.mov'
+          - '/home/pi/hoh/win1.mov'
+          - '/home/pi/hoh/win2.mov'
+          - '/home/pi/hoh/win3.mov'
+
     midi:
       osc_outputs:
         local:
