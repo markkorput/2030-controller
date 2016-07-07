@@ -447,18 +447,21 @@ py2030:
         #   verbose: true
         #   outputs:
         #     - osc
+        # local_bridge:
+        #   ip: 127.0.0.1
+        #   port: 2030
         bcast:
           ip: 192.168.2.255
           # hostname: 'rpi4.local'
           port: 2031
           outputs:
             - osc
-        max_dev:
-          ip: 192.168.2.100
-          # hostname: 'rpi4.local'
-          port: 2030
-          outputs:
-            - osc
+        # max_dev:
+        #   ip: 192.168.2.100
+        #   # hostname: 'rpi4.local'
+        #   port: 2030
+        #   outputs:
+        #     - osc
         # rpi2:
         #   hostname: 'rpi2.local'
         #   port: 2031

@@ -45,7 +45,8 @@ class HohVidStarter:
 
     # this will be paused by default
     if OMXPlayer:
-        self.player = OMXPlayer(videoPath)
+        # start omx player without osd and sending audio through analog jack
+        self.player = OMXPlayer(videoPath, args=['--no-osd', '--adev', 'local'])
 
   def start(self):
     if not self.player:
@@ -87,11 +88,16 @@ class HohVidStarter:
       print '[HohVidStarter] invalid start value:', no
       return
 
+    vidPath = self.vidPaths[no]
+    if vidPath == '':
+        print '[HohVidStarter] empty video path, not starting anything'
+        return
+
     # cmd = 'omxplayer ' + self.vidPaths[0] + ' &'
     # if self.verbose:
     #     print 'starting video with command:', cmd
     # os.system(cmd)
-    self.load(self.vidPaths[no])
+    self.load(vidPath)
     self.start()
 
   def _onStop(self):
@@ -110,7 +116,13 @@ class HohVidStarter:
     if no < 0 or no >= len(self.vidPaths):
         print '[HohVidStarter] invalid load value:', no
         return
-    self.load(self.vidPaths[no])
+
+    vidPath = self.vidPaths[no]
+    if vidPath == '':
+        print '[HohVidStarter] empty video path, not loading anything'
+        return
+
+    self.load(vidPath)
 
   def _onPlay(self):
     # if no < 0 or no >= len(self.vidPaths):
