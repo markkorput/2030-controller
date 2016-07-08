@@ -276,6 +276,11 @@ class Osc:
                 self.interface.hohSeekEvent(data[0])
                 return
 
+            if addr.startswith('/hoh/seek/'):
+                pos = addr.replace('/hoh/seek/', '')
+                self.interface.hohSeekEvent(pos)
+                return
+
             if addr == '/hoh/speed' and len(data) == 2:
                 try:
                     speed = int(data[1])
@@ -285,6 +290,19 @@ class Osc:
 
                 self.interface.hohSpeedEvent(str(data[0]), speed)
                 return
+
+            if addr.startswith('/hoh/speed/'):
+                values = addr.replace('/hoh/speed/', '').split('/')
+                if len(values) != 2:
+                    print "could not extract two params from: ", addr
+                    return
+
+                try:
+                    speed = int(values[1])
+                except ValueError as err:
+                    print '[osc-in] got invalid speed value for /hoh/speed:', addr
+                    return
+                self.interface.hohSpeedEvent(values[0], speed)
 
         # print 'py2030.inputs.Osc._forwardOscMessage with', addr, tags, data, client_address
         # ColorTerminal().warn('Got unknown OSC Message {0}'.format((addr, tags, data, client_address)))
