@@ -34,19 +34,19 @@ py2030:
 
     bridge:
       osc_outputs:
-        # bcast:
-        #   ip: 192.168.2.255
-        #   # hostname: 'rpi4.local'
-        #   port: 2031
-        #   outputs:
-        #     - osc
-        local:
-          ip: 127.0.0.1
+        bcast:
+          ip: 192.168.2.255
           # hostname: 'rpi4.local'
           port: 2031
-          verbose: true
           outputs:
             - osc
+        # local:
+        #   ip: 127.0.0.1
+        #   # hostname: 'rpi4.local'
+        #   port: 2031
+        #   verbose: true
+        #   outputs:
+        #     - osc
       osc_inputs:
         hallofheroes:
           ip: '' # '127.0.0.1'
