@@ -2,6 +2,7 @@ py2030:
   # version must have single quotes marks!
   version: '0.1.0'
   profiles:
+
     hoh:
       osc_inputs:
         self:
@@ -15,6 +16,43 @@ py2030:
           - '/home/pi/hoh/win1.mov'
           - '/home/pi/hoh/win2.mov'
           - '/home/pi/hoh/win3.mov'
+
+    oscplayer:
+      osc_ascii_input:
+        path: 'auto' # 'data/osc/clock_spot.csv'
+        # loop: true
+        # sync: true
+        # verbose: true
+      osc_outputs:
+        localhost:
+          ip: '127.0.0.1'
+          port: 2030
+          verbose: true
+          outputs:
+            - osc
+
+
+    bridge:
+      osc_outputs:
+        bcast:
+          ip: 192.168.2.255
+          # hostname: 'rpi4.local'
+          port: 2031
+          outputs:
+            - osc
+        # local:
+        #   ip: 127.0.0.1
+        #   # hostname: 'rpi4.local'
+        #   port: 2031
+        #   verbose: true
+        #   outputs:
+        #     - osc
+      osc_inputs:
+        hallofheroes:
+          ip: '' # '127.0.0.1'
+          port: 2030
+          verbose: true
+          forwarder: true
 
     midi:
       osc_outputs:
@@ -102,410 +140,3 @@ py2030:
       #     2: 3
       #     3: 4
       #     4: 5
-
-    client:
-      join_interval: 5.0
-      osc_outputs:
-        controller_joiner:
-          # ip: '192.168.2.1'
-          hostname: 'MarkBookPro.local'
-          port: 2030
-          outputs:
-            - join
-            - pong
-          verbose: true
-        of2030:
-          ip: '127.0.0.1'
-          port: 2031
-          verbose: true
-          outputs:
-            - clip
-            - song
-            - osc
-      osc_inputs:
-        self:
-          ip: '' #'self'
-          port: 2030
-          inputs:
-            - ack
-            - effect
-            - event
-            - clip
-            - ping
-            - restart
-
-    test:
-      join_interval: 5.0
-      syncer:
-        pong: true
-        ping: false
-      osc_outputs:
-        controller_joiner:
-          # ip: '127.0.0.1'
-          hostname: 'MarkBookPro.local'
-          port: 2030
-          outputs:
-            - join
-            - pong
-          verbose: true
-        of2030:
-          ip: '127.0.0.1'
-          port: 2031
-          outputs:
-            - clip
-            - song
-            - osc
-      osc_inputs:
-        self:
-          ip: ''
-          port: 2025
-          inputs:
-            - ack
-            - effect
-            - event
-            - clip
-            - ping
-            - restart
-        of2030:
-          ip: '' # '127.0.0.1'
-          port: 2026
-          verbose: true
-          forwarder: true
-
-    controller:
-      osc_inputs:
-        client_join_and_clip_receiver:
-          ip: ''
-          port: 2030
-          inputs:
-            - join
-            - clip
-            - pong
-          verbose: true
-        forwarder_for_all_osc_messages:
-          ip: ''
-          port: 2031
-          forwarder: true
-      osc_outputs:
-        to_joiners:
-          ip: 'joiner'
-          port: 'joiner'
-          verbose: true
-          outputs:
-            - event
-            - effect
-            - clip
-            - ping
-            - osc
-        testpi:
-          # ip: 'joiner'
-          hostname: 'rpi2.local'
-          port: '2031'
-          # verbose: true
-          outputs:
-            - osc
-      version_packager:
-        enabled: true # dummy attribute
-        source: 'py2030'
-        destination: 'data/py2030-{version}.tar.gz'
-
-    bridge:
-      osc_outputs:
-        bcast:
-          ip: 192.168.2.255
-          # hostname: 'rpi4.local'
-          port: 2031
-          outputs:
-            - osc
-        # local:
-        #   ip: 127.0.0.1
-        #   # hostname: 'rpi4.local'
-        #   port: 2031
-        #   outputs:
-        #     - osc
-      osc_inputs:
-        #   self:
-        #     ip: '' # '127.0.0.1'
-        #     port: 2029
-        #     # verbose: true
-        #     forwarder: true
-        self_and_maxosc:
-          ip: '' # '127.0.0.1'
-          port: 2030
-          verbose: true
-          forwarder: true
-          # osc_map format:
-          # <osc addr>:
-          #   <first param value>: <osc message to be triggered>
-          osc_map:
-            '/inloop':
-              127: '/p/inloop.start'
-              0: '/p/inloop.start'
-            '/impro':
-              127: '/p/impro.start'
-              # 1: '/p/impro.finalize' # still necessary?
-            '/stellar':
-              127: '/p/stellar.00.start'
-              126: '/p/stellar.99.end'
-              0: '/p/stellar.01.worms'
-              1: '/p/stellar.01.spot_grow'
-              2: '/p/stellar.02.clock1'
-              3: '/p/stellar.03.clock2'
-              4: '/p/stellar.04.clock3'
-              5: '/p/stellar.05.clock4'
-              6: '/p/stellar.06.clock5'
-              7: '/p/stellar.07.clock6'
-              8: '/p/stellar.08.clock7'
-              9: '/p/stellar.09.map'
-              # 10: '/p/stellar.voice1' # now live
-              11: '/p/stellar.11.chorus' # two spots and smoke
-              12: '/p/stellar.12.ping'
-              # 13: '/p/stellar.voice2' # also turns on steady (non-blinking) spot
-              14: '/p/stellar.09.loadmap'
-            '/live':
-              0: '/p/stellar.10.voice1'
-              1: '/p/stellar.13.voice2'
-            '/scav':
-              127: '/p/scav.01.start'
-              126: '/p/scav.99.end'
-              # 0: '/p/scav.fans'
-              1: '/p/scav.02.fans'
-              2: '/p/scav.03.fanbeat'
-              3: '/p/scav.04.pano'
-              4: '/p/scav.05.turbo'
-              5: '/p/scav.06.roof' # TOMAX ; every beat?
-              6: '/p/scav.07.fallingline'
-              7: '/p/scav.08.spotkoen' # TOMAX, 4.00
-              8: '/p/scav.09.fade' # TOMAX 4.06
-            '/leap':
-              'forward': '/cfg/rings_pattern_white_intro/current_alpha'
-            '/rings':
-              127: '/p/rings.01.start'
-              126:  '/p/rings.99.end'
-              0: '/p/rings.02.fade'
-              1: '/p/rings.03.march1'
-              2: '/p/rings.04.hey1'
-              3: '/p/rings.05.circles'
-              4: '/p/rings.06.squares'
-              5: '/p/rings.07.chorus.beat'
-              6: '/p/rings.08.hey2'
-              7: '/p/rings.09.hey3' # also start verse
-              8: '/p/rings.10.verse2.2'
-              9: '/p/rings.11.verse2.2.2'
-              10: '/p/rings.12.blackblocks'
-              11: '/p/rings.13.chorus2'
-              12: '/p/rings.14.hey4' # also start onregelmatigheid
-              13: '/p/rings.15.hey5' # also start bridge
-              14: '/p/rings.16.snare'
-              15: '/p/rings.17.roll'
-              16: '/p/rings.18.chorus3'
-              17: '/p/rings.19.chorus1.start'
-              18: '/p/rings.20.chorus1.end'
-              19: '/p/rings.21.chorus2.end'
-              20: '/p/rings.22.chorus4.start'
-            # '/live' [pitch]:
-            '/mud':
-              1: '/p/mud.01.machinebuild'
-              2: '/p/mud.02.machineloop'
-              3: '/p/mud.03.roof1'
-              0: '/p/mud.04.wheel'
-              4: '/p/mud.05.roof2'
-              5: '/p/mud.06.destruct'
-            '/lava':
-              127: '/p/lava.01.start'
-              # 126: '/p/lava.end' # <-- geruik lava.flatline voor end
-              0: '/p/lava.02.beat'
-              1: '/p/lava.03.bed'
-              2: '/p/lava.04.grow'
-              # 5: '/p/lava.05.blink' # <-- disabled, too intense too process
-              4: '/p/lava.06.nightmare'
-              6: '/p/lava.07.chorus1.end'
-              3: '/p/lava.08.flatline'
-            '/dead':
-              127: '/p/dead.start'
-            '/rain':
-              127: '/p/rain.00.start'
-              126: '/p/rain.99.end'
-              1: '/p/rain.01.noorderlicht'
-              3: '/p/rain.02.cubes'
-              2: '/p/rain.03.tear'
-              0: '/p/rain.04.thunder'
-            '/wan':
-              127: '/p/now.01.start' # niet alles pre-loaden; sommmgie dingen laden tijdens voice1
-              126: '/p/now.99.end'
-              0: '/p/now.02.alarm1' # 0.46
-              1: '/p/now.04.drumlines' # 0.54 (streepjes), 7x, 1x niet, 15x
-              2: '/p/now.05.dots' # 0.54, 3.5x
-              3: '/p/now.06.alarm2' # 1.10 --> triggers break1 (1.12)
-              4: '/p/now.07.roof1' # 1.15s, 1x (loop)
-              5: '/p/now.08.triangles1' # 1.56 (3x)
-              6: '/p/now.08.triangles2' # 1.56 (3x)
-              7: '/p/now.09.voice1'
-              8: '/p/now.05.dots' # 2.55 (8x)
-              9: '/p/now.10.magnet.short' # (1x), immediately unloads after that first play
-              10: '/p/now.11.magnet.long1'
-              11: '/p/now.12.magnet.long2'
-              12: '/p/now.13.magnet.long3'
-              13: '/p/now.14.magnet.long4'
-              14: '/p/now.15.voice2'
-              15: '/p/now.03.noisefade' # 0.51
-            '/fusion':
-              127: '/p/fusion.01.start'
-              126: '/p/fusion.99.end'
-              0: '/p/fusion.02.startline' # 0.2
-              1: '/p/fusion.03.lines1' # 0.12
-              2: '/p/fusion.03.lines2'
-              3: '/p/fusion.03.lines3' # vacals
-              4: '/p/fusion.03.lines4'
-              5: '/p/fusion.04.chorus1' # 0.43
-              6: '/p/fusion.05.lines5' # 0.58
-              7: '/p/fusion.06.lines6' # 1.07
-              8: '/p/fusion.07.fade1' # 1.14
-              9: '/p/fusion.08.accent' # 1.17
-              10: '/p/fusion.09.beat' # 1.18
-              11: '/p/fusion.10.spring' # 1.26
-              12: '/p/fusion.11.lines' # 1.49
-              13: '/p/fusion.12.lines' # 1.57
-              14: '/p/fusion.13.buildup' # 2.03
-              15: '/p/fusion.13.beat' # 2.06
-              16: '/p/fusion.14.fadegydo' # 2.37
-              17: '/p/fusion.15.accent' # 2.40; 8x fades gydo spot
-              18: '/p/fusion.16.spring' # 2.55, also starts gydo spot again and unloads spring
-              19: '/p/fusion.17.lines' # 3.11 also stops max and gydo spots
-              20: '/p/fusion.18.lines' # 3.19 and unloads lines vid
-              21: '/p/fusion.13.beat' # 3.28
-              22: '/p/fusion.19.fade' # 3.58 fades all three spots, fades in koen after 5sec
-              23: '/p/fusion.20.fade' # 3.25
-              24: '/p/fusion.21.space' # 3.30
-              25: '/p/fusion.22.space' # 5.29
-            '/divide':
-              127: '/p/divide.01.start'
-              126: '/p/divide.99.end'
-              0: '/p/divide.02.chords'
-              1: '/p/divide.03.particles1'
-              # 2: '/p/divide.particles1move'
-              3: '/p/divide.04.particles2'
-              4: '/p/divide.05.particles3'
-              5: '/p/divide.06.blinks'
-
-    everything:
-      # monitor_config: true
-      # midi_input_port: 0
-      # http_server_port: 2040
-      # broadcast_interval: 3.0
-      # broadcast_reconfig: true
-      # download_reconfig: true
-      of2030:
-        # path: '/home/pi/of2030' # default
-        log_monitor_interval: 20.0
-        log_monitor_treshold: 20.0
-      alive_notifier:
-        file: 'last-alive.txt'
-        interval: 15.0
-      downloader:
-        enabled: true
-        reconfig: true
-        version: true
-      syncer:
-        pong: true
-        ping: false
-      osc_inputs:
-        self:
-          ip: '' #'self'
-          port: 2030
-          shared: false
-          verbose: true
-          inputs:
-            - ack
-            - effect
-            - event
-            - clip
-            - ping
-            - restart
-
-    oscrecorder:
-      osc_inputs:
-        receiver:
-          ip: '127.0.0.1'
-          port: 2031
-          forwarder: true
-      osc_ascii_output:
-        path: auto
-        verbose: true
-        trim: true
-
-    oscplayer:
-      osc_ascii_input:
-        path: 'auto' # 'data/osc/clock_spot.csv'
-        # loop: true
-        # sync: true
-        # verbose: true
-      osc_outputs:
-        # localhost:
-        #   ip: '127.0.0.1'
-        #   port: 2031
-        #   verbose: true
-        #   outputs:
-        #     - osc
-        # local_bridge:
-        #   ip: 127.0.0.1
-        #   port: 2030
-        bcast:
-          ip: 192.168.2.255
-          # hostname: 'rpi4.local'
-          port: 2031
-          outputs:
-            - osc
-        # max_dev:
-        #   ip: 192.168.2.100
-        #   # hostname: 'rpi4.local'
-        #   port: 2030
-        #   outputs:
-        #     - osc
-        # rpi2:
-        #   hostname: 'rpi2.local'
-        #   port: 2031
-        #   outputs:
-        #     - osc
-
-    osccfg:
-      osc_inputs:
-        remote_receiver:
-          ip: '' #'127.0.0.1'
-          port: 2029
-          forwarder: true
-          # verbose: true
-      osc_outputs:
-        forward_local:
-          ip: '127.0.0.1'
-          port: 2031
-          # verbose: true
-          outputs:
-          - osc
-      config_recorders:
-        screens:
-          prefix: '/scr'
-          path: 'data/screens.xml'
-          configs_root_el: 'screens'
-          config_el: 'screen'
-          # verbose: true
-        effects:
-          prefix: '/cfg'
-          path: 'data/effects.xml'
-          configs_root_el: 'effects'
-          config_el: 'effect'
-          # verbose: true
-
-  midi_triggers:
-    48: # C2
-      effect:
-        type: 'COLOR'
-        r: 255
-        g: 0
-        b: 0
-    60: # midi note: C3
-      effect:
-        type: 'COLOR'
-        r: 0
-        g: 255
-        b: 0

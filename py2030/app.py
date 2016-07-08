@@ -191,7 +191,9 @@ class App:
 
         if 'hoh_vid_starter' in profile_data:
             from py2030.hoh_vid_starter import HohVidStarter
-            self.hoh_vid_starter = HohVidStarter(profile_data['hoh_vid_starter'])
+            opts = {'hostname': self._hostname()}
+            opts.update(profile_data['hoh_vid_starter'])
+            self.hoh_vid_starter = HohVidStarter(opts)
             self.hoh_vid_starter.setup()
             del HohVidStarter
 
