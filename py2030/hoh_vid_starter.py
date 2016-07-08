@@ -8,29 +8,31 @@ except:
 class HohVidStarter:
   def __init__(self, options = {}):
     # params
-    self.options = options
+    # self.options = options
     # config
-    self.interface = self.options['interface'] if 'interface' in self.options else Interface.instance()
-    self.verbose = 'verbose' in self.options and self.options['verbose']
+    self.interface = options['interface'] if 'interface' in options else Interface.instance()
+    self.verbose = 'verbose' in options and options['verbose']
     self.player = None
+    self.hostname = options['hostname'] if 'hostname' in options else ''
+    # get video paths
+    self.vidPaths = []
+    self.vidPaths = options['vids'] if 'vids' in options else []
+    print '[HohVidStarter] video paths:', self.vidPaths
 
   def __del__(self):
       if self.player:
           self.unload()
 
   def setup(self):
-    # get video paths
-    self.vidPaths = []
-    self.vidPaths = self.options['vids'] if 'vids' in self.options else []
-    print '[HohVidStarter] video paths:', self.vidPaths
+
     # register callbacks
-    print 'registering hoh video starter callbacks'
     self.interface.hohStartEvent += self._onStart
     self.interface.hohLoadEvent += self._onLoad
     self.interface.hohPlayEvent += self._onPlay
     self.interface.hohStopEvent += self._onStop
     self.interface.hohPauseEvent += self._onPause
     self.interface.hohSeekEvent += self._onSeek
+    self.interface.hohSpeedEvent += self._onSpeed
 
 
   def unload(self):
@@ -93,6 +95,28 @@ class HohVidStarter:
 
     self.player.set_position(pos)
 
+  def speed(self, speed):
+    if not self.player:
+      print '[HohVidStarter#speed] No video loaded'
+      return
+
+    # speed -1 means 'slower'
+    # speed 1 means 'faster'
+
+    if speed == -1:
+      if self.verbose:
+        print '[HohVidStarter#speed] slower'
+      self.player.action(1)
+      return
+
+    if speed == 1:
+      if self.verbose:
+        print '[HohVidStarter#speed] faster'
+      self.player.action(2)
+      return
+
+    print '[HohVidStarter#speed invalid speed value:', speed
+
   def _noToVidPath(self, no):
     # make sure we have an int
     try:
@@ -143,3 +167,10 @@ class HohVidStarter:
 
   def _onSeek(self, pos):
     self.seek(pos)
+
+  def _onSpeed(self, hostname, speed):
+    if hostname != self.hostname:
+      # not for us
+      return 
+
+    self.speed(speed)

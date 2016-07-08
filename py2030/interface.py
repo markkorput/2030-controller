@@ -59,6 +59,7 @@ class Interface:
         self.hohStopEvent = Event()
         self.hohPauseEvent = Event()
         self.hohSeekEvent = Event()
+        self.hohSpeedEvent = Event()
 
         self.ledValueEvent = Event()
 

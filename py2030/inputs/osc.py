@@ -276,6 +276,16 @@ class Osc:
                 self.interface.hohSeekEvent(data[0])
                 return
 
+            if addr == '/hoh/speed' and len(data) == 2:
+                try:
+                    speed = int(data[1])
+                except ValueError as err:
+                    print '[osc-in] got invalid speed value for /hoh/speed:', data[1]
+                    return
+
+                self.interface.hohSpeedEvent(str(data[0]), speed)
+                return
+
         # print 'py2030.inputs.Osc._forwardOscMessage with', addr, tags, data, client_address
         # ColorTerminal().warn('Got unknown OSC Message {0}'.format((addr, tags, data, client_address)))
         # self.unknownMessageEvent(addr, tags, data, client_address, self)
