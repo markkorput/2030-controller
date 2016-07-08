@@ -30,6 +30,8 @@ class HohVidStarter:
     self.interface.hohPlayEvent += self._onPlay
     self.interface.hohStopEvent += self._onStop
     self.interface.hohPauseEvent += self._onPause
+    self.interface.hohSeekEvent += self._onSeek
+
 
   def unload(self):
     if self.player:
@@ -37,12 +39,12 @@ class HohVidStarter:
       self.player = None
 
   def load(self, videoPath):
-    if self.verbose:
-      print '[HohVidStarter#start] loading player with:', videoPath
-
     # close existing video
     if self.player:
       self.unload()
+
+    if self.verbose:
+      print '[HohVidStarter#load] loading player with:', videoPath
 
     # this will be paused by default
     if OMXPlayer:
@@ -74,6 +76,22 @@ class HohVidStarter:
       print '[HohVidStarter#start] self.player.stop()'
 
     self.player.stop()
+
+  def seek(self, pos):
+    if not self.player:
+      print '[HohVidStarter#seek] No video loaded'
+      return
+
+    try:
+        pos = float(pos)
+    except ValueError as err:
+        print '[HohVidStarter#seek] invalid pos value:', pos
+        return
+
+    if self.verbose:
+      print '[HohVidStarter#seek] self.player.set_position() with:', pos
+
+    self.player.set_position(pos)
 
   def _noToVidPath(self, no):
     # make sure we have an int
@@ -122,3 +140,6 @@ class HohVidStarter:
 
   def _onPause(self):
     self.pause()
+
+  def _onSeek(self, pos):
+    self.seek(pos)
