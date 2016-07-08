@@ -5,6 +5,8 @@ except:
     print '[HohVidStarter] no omxplayer'
     OMXPlayer = None
 
+import os
+
 class HohVidStarter:
   def __init__(self, options = {}):
     # params
@@ -51,7 +53,7 @@ class HohVidStarter:
     # this will be paused by default
     if OMXPlayer:
         # start omx player without osd and sending audio through analog jack
-        self.player = OMXPlayer(videoPath, args=['--no-osd', '--adev', 'local'])
+        self.player = OMXPlayer(videoPath, args=['--no-osd', '--adev', 'local', '-b'])
 
   def start(self):
     if not self.player:
@@ -59,6 +61,9 @@ class HohVidStarter:
       return
     if self.verbose:
       print '[HohVidStarter#start] self.player.play()'
+    # clear console screen
+    #print "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+    os.system('clear')
     self.player.play()
 
   def pause(self):
@@ -76,8 +81,12 @@ class HohVidStarter:
       return
     if self.verbose:
       print '[HohVidStarter#start] self.player.stop()'
+    # clear console screen
+    #print "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+    os.system('clear')
 
     self.player.stop()
+    os.system('clear')
 
   def seek(self, pos):
     if not self.player:
