@@ -31,6 +31,20 @@ py2030:
           outputs:
             - osc
 
+    mainstopper:
+      osc_ascii_input:
+        path: 'auto' # 'data/osc/clock_spot.csv'
+        # loop: true
+        # sync: true
+        # verbose: true
+      osc_outputs:
+        localhost:
+          hostname: 'rpi8.local'
+          # ip: '127.0.0.1'
+          port: 2031
+          verbose: true
+          outputs:
+            - osc
 
     bridge:
       osc_outputs:
@@ -65,7 +79,7 @@ py2030:
             - osc
       midi_input:
         port: 1
-        # verbose: true
+        verbose: true
         #   port: 1
         #   dummy: 'ok'
         map:
