@@ -18,6 +18,7 @@ class MidiEffectInput:
         self.port_name = None
         self.limit = 10
         self.connected = False
+        self.osc_seq_counters = {}
 
         # # setup
         # if 'setup' in options and options['setup']:
@@ -97,19 +98,44 @@ class MidiEffectInput:
             if not msg:
                 return
 
+            if len(msg) > 0 and len(msg[0]) > 2 and msg[0][2] == 0 or msg[0][0] == 128:
+                continue
+
             if self.verbose():
-                print msg
+                print 'midi message: ', msg # ie. ([176, 12, 7], 0.0)
+                # print self.op_map # ie. {'176': {'4': {'op': 'led'}}}
 
             self.time += msg[1]
 
-            if midi_message[0] in self.op_map:
-                map = self.op_map[midi_message[0]]
-                if midi_message[1] in self.op_map[]
-            # process message
-            effect_data = self.midi_message_to_effect(msg[0])
-            # if effect_data:
-                # self.interface.effectEvent(effect_data)
-                # print('[MidiEffectInput] triggered interface effectEvent with: ', effect_data)
+            if msg[0][0] in self.op_map:
+                cur = self.op_map[msg[0][0]]
+                if msg[0][1] in cur:
+                    cur=cur[msg[0][1]]
+                    if 'osc' in cur:
+                        self.interface.oscMessageEvent(cur['osc'], [], [], None)
+                        if self.verbose():
+                            print 'mapped to', cur['osc']
+                    elif 'osc-seq' in cur:
+                        # counter identifier
+                        id = (msg[0][0], msg[0][1])
+                        # get count from counter, default to zero if counter doesn't exist yet
+                        count = self.osc_seq_counters[id] if id in self.osc_seq_counters else 0
+                        # get osc message for current count
+                        osc_msg = cur['osc-seq'][count]
+                        # send message
+                        self.interface.oscMessageEvent(osc_msg, [], [], None)
+                        # log
+                        if self.verbose():
+                            print 'mapped to', osc_msg
+                        # update counter
+                        self.osc_seq_counters[id] = (count+1) % len(cur['osc-seq'])
+
+            # else:
+            # # process message
+            # effect_data = self.midi_message_to_effect(msg[0])
+            # # if effect_data:
+            #     # self.interface.effectEvent(effect_data)
+            #     # print('[MidiEffectInput] triggered interface effectEvent with: ', effect_data)
 
 
             # debugging

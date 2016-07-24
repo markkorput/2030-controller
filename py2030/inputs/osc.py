@@ -131,8 +131,9 @@ class Osc:
             self.osc_server.addMsgHandler('/clip', self._onClip)
             self.osc_server.addMsgHandler('/effect', self._onEffect)
             self.osc_server.addMsgHandler('/restart', self._onRestart)
+
             # self.osc_server.addMsgHandler('default', self._onUnknownMessage)
-        self.osc_server.addMsgHandler('default', self._forwardOscMessage)
+        self.osc_server.addMsgHandler('default', self._onDefault)
 
 
         # set internal connected flag
@@ -227,12 +228,85 @@ class Osc:
     def isForwarder(self):
         return 'forwarder' in self.options and self.options['forwarder']
 
-    def _forwardOscMessage(self, addr, tags, data, client_address):
+    def _onDefault(self, addr, tags, data, client_address):
+        # skip touch osc touch-up events
+        if len(data) == 1 and data[0] == 0.0:
+            return
+
+        if self.verbose:
+            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
+
+        if not self.isForwarder():
+            if addr.startswith('/hoh/start/'):
+                try:
+                    no = int(addr.replace('/hoh/start/', ''))
+                    self.interface.hohStartEvent(addr.replace('/hoh/start/', ''))
+                except ValueError as err:
+                    print '[osc-in] invalid hoh start addr:', addr
+                return
+
+            if addr.startswith('/hoh/load/'):
+                try:
+                    no = int(addr.replace('/hoh/load/', ''))
+                    self.interface.hohLoadEvent(addr.replace('/hoh/load/', ''))
+                except ValueError as err:
+                    print '[osc-in] invalid hoh load addr:', addr
+                return
+
+
+            # if addr.startswith('/hoh/play/')
+            #     try:
+            #         no = int(addr.replace('/hoh/play/', ''))
+            #         self.interface.hohPlayEvent(addr.replace('/hoh/play/', ''))
+            #     except ValueError as err:
+            #         print '[osc-in] invalid hoh play addr:', addr
+            if addr == '/hoh/play':
+                self.interface.hohPlayEvent()
+                return
+
+            if addr == '/hoh/stop':
+                self.interface.hohStopEvent()
+                return
+
+            if addr == '/hoh/pause':
+                self.interface.hohPauseEvent()
+                return
+
+            if addr == '/hoh/seek' and len(data) == 1:
+                self.interface.hohSeekEvent(data[0])
+                return
+
+            if addr.startswith('/hoh/seek/'):
+                pos = addr.replace('/hoh/seek/', '')
+                self.interface.hohSeekEvent(pos)
+                return
+
+            if addr == '/hoh/speed' and len(data) == 2:
+                try:
+                    speed = int(data[1])
+                except ValueError as err:
+                    print '[osc-in] got invalid speed value for /hoh/speed:', data[1]
+                    return
+
+                self.interface.hohSpeedEvent(str(data[0]), speed)
+                return
+
+            if addr.startswith('/hoh/speed/'):
+                values = addr.replace('/hoh/speed/', '').split('/')
+                if len(values) != 2:
+                    print "could not extract two params from: ", addr
+                    return
+
+                try:
+                    speed = int(values[1])
+                except ValueError as err:
+                    print '[osc-in] got invalid speed value for /hoh/speed:', addr
+                    return
+                self.interface.hohSpeedEvent(values[0], speed)
+
         # print 'py2030.inputs.Osc._forwardOscMessage with', addr, tags, data, client_address
         # ColorTerminal().warn('Got unknown OSC Message {0}'.format((addr, tags, data, client_address)))
         # self.unknownMessageEvent(addr, tags, data, client_address, self)
-        if self.verbose:
-            print '[osc-in {0}:{1}]'.format(self.host(), self.port()), addr, data, client_address
 
         if self.osc_map:
             if addr == '-none-':

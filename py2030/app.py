@@ -189,6 +189,14 @@ class App:
 
             del MidiEffectInput
 
+        if 'hoh_vid_starter' in profile_data:
+            from py2030.hoh_vid_starter import HohVidStarter
+            opts = {'hostname': self._hostname()}
+            opts.update(profile_data['hoh_vid_starter'])
+            self.hoh_vid_starter = HohVidStarter(opts)
+            self.hoh_vid_starter.setup()
+            del HohVidStarter
+
         #     if self.midi_effect_input:
         #         if self.midi_effect_input.port != port:
         #             self.midi_effect_input.destroy()
