@@ -12,10 +12,91 @@ py2030:
       hoh_vid_starter:
         verbose: true
         vids:
-          - '/home/pi/hoh/video.mov'
-          - '/home/pi/hoh/win1.mov'
-          - '/home/pi/hoh/win2.mov'
-          - '/home/pi/hoh/win3.mov'
+          - '/home/pi/hoh/hoh-right-v06.mov'
+          - '/home/pi/hoh/hoh-right-winjohn-v01.mov'
+          - '/home/pi/hoh/hoh-right-wingeorgia-v01.mov'
+          - '/home/pi/hoh/hoh-right-winmohammed-v01.mov'
+
+    hohmidi:
+      osc_outputs:
+        bcast_and_local:
+          # verbose: true
+          # ip: 127.0.0.1
+          ip: 192.168.2.255
+          # hostname: 'rpi4.local'
+          port: 2031
+          outputs:
+            - osc
+
+      midi_input:
+        port: 1
+        verbose: true
+        #   port: 1
+        #   dummy: 'ok'
+        map:
+          # akai pads (prog1)
+          144: # midi message type; note on
+            36: # prog1, pad1
+              osc: '/hoh/start/0'
+            37:
+              osc: '/hoh/start/1'
+            38:
+              osc: '/hoh/start/2'
+            39:
+              osc: '/hoh/start/3'
+            40:
+              osc: '/hoh/pause'
+            41:
+              osc: '/hoh/pause'
+            42:
+              osc: '/hoh/stop'
+            43:
+              osc: '/hoh/stop'
+
+          # korg nano kontrol
+            0: # prog1, pad1
+              osc: '/hoh/start/1'
+            9:
+              osc: '/hoh/start/1'
+            1:
+              osc: '/hoh/start/2'
+            10:
+              osc: '/hoh/start/2'
+            2:
+              osc: '/hoh/start/3'
+            11:
+              osc: '/hoh/start/3'
+            8:
+              osc: '/hoh/start/0'
+            17:
+              osc: '/hoh/start/0'
+            12:
+              osc: '/hoh/pause'
+            41:
+              osc: '/hoh/pause'
+            42:
+              osc: '/hoh/stop'
+            43:
+              osc: '/hoh/stop'
+          176:
+            20:
+              osc: '/hoh/pause'
+            23:
+              osc: '/hoh/stop'
+
+    hohosc:
+      osc_ascii_input:
+        path: 'auto' # 'data/osc/clock_spot.csv'
+        # loop: true
+        # sync: true
+        # verbose: true
+      osc_outputs:
+        localhost:
+          ip: '192.168.2.255'
+          port: 2031
+          verbose: true
+          outputs:
+            - osc
 
     oscplayer:
       osc_ascii_input:
@@ -68,7 +149,7 @@ py2030:
           verbose: true
           forwarder: true
 
-    midi:
+    midi_old:
       osc_outputs:
         local:
           # verbose: true
