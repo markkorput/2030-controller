@@ -469,6 +469,10 @@ class Tool:
         if '--get-shaders' in argv or '--update-shaders' in argv:
             self.get_shaders()
 
+        if '--get-py' in argv or '--update-py' in argv:
+            tarfile='py2030.tar.gz'
+            ShellScript('data/scripts/py2030_tar_create.sh').execute({'tarfile': tarfile})
+
         # each connection
         cons = self.get_connections()
         for con in cons:
@@ -528,6 +532,9 @@ class Tool:
 
             if '--shutdown' in argv:
                 ssh.cmd('sudo shutdown -h now')
+
+            if '--push-py' in argv or '--update-py' in argv:
+                self.push_py(remote, ssh)
 
 
         # post remote cleanups
@@ -927,7 +934,7 @@ def main(opts, args):
 
     client.send('/ping', [service.osc_port])
     t = time.time()
-    while time.time() - t < 3.0:
+    while time.time() - t < 2.0:
         service.update()
         if service.got_pong:
             remote_service_running = True
